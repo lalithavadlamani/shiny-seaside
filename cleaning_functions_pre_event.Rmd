@@ -1,0 +1,259 @@
+---
+title: "cleaning_functions_pre_event"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# packages
+library(readxl)
+library(plotly)
+library(janitor)
+library(tidyverse)
+
+# definitions
+attributes_ls <- c("Email", "What pronoun do you identify with?", "Age", "Postcode", "How many people under (5) years are you signing up for?", "How many people in the age range(5-10) are you signing up for?", "How many people in the age range(11-20) are you signing up for?", "How many people in the age range(21-30) are you signing up for?", "How many people in the age range(31-50) are you signing up for?", "How many people in the age range(51-70) are you signing up for?", "How many people in this age range(71+) are you signing up for?", "Have you previously attended an organised clean-up event (hosted by any organisation)?", "On a scale of 1-5 how invested are you in environmental impact?(1 being the least invested)", "How did you find out about this event?" ) 
+
+colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "invested_environmental_impact", "find_out_event" )
+
+age_range_options <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71")
+
+
+numeric_ls <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71", "age", "invested_environmental_impact")
+
+factor_ls <- c("pronoun", "previous_attendance", "find_out_event")
+
+character_ls <- c("email", "postcode")
+
+```
+
+```{r, warning=FALSE}
+
+############################## PREPROCESSING #############################
+
+# cleans up single excel file for columns required
+# input is single excel file
+# output is cleaned dataframe
+
+preprocessing_fn <- function(excel_name) {
+  
+  pre_event_all = read_excel(excel_name)
+  
+  # names(pre_event_all)
+  
+  pre_event_data = subset(pre_event_all, select = attributes_ls)
+  # pre_event_data = clean_names(pre_event_data)
+  colnames(pre_event_data) <- colnames_ls
+  # pre_event_data$age
+  # pre_event_data %>% lapply(numeric_ls, valid_numeric)
+    
+    
+  # pre_event_data_numeric = apply(pre_event_data[ , numeric_ls], 2, valid_numeric)   
+  
+  pre_event_data_numeric = as.data.frame(lapply(pre_event_data[, numeric_ls], valid_numeric))
+  
+  
+  pre_event_data = pre_event_data[, !(names(pre_event_data) %in% numeric_ls)]
+  
+  pre_event_data$postcode = valid_postcode(pre_event_data$postcode)
+  
+  pre_event_data = cbind(pre_event_data, pre_event_data_numeric)
+
+  # creates new column for correct age bin of eventbrite responders
+  pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE)
+  
+  View(pre_event_data)
+
+  return (pre_event_data)
+
+}
+
+# converts required values to numeric
+valid_numeric <- function(input) {
+    input_numeric = as.numeric(input)
+    input_numeric = ifelse(input_numeric >= 0, input_numeric, NA)    
+
+  return (input_numeric)
+}
+
+# validates postcode values
+valid_postcode <- function(input) {
+  input_numeric = as.numeric(input)
+  input_numeric = ifelse(input_numeric >= 1000 & input_numeric <=9999, input_numeric, NA)
+  
+  return (as.character(input_numeric))
+}
+
+## Code to call functions ##
+pre_event_data = preprocessing_fn("pre-event_responses_v2.xlsx")
+summary(pre_event_data)
+
+
+```
+
+
+```{r}
+
+########################## AMOUNT OF ATTENDEES ###########################
+
+# returns number of total attendees
+# input is preprocessed dataframe
+# output is integer
+attendees_total <- function(pre_event_data) {
+    eventbrite_tot = attendees_eventbrite(pre_event_data)
+    other_tot = sum(rowSums(pre_event_data[,age_range_options], na.rm=TRUE))
+    # eventbrite_tot + other_tot
+    return (eventbrite_tot + other_tot)
+}
+
+# returns total number of respondents to eventbrite form
+# input is preprocessed dataframe
+# output is integer
+attendees_eventbrite <- function(pre_event_data) {
+    return (nrow(pre_event_data))
+}
+
+# returns number of total attendees answering "Age" question correctly (TOTAL)
+# input is preprocessed dataframe
+# output is integer
+
+attendees_age_correct_total <- function(pre_event_data) {
+    eventbrite_tot = attendees_age_correct_eventbrite(pre_event_data)
+    other_tot = sum(rowSums(pre_event_data[,age_range_options], na.rm=TRUE))
+    return (eventbrite_tot + other_tot)
+}
+
+# returns number of total attendees answering "Age" question correctly (Only from people who HAVE filled out eventbrite)
+# input is preprocessed dataframe
+# output is integer
+
+attendees_age_correct_eventbrite <- function(pre_event_data) {
+    valid_value = ifelse(is.na(pre_event_data$age), 0, 1)
+    return (sum(valid_value))
+}
+
+# returns number of total attendees answering "Postcode" question correctly
+# input is preprocessed dataframe
+# output is integer
+
+attendees_correct_postcode <- function(pre_event_data) {
+    valid_value = ifelse(is.na(pre_event_data$postcode), 0, 1)
+    return (sum(valid_value))
+}
+
+## Code to call functions ##
+attendees_total(pre_event_data)
+attendees_eventbrite(pre_event_data)
+attendees_age_correct_eventbrite(pre_event_data)
+attendees_age_correct_total(pre_event_data)
+attendees_correct_postcode(pre_event_data)
+```
+
+
+```{r}
+
+########################## PRONOUN DISTRIBUTION ##########################
+
+# returns number of attendees answering "She/He/Their/Other" for question "What pronoun do you identify with"
+# input is preprocessed dataframe and specified pronoun
+# output is table
+
+pronoun_count <- function(pre_event_data) {
+  pronoun_table = table(pre_event_data$pronoun)
+  return(pronoun_table)
+}
+
+## Code to call functions ##
+pronoun_count(pre_event_data)
+
+```
+
+
+```{r}
+
+############################ AGE DISTRIBUTION ############################
+
+# returns number of attendees in a certain age range (TOTAL)
+# input is preprocessed dataframe and specified age range
+# output is table
+age_count_total <- function(pre_event_data) {
+  age_count_eventbrite_table = age_count_eventbrite(pre_event_data)
+  age_count_not_eventbrite_table = age_count_not_eventbrite(pre_event_data)
+  age_count_total_table = colSums(rbind(age_count_eventbrite_table, age_count_not_eventbrite_table))
+  return(age_count_total_table)
+}
+
+# returns number of attendees in a certain age range (Only from people who HAVE filled out eventbrite)
+# input is preprocessed dataframe and specified age range
+# output is table
+
+age_count_eventbrite <- function(pre_event_data) {
+  age_count_eventbrite_table = table(pre_event_data$age_group)
+  return(age_count_eventbrite_table)
+}
+
+# returns number of attendees in a certain age range (Only from people who HAVEN'T filled out eventbrite)
+# input is preprocessed dataframe and specified age range
+# output is table
+
+age_count_not_eventbrite <- function(pre_event_data) {
+  age_count = (colSums(pre_event_data[, age_range_options], na.rm=TRUE))
+  return(age_count)
+}
+
+## Code to call functions ##
+age_count_eventbrite(pre_event_data)
+age_count_not_eventbrite(pre_event_data)
+age_count_total(pre_event_data)
+
+```
+
+
+```{r}
+
+################### ENVIRONMENTAL HABITS DISTRIBUTION ####################
+
+# returns number of attendees answering "Yes/No/Can't Remember" for question "Have you previously attended an organised clean-up event (hosted by any organisation)?"
+# input is preprocessed dataframe and specified answer
+# output is table
+
+previous_event_count <- function(pre_event_data) {
+  previous_event_table = table(pre_event_data$previous_attendance)
+  return(previous_event_table)
+}
+
+# returns number of attendees answering "1/2/3/4/5" for question "On a scale of 1-5 how invested are you in environmental impact?(1 being the least invested)"
+# input is preprocessed dataframe and specified answer
+# output is table
+
+invested_environmental_impact_count <- function(pre_event_data) {
+  invested_environmental_impact_table = table(pre_event_data$invested_environmental_impact)
+  return(invested_environmental_impact_table)
+}
+
+## Code to call functions ##
+previous_event_count(pre_event_data)
+invested_environmental_impact_count(pre_event_data)
+
+```
+
+```{r}
+
+######################### MARKETING DISTRIBUTION #########################
+
+# returns number of attendees answering a certain marketing type for question "How did you find out about this event?"
+# input is preprocessed dataframe and specified answer
+# output is vector
+
+
+marketing_count <- function(pre_event_data) {
+  marketing_table = table(pre_event_data$find_out_event)
+  return(marketing_table)
+}
+
+## Code to call functions ##
+marketing_count(pre_event_data)
+
+```
+
