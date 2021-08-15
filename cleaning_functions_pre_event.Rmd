@@ -257,3 +257,9 @@ marketing_count(pre_event_data)
 
 ```
 
+
+
+```{r}
+write.csv(pre_event_data, "pre_event_cleaned_dummy.csv")
+```
+
