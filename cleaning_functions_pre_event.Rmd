@@ -2,7 +2,7 @@
 title: "cleaning_functions_pre_event"
 output: html_document
 ---
-
+# Muk was here
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -63,7 +63,7 @@ preprocessing_fn <- function(excel_name) {
   # creates new column for correct age bin of eventbrite responders
   pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE)
   
-  View(pre_event_data)
+  #View(pre_event_data)
 
   return (pre_event_data)
 
