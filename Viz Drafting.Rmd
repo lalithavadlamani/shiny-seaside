@@ -26,3 +26,9 @@ data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_ou
 (data  %>% ggplot(aes(x = find_out_event, fill = find_out_event)) + geom_bar()+ theme_minimal() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) ) %>% plotly::ggplotly()
 ```
 
+
+
+```{r}
+devtools::install_github()
+```
+
