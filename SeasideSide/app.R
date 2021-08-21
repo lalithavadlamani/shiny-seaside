@@ -8,13 +8,16 @@ library(shinydashboard)
 library(googlesheets4)
 library(googledrive)
 
+# path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
+path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+# driveToken = googledrive::drive_auth(email = c("sourish.iyengar@gmail.com"), path = path)
+# sheetsToken = gs4_auth(token = drive_token())
+# files = drive_ls(path)
+email = "sourish.iyengar@gmail.com"
 
-driveToken = googledrive::drive_auth(email = c("sourish.iyengar@gmail.com"), path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds")
-sheetsToken = gs4_auth(token = drive_token())
 
-
-
-files = drive_ls( "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds")
+# Prevent Choices (Variables)
+preVars = list(Age = "age",Gender = "pronoun", "Previous Attendance" = "previous_attendance", "How did you hear about the event?" = "find_out_event") 
 
 
 
@@ -37,8 +40,17 @@ ui <- dashboardPage(
     
     # Main Body
     dashboardBody(
-        # Boxes need to be put in a row (or column)
+        
+        
+        # User inputted email and drive link
+        textInput("emailID", "Paste drive email address:", value = email ,width = NULL, placeholder = email),
+        textInput("driveID", "Paste folder drive link:", value = path,width = NULL, placeholder = path),
+        
+        # Pre Event Panel
+        ## Row 1
         fluidRow(
+            
+            # Panel 1 sidebar
             column(4,
                 box(
                     status = "primary", 
@@ -47,22 +59,43 @@ ui <- dashboardPage(
                     title = "Controls",
                     width = 12,
 
-                    # Panel 1 sidebar
+                    # Inputs
                     sidebarPanel(
                         width = 12,
-                        selectizeInput("sheet", "Choose Survey", choices = files$name)
+                        # Year by Year Analysis 
+                        checkboxInput("yearAnalysis", "Yearly Analysis?", FALSE),
+                        
+                        # Survey choice - Choices populated in server
+                        selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
+                        
+                        # Prevent visualisation
+                        selectizeInput("preVar1", "Demographic", choices = preVars, multiple = TRUE)
+                        # selectizeInput("preVar2", "Demographic 2", choices = NULL, multiple = TRUE)
                     ),
                 )
             ),
             
+            # Panel 1 Age
             column(8,
+                   box(title = "Demographic Analysis", 
+                       status = "primary", 
+                       solidHeader = TRUE,
+                       collapsible = TRUE,
+                       width = 12,
+                       
+                       plotly::plotlyOutput("preViz", height = 250)
+                   )
+            ),
+            
+            # Panel 1 Data
+            column(12,
                 box(title = "Data", 
                     status = "primary", 
                     solidHeader = TRUE,
                     collapsible = TRUE,
+                    collapsed = TRUE,
                     width = 12,
-                    
-                    # Panel 1 Data
+    
                     DT::DTOutput("googleSheetData", height = 250)
                     )
             )
@@ -75,11 +108,46 @@ ui <- dashboardPage(
 )
 
 
-server <- function(input, output, server) {
+server <- function(input, output, session) {
+    
+    # Pulling Google Sheets
+    sheetInitialisation = reactive({
+        path = input$driveID
+        driveToken = googledrive::drive_auth(email = c(input$emailID), path = path)
+        sheetsToken = gs4_auth(token = drive_token())
+        files = drive_ls(path)
+    })
+    
+    # Updating Survey Choices
+    observeEvent(input$driveID,{
+                 if (!(is.null(input$emailID) & is.null(input$driveID))){
+                     updateSelectizeInput(session,
+                                          "sheet", 
+                                          choices = sheetInitialisation()$name, 
+                                          selected = sheetInitialisation()$name[1],
+                                          server = TRUE)
+                 }
+             }
+        )
     
     
-    output$googleSheetData = renderDT({read_sheet(drive_get(input$sheet))})
+    # Panel 1
+    # Prevent Data Table
+    output$googleSheetData = renderDT({
+            datatable(
+                read_sheet(drive_get(input$sheet)),
+                options = list(pageLength=10, scrollX='400px')
+            )
+        })
 
+    
+    # PreEvent Visualisations 
+    
+    output$preViz = renderPlotly({
+        
+    })
+    
+    
 }
 
 # Run the application 
