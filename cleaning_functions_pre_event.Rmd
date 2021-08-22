@@ -261,5 +261,31 @@ marketing_count(pre_event_data)
 
 ```{r}
 write.csv(pre_event_data, "pre_event_cleaned_dummy.csv")
+
+pre_event_cleaned <- read.csv("pre_event_cleaned_dummy.csv")
+
+glimpse(pre_event_cleaned)
+
+#Histogram for ages of people who filled out the survey 
+
+p <- pre_event_cleaned %>% 
+  ggplot(aes(x = age)) +
+  geom_histogram()
+p
+
+#getting rid of the NAs
+pre_event_cleaned[is.na(pre_event_cleaned)]  <- 0
+glimpse(pre_event_cleaned)
+
+age_buckets <- c('age_under_5', "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71")
+
+
+#total_in_age_bucket <- c(rowsum(pre_event_cleaned$age_under_5), rowsum(pre_event_cleaned$age_5_to_10), rowsum(pre_event_cleaned$age_11_to_20), rowsum(pre_event_cleaned$age_21_to_30), rowsum(pre_event_cleaned$age_31_to_50), rowsum(pre_event_cleaned$age_51_to_70), rowsum(pre_event_cleaned$age_over_71))
+
+
+#total_in_age_bucket <- rowSums(pre_event_cleaned[7,13])
+x <- rowSums(pre_event_cleaned$age_under_5, pre_event_cleaned$age_5_to_10)
+x
+  
 ```
 
