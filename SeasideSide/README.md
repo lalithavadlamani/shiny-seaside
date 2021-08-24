@@ -1,6 +1,6 @@
 File Naming Convention
 
-[Location Name]\_[Date (Format: DD.MM.YYYY)]_[Form Type (Pre/Post)]_[Event Type (Participants/Volunteers)]
+[Location Name]\_[Date (Format: DD.MM.YYYY)]\_[Form Type (Pre/Post)]\_[Event Type (Participants/Volunteers)]
 
 String functions for extracting information:
 
