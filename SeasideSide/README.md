@@ -23,9 +23,8 @@ Examples:
 
     * In this example, use a space if there are two words in the location. Make sure you do not use an underscore in the location name (e.g. Bondi_Junction_03.02.2021_Pre_Participants)
 
-String functions for extracting information:
+Important things to note:
 
-* Locations can be extracted by filtering up to first number
-* Date can be extracted since they are the only numbers in the file name
-* Data type can be determined by doing a search of the two words on the string
+* The underscore is incredibly important in separating the different fields in this file name. It shouldn't be used for any other purpose.
+* Extra fields can be potentially added
 
