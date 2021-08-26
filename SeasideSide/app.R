@@ -17,7 +17,7 @@ email = "sourish.iyengar@gmail.com"
 
 
 # Prevent Choices (Variables)
-preVars = list(Age = "age",Gender = "pronoun", "Previous Attendance" = "previous_attendance", "How did you hear about the event?" = "find_out_event") 
+preVars = list(Age = "age_group",Gender = "pronoun", "Previous Attendance" = "previous_attendance", "How did you hear about the event?" = "find_out_event") 
 
 
 
@@ -53,7 +53,7 @@ ui <- dashboardPage(
             )
         ),
         
-        conditionalPanel("input.sidebar == 'preEvent'",
+
         # Pre Event Panel
         ## Row 1
         fluidRow(
@@ -72,44 +72,50 @@ ui <- dashboardPage(
                         width = 12,
                         # Year by Year Analysis 
                         checkboxInput("yearAnalysis", "Yearly Analysis?", FALSE),
-                        
+                        checkboxInput("locationAnalysis", "Location Analysis?", FALSE),
                         # Survey choice - Choices populated in server
                         selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
                         
                         # Prevent visualisation
-                        selectizeInput("preVar1", "Demographic", choices = preVars, multiple = TRUE)
-                        # selectizeInput("preVar2", "Demographic 2", choices = NULL, multiple = TRUE)
+                        conditionalPanel("input.sidebar == 'preEvent'",
+                            selectizeInput("preVar1", "Demographic", choices = preVars, multiple = TRUE)
+                            # selectizeInput("preVar2", "Demographic 2", choices = NULL, multiple = TRUE)
+                        )
                     ),
                 )
             ),
             
             # Panel 1 Age
             column(8,
-                   box(title = "Demographic Analysis", 
-                       status = "primary", 
-                       solidHeader = TRUE,
-                       collapsible = TRUE,
-                       width = 12,
-                       
-                       plotly::plotlyOutput("preViz", height = 300)
+                   conditionalPanel("input.sidebar == 'preEvent'",
+                       box(title = "Demographic Analysis", 
+                           status = "primary", 
+                           solidHeader = TRUE,
+                           collapsible = TRUE,
+                           width = 12,
+                           
+                           plotly::plotlyOutput("preViz", height = 300)
+                       )
                    )
             ),
             
             # Panel 1 Data
             column(12,
-                box(title = "Data",
-                    status = "danger", 
-                    solidHeader = TRUE,
-                    collapsible = TRUE,
-                    collapsed = TRUE,
-                    width = 12,
-    
-                    DT::DTOutput("googleSheetData", height = 250)
-                    )
+                conditionalPanel("input.sidebar == 'preEvent'",   
+                    box(title = "Data",
+                        status = "danger", 
+                        solidHeader = TRUE,
+                        collapsible = TRUE,
+                        collapsed = TRUE,
+                        width = 12,
+        
+                        DT::DTOutput("googleSheetData", height = 250)
+                        )
+                )
             )
             
         )
-        )
+        
     )
     
     
@@ -142,7 +148,7 @@ server <- function(input, output, session) {
     
     
     preEventData = reactive({read_sheet(drive_get(input$sheet))})
-    
+
     # Panel 1
     # Prevent Data Table
 
