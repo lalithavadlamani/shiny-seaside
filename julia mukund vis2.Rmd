@@ -6,36 +6,70 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(readxl)
+library(plotly)
+library(janitor)
+library(tidyverse)
+
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
+<<<<<<< HEAD
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-## Julia's plots draft
+## Attendance viz coloured by gender
+```{R}
 
 data = read_csv("pre_event_cleaned_dummy.csv")
 
 
-data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_out_event, y = n)) + geom_bar()
+data  %>% group_by(previous_attendance) %>% dplyr::count() %>% ggplot(aes(x = previous_attendance, y = n)) + geom_bar()
  
 
 
-(data  %>% ggplot(aes(x = find_out_event, fill = find_out_event)) + geom_bar()+ theme_minimal() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) ) %>% plotly::ggplotly()
+(data  %>% ggplot(aes(x = previous_attendance, fill = pronoun)) + geom_bar()+ggtitle('Previous Event Attendance by Gender')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) ) %>% plotly::ggplotly()
+
+```
+
+## Find out event filled by attendance previously
+```{r}
+
+data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_out_event, y=n)) + geom_bar(stat = "identity")
+ 
+
+(data  %>% ggplot(aes(x = find_out_event, fill = previous_attendance)) + geom_bar()+ggtitle('Found Out About Event by Previous Attendance')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) ) %>% plotly::ggplotly()
+```
+## Find out event alone
+```{r}
+
+data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_out_event, y=n)) + geom_bar(stat = "identity")
+ 
+
+data  %>% ggplot(aes(x = find_out_event)) + geom_bar(fill='skyblue1')+ggtitle('Found Out About Event by Previous Attendance')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
+```
+## Age alone
+```{r}
+glimpse(data)
+data  %>% group_by(age_group) %>% dplyr::count() %>% ggplot(aes(x = age_group, y=n)) + geom_bar(stat = "identity")
+ 
+
+data  %>% ggplot(aes(x = age_group)) + geom_bar(fill='skyblue1')+ggtitle('Age Group of Primary Participant')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
+```
+## Age 
+```{r}
+data2=select(data, -email, -pronoun, -previous_attendance, -find_out_event, -age_group)
+glimpse(data2)
+
+data2[is.na(data2)]  <- 0
+
+glimpse(data2)
+
+data2_agesums<- colSums(data2[3:9])
+age_count<- c(data2_agesums)
+age_df<- data.frame(age_count)
+
+age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = age_count)) + geom_bar(stat = "identity", fill='skyblue1')+ggtitle('Age Group of All Participants at Event')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
+
+```
