@@ -32,3 +32,7 @@ data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_ou
 devtools::install_github()
 ```
 
+
+
+
+

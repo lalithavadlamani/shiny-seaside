@@ -160,7 +160,8 @@ attendees_correct_postcode(pre_event_data)
 # output is table
 
 pronoun_count <- function(pre_event_data) {
-  pronoun_table = table(pre_event_data$pronoun)
+  pronoun_table = table(pre_event_data$pronoun) %>% as.data.frame()
+  colnames(pronoun_table) <- c("Pronoun", "Frequency")
   return(pronoun_table)
 }
 
@@ -178,9 +179,11 @@ pronoun_count(pre_event_data)
 # input is preprocessed dataframe and specified age range
 # output is table
 age_count_total <- function(pre_event_data) {
-  age_count_eventbrite_table = age_count_eventbrite(pre_event_data)
-  age_count_not_eventbrite_table = age_count_not_eventbrite(pre_event_data)
-  age_count_total_table = colSums(rbind(age_count_eventbrite_table, age_count_not_eventbrite_table))
+  age_count_eventbrite_table = table(pre_event_data$age_group)
+  age_count_not_eventbrite_table = colSums(pre_event_data[, age_range_options], na.rm=TRUE) 
+  age_count_total_table = colSums(rbind(age_count_eventbrite_table, age_count_not_eventbrite_table)) %>% as.data.frame()
+  colnames(age_count_total_table) <- c("Frequency")
+
   return(age_count_total_table)
 }
 
@@ -189,7 +192,8 @@ age_count_total <- function(pre_event_data) {
 # output is table
 
 age_count_eventbrite <- function(pre_event_data) {
-  age_count_eventbrite_table = table(pre_event_data$age_group)
+  age_count_eventbrite_table = table(pre_event_data$age_group) %>% as.data.frame()
+  colnames(age_count_eventbrite_table) <- c("Age", "Frequency")
   return(age_count_eventbrite_table)
 }
 
@@ -198,7 +202,8 @@ age_count_eventbrite <- function(pre_event_data) {
 # output is table
 
 age_count_not_eventbrite <- function(pre_event_data) {
-  age_count = (colSums(pre_event_data[, age_range_options], na.rm=TRUE))
+  age_count = colSums(pre_event_data[, age_range_options], na.rm=TRUE) %>% as.data.frame()
+  colnames(age_count) <- c("Frequency")
   return(age_count)
 }
 
@@ -219,7 +224,8 @@ age_count_total(pre_event_data)
 # output is table
 
 previous_event_count <- function(pre_event_data) {
-  previous_event_table = table(pre_event_data$previous_attendance)
+  previous_event_table = table(pre_event_data$previous_attendance)  %>% as.data.frame()
+  colnames(previous_event_table) <- c("Previous Attendance", "Frequency")
   return(previous_event_table)
 }
 
@@ -228,7 +234,8 @@ previous_event_count <- function(pre_event_data) {
 # output is table
 
 invested_environmental_impact_count <- function(pre_event_data) {
-  invested_environmental_impact_table = table(pre_event_data$invested_environmental_impact)
+  invested_environmental_impact_table = table(pre_event_data$invested_environmental_impact) %>% as.data.frame()
+  colnames(invested_environmental_impact_table) <- c("Invested Rating", "Frequency")
   return(invested_environmental_impact_table)
 }
 
@@ -248,7 +255,8 @@ invested_environmental_impact_count(pre_event_data)
 
 
 marketing_count <- function(pre_event_data) {
-  marketing_table = table(pre_event_data$find_out_event)
+  marketing_table = table(pre_event_data$find_out_event) %>% as.data.frame()
+  colnames(marketing_table) <- c("Marketing Type", "Frequency")
   return(marketing_table)
 }
 
