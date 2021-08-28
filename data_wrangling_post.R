@@ -1,3 +1,15 @@
+# # Read me 
+# 
+#    Variable name                  Value stored 
+#   
+# 1.  clean_data                    Datrame of cleaned data i.e. with only required columns for analysis from the original file 
+# 2.  first_activity_table          Table with proportion values of people who responded yes/no to the question 'Is this your first waste education activity?
+# 3.  biggest_takeaway_kpi_table    Table with KPI % for the question 'What were your biggest takeaways from the activity?'
+# 4.  env_habits_table              Table with proportion values of people who choose 1-5 for the question 'On a scale of 1-5, how would you rate your environmental habits after the activity?'
+# 5.  preferred_channel_table       Table with proportion values of people who prefer the corresponsing channel to find about upcoming events
+# 6.  action_kpi_table              Table with percentages of Action KPI for different categories 
+# ############################################################################################
+
 library('readxl')
 library(tidyverse)
 library(stringr)
@@ -16,22 +28,17 @@ preprocess <- function(data){
   return(df)
 }
 
-# Checkpoint: Uncomment below line 
-#df <- preprocess(data)
+df <- preprocess(data) # Cleaned data 
+clean_data <- df 
 
 # Function to return percentage of people who responded yes/no to the question Is this your first waste education activity?
 FA <- function(column){
   val <- table(column)
-  yes <- val[names(val)=='Yes']
-  no <- val[names(val)=='No']
-  
-  yes_per = (yes/length(column)) * 100
-  no_per = (no/length(column)) * 100 
-  
-  return(c(yes_per,no_per))
+  return(val)
 }
-# Checkpoint: Uncomment below line 
-#FA(df$first_activity)
+ 
+first_activity_table <- prop.table(FA(df$first_activity))
+# first_activity_table
 
 # Function to return KPI values for the question biggest takeaway 
 count_takeaways <- function(column){
@@ -44,7 +51,7 @@ count_takeaways <- function(column){
   
   # Average counts
   action_count = action1  
-  learning_count = (learning2 + learning2 + learning3) / 3
+  learning_count = (learning1 + learning2 + learning3) / 3
   community_count = (community1 + community2) / 2
   
   total_people = length(column)
@@ -54,39 +61,30 @@ count_takeaways <- function(column){
   learning_per = round((learning_count/total_people) * 100,2)
   community_per = round((community_count/total_people) * 100,2)
   
-  return(c(action_per,learning_per,community_per))
+   percentages <- matrix(c(action_per,learning_per,community_per),ncol=3,byrow = TRUE)
+   colnames(percentages) <- c('Action','Learning','Community')
+   rownames(percentages) <- c('Percentage')
+   return(as.table(percentages))
 }
-# Checkpoint: Uncomment below line 
-#count_takeaways(df$takeaway)
+ 
+biggest_takeaway_kpi_table <- count_takeaways(df$takeaway)
 
 #Function to return count of people for each number on the scale 1-5 for environmental habits 
 env_habits_scale <- function(column){
   val <- table(column)
-  one <- val[names(val)==1]
-  two <- val[names(val)==2]
-  three <- val[names(val)==3]
-  four <- val[names(val)==4]
-  five <- val[names(val)==5]
-  return(c(one,two,three,four,five))
-} # Note: To club to 2 or 3 categories accordingly 
-# Checkpoint: Uncomment below line 
-#env_habits_scale(df$env_habits)
+  return (val)
+} 
+
+env_habits_table <- prop.table(env_habits_scale(df$env_habits))
 
 # Function for How would you prefer to find out about Seaside Scavenge events?
 channel <- function(column){
   val <- table(column)
-  cw <- val[names(val)=='Council Website']
-  email <- val[names(val)=='Email']
-  eb <- val[names(val)=='Eventbrite']
-  fb <- val[names(val)=='Facebook']
-  insta <- val[names(val)=='Instagram']
-  pb <- val[names(val)=='Passing By']
-  ssw <- val[names(val)=='Seaside Scavenge website']
-  
-  return(c(cw,email,eb,fb,insta,pb,ssw))
+  return(val)
 }
-# Checkpoint: Uncomment below line 
-#channel(df$channel_preferred)
+
+preferred_channel_table <- prop.table(channel(df$channel_preferred))
+
 
 # Function for Action kPI 
 action_kpi <- function(df){
@@ -102,47 +100,41 @@ action_kpi <- function(df){
                         cp[names(cp)=='Doing before the event'] +
                         dw[names(dw)=='Doing before the event'] +
                         cc[names(cc)=='Doing before the event'] +
-                        us[names(us)=='Doing before the event'] ) 
+                        us[names(us)=='Doing before the event'] ) / 6
   
   doing_after_event <- (uh2[names(uh2)=='Started doing after the event'] +
                        ulp[names(ulp)=='Started doing after the event'] +
                        cp[names(cp)=='Started doing after the event'] +
                        dw[names(dw)=='Started doing after the event'] +
                        cc[names(cc)=='Started doing after the event'] +
-                       us[names(us)=='Started doing after the event'] ) 
+                       us[names(us)=='Started doing after the event'] ) / 6
   
   likely_to_do <- (uh2[names(uh2)=='Likely to do in the next 3 months'] +
                   ulp[names(ulp)=='Likely to do in the next 3 months'] +
                   cp[names(cp)=='Likely to do in the next 3 months'] +
                   dw[names(dw)=='Likely to do in the next 3 months'] +
                   cc[names(cc)=='Likely to do in the next 3 months'] +
-                  us[names(us)=='Likely to do in the next 3 months'] ) 
+                  us[names(us)=='Likely to do in the next 3 months'] ) / 6
   
   unlikely_to_do <- (uh2[names(uh2)=='Unlikely to do in the next 3 months'] +
                     ulp[names(ulp)=='Unlikely to do in the next 3 months'] +
                     cp[names(cp)=='Unlikely to do in the next 3 months'] +
                     dw[names(dw)=='Unlikely to do in the next 3 months'] +
                     cc[names(cc)=='Unlikely to do in the next 3 months'] +
-                    us[names(us)=='Unlikely to do in the next 3 months']) 
+                    us[names(us)=='Unlikely to do in the next 3 months']) / 6
  
-   return(c(doing_before_event,doing_after_event,likely_to_do,unlikely_to_do))
-} # Note: Need to modify to return percentages
+  total_people = nrow(df)
+  
+  # Percentages 
+  doing_before_event_per = round((doing_before_event/total_people) * 100,2)
+  doing_after_event_per = round((doing_after_event/total_people) * 100,2)
+  likely_to_do_per = round((likely_to_do/total_people) * 100,2)
+  unlikely_to_do_per = round((unlikely_to_do/total_people) * 100,2)
+  
+  percentages <- matrix(c(doing_before_event_per,doing_after_event_per,likely_to_do_per,unlikely_to_do_per),ncol=4,byrow = TRUE)
+  colnames(percentages) <- c('Doing before event','Doing after event','Likely to do','Unlikely to do')
+  rownames(percentages) <- c('Percentage')
+  return(as.table(percentages))
+} 
 
-# Checkpoint : Uncomment below line
-#action_kpi(df)
-
-# -------------------------------------------------------------------------------------------------------------
-# Note: First draft only :3
-
-#Add your thoughts or changes required below:
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-#
-#
+action_kpi_table <- action_kpi(df)
