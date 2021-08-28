@@ -318,3 +318,4 @@ age_df %>%
 ```
 ```{r}
 age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = count_ages)) + geom_bar(stat = "identity")
+```
