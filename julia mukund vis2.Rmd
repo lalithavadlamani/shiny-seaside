@@ -25,7 +25,7 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 data = read_csv("pre_event_cleaned_dummy.csv")
 
 
-data  %>% group_by(previous_attendance) %>% dplyr::count() %>% ggplot(aes(x = previous_attendance, y = n)) + geom_bar()
+data  %>% group_by(previous_attendance) %>% dplyr::count() %>% ggplot(aes(x = previous_attendance)) + geom_bar()
  
 
 
@@ -73,3 +73,39 @@ age_df<- data.frame(age_count)
 age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = age_count)) + geom_bar(stat = "identity", fill='skyblue1')+ggtitle('Age Group of All Participants at Event')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
 
 ```
+```{r}
+
+
+PreEventPlot <- function(var1, var2, title, varNum) {
+  
+  if(varNum == 1) {
+    
+    
+    
+  } else {
+     
+    data %>% group_by(var1) %>% dplyr::count() %>% ggplot(aes(x = var1)) + geom_bar()
+ 
+
+
+    ggplot(aes(x = var1, fill = var2) + geom_bar()+ggtitle(title)+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) ) %>% plotly::ggplotly()
+    
+  }
+  
+  
+}
+
+
+```
+
+
+```{r}
+
+data = read_csv("pre_event_cleaned_dummy.csv")
+
+PreEventPlot(data$previous_attendance, data$pronoun, 'Previous Event Attendance by Gender', 2)
+
+
+```
+```
+
