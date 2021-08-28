@@ -265,6 +265,10 @@ write.csv(pre_event_data, "pre_event_cleaned_dummy.csv")
 pre_event_cleaned <- read.csv("pre_event_cleaned_dummy.csv")
 
 glimpse(pre_event_cleaned)
+#barplot of ages of those who filled the survey
+pre_event_cleaned %>% 
+  ggplot() + aes(x=age_group)+
+  geom_bar()
 
 #Histogram for ages of people who filled out the survey 
 
@@ -284,8 +288,33 @@ age_buckets <- c('age_under_5', "age_5_to_10", "age_11_to_20", "age_21_to_30", "
 
 
 #total_in_age_bucket <- rowSums(pre_event_cleaned[7,13])
-x <- rowSums(pre_event_cleaned$age_under_5, pre_event_cleaned$age_5_to_10)
-x
-  
-```
+#x <- rowSums(pre_event_cleaned$age_under_5, pre_event_cleaned$age_5_to_10)
+#x
 
+pre_event_cleaned_rowsums <- colSums(pre_event_cleaned[7:13])
+count_ages <- c(pre_event_cleaned_rowsums)
+
+age_df <- data.frame(count_ages)
+age_df
+
+age_df %>% 
+  ggplot() + aes(x = "ages") + geom_bar()
+
+#age_df <- data.frame(age_buckets, count_ages)
+
+#age_df <-as.data.frame(t(age_df))
+
+#a <- barplot(age_df$,
+             xlab = "age_buckets",
+             ylab = "count_ages" )
+
+#age_df <- data.frame(age_buckets, count_ages)
+
+#age_df <-as.data.frame(t(age_df))
+
+#a <- barplot(age_df$,
+             #xlab = "age_buckets",
+             #ylab = "count_ages" )
+```
+```{r}
+age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = count_ages)) + geom_bar(stat = "identity")
