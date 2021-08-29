@@ -78,10 +78,9 @@ filter_data <- function(df, location_filter = vector(), year_filter = vector(),
   return(filter_df)
 }
 
-<<<<<<< Updated upstream
 
 # lubridate::as_date(df$date, format = "%d.%m.%y")
-=======
+
 # Examples
 
 filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"))
@@ -96,5 +95,3 @@ filter_df
 
 
 
-
->>>>>>> Stashed changes
