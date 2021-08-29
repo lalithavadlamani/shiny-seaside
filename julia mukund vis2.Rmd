@@ -82,15 +82,16 @@ PreEventPlot <- function(data, varNames, title) {
   if(length(varNames) == 1) {
     # This line fixes it
     data = data %>% dplyr::rename(var1 = varNames[[1]])
-    
+    if (varNames == "age_group"){
+      # Mukund's Code
+    }else{
+      data  %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)))) + geom_bar()
+    }
+ 
     
   } else {
     # This line fixes it
     data = data %>% dplyr::rename(var1 = varNames[[1]], var2 = varNames[[2]])
-    
-    data %>% group_by(var1) %>% dplyr::count() %>% ggplot(aes(x = reorder(varViz, varViz, function(x)-length(x)))) + geom_bar()
- 
-
 
     data %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)), fill = var2)) + 
       geom_bar() + 
@@ -111,9 +112,9 @@ PreEventPlot <- function(data, varNames, title) {
 
 data = read_csv("pre_event_cleaned_dummy.csv")
 
-PreEventPlot(data, c("previous_attendance", "pronoun"), 'Previous Event Attendance by Gender')
+PreEventPlot(data, c("previous_attendance"), 'Previous Event Attendance by Gender')
 
 
 ```
-```
+
 
