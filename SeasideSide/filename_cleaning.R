@@ -1,3 +1,6 @@
+require(stringr)
+require(tidyverse)
+
 # Example input
 test_input = c("Bondi Junction_03.02.2021_Pre_Participants", "Turramurra_04.01.2020_Pre_Participants",
                "Camperdown_04.01.2020_Pre_Participants", "Lithgow_04.01.2019_Pre_Participants")
@@ -52,7 +55,9 @@ name_processing <- function(files) {
 
   }
   colnames(df) <- c("location", "date", "form_type", "event_type")
-  df$date
+  df = df %>% 
+    mutate(date = as.Date(date, format = "%d.%m.%Y"))
+  df$year <- as.numeric(format(df$date, "%Y"))
   return(df)
 }
 
@@ -61,9 +66,35 @@ df <- name_processing(test_input)
 # Function: Takes in filter values and outputs the names of the files
 # Use optional arguments
 
-filter_data <- function(df, location, date, form_type, event_type){
-  
+filter_data <- function(df, location_filter = vector(), year_filter = vector(), 
+                        form_type_filter = vector(), event_type_filter = vector(),
+                        date_filter = vector()){
+  filter_df <- df %>% filter(location %in% location_filter | 
+                               year %in% year_filter |
+                               form_type %in% form_type_filter |
+                               event_type %in% event_type_filter |
+                               date %in% date_filter)
+
+  return(filter_df)
 }
 
+<<<<<<< Updated upstream
 
 # lubridate::as_date(df$date, format = "%d.%m.%y")
+=======
+# Examples
+
+filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"))
+filter_df
+
+filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"),
+                         year_filter = c("2021", "2020"))
+filter_df
+
+filter_df <- filter_data(df, year_filter = c("2020"))
+filter_df
+
+
+
+
+>>>>>>> Stashed changes
