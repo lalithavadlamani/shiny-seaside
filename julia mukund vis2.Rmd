@@ -76,16 +76,18 @@ age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = age_count
 ```{r}
 
 
-PreEventPlot <- function(data, var1, var2, title, varNum) {
+PreEventPlot <- function(data, varNames, title) {
   
   
-  data = data %>% dplyr::rename(var1 = var1, var2 = var2)
-  if(varNum == 1) {
-    
+  if(length(varNames) == 1) {
+    # This line fixes it
+    data = data %>% dplyr::rename(var1 = varNames[[1]])
     
     
   } else {
-     
+    # This line fixes it
+    data = data %>% dplyr::rename(var1 = varNames[[1]], var2 = varNames[[2]])
+    
     data %>% group_by(var1) %>% dplyr::count() %>% ggplot(aes(x = var1)) + geom_bar()
  
 
@@ -109,7 +111,7 @@ PreEventPlot <- function(data, var1, var2, title, varNum) {
 
 data = read_csv("pre_event_cleaned_dummy.csv")
 
-PreEventPlot(data, "previous_attendance", "pronoun", 'Previous Event Attendance by Gender', 2)
+PreEventPlot(data, c("previous_attendance", "pronoun"), 'Previous Event Attendance by Gender')
 
 
 ```
