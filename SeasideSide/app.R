@@ -8,6 +8,11 @@ library(shinydashboard)
 library(googlesheets4)
 library(googledrive)
 
+
+source("filename_cleaning.R")
+
+
+
 # path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
 path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
 # driveToken = googledrive::drive_auth(email = c("sourish.iyengar@gmail.com"), path = path)
@@ -71,14 +76,13 @@ ui <- dashboardPage(
                     sidebarPanel(
                         width = 12,
                         # Year by Year Analysis 
-                        checkboxInput("yearAnalysis", "Yearly Analysis?", FALSE),
-                        checkboxInput("locationAnalysis", "Location Analysis?", FALSE),
+                        selectizeInput("analysisType", "Analysis:", choices = c("Event","Yearly", "Location")),
                         # Survey choice - Choices populated in server
-                        selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
+                        selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = FALSE),
                         
                         # Prevent visualisation
                         conditionalPanel("input.sidebar == 'preEvent'",
-                            selectizeInput("preVar1", "Demographic", choices = preVars, multiple = TRUE)
+                            selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun", multiple = TRUE,  options = list(maxItems = 2))
                             # selectizeInput("preVar2", "Demographic 2", choices = NULL, multiple = TRUE)
                         )
                     ),
@@ -137,14 +141,41 @@ server <- function(input, output, session) {
     # Updating Survey Choices
     observeEvent(input$driveID,{
                  if (!(is.null(input$emailID) & is.null(input$driveID))){
+                     
+                     files = sheetInitialisation()
+                     choices = files$name
                      updateSelectizeInput(session,
                                           "sheet", 
-                                          choices = sheetInitialisation()$name, 
-                                          selected = sheetInitialisation()$name[1],
+                                          choices = choices, 
+                                          selected = choices[1],
                                           server = TRUE)
                  }
              }
         )
+    observeEvent(input$analysisType,{
+                 if (!(is.null(input$emailID) & is.null(input$driveID))){
+                     
+                     files = sheetInitialisation()
+                     if(input$analysisType == "Event"){
+                         # choices = paste(name_processing(files$name)$location, name_processing(files$name)$date)
+                         choices = files$name
+                     }else if (input$analysisType == "Yearly"){
+                         choices = name_processing(files$name)$date %>% 
+                             lubridate::as_date(format = "%d.%m.%y") %>% 
+                             lubridate::year() %>% 
+                             unique() %>% 
+                             sort()
+                         
+                     }else{
+                         choices = name_processing(files$name)$location
+                     }
+                     updateSelectizeInput(session,
+                                          "sheet", 
+                                          choices = choices, 
+                                          selected = choices[1],
+                                          server = TRUE)
+                 }
+    })
     
     
     preEventData = reactive({read_sheet(drive_get(input$sheet))})

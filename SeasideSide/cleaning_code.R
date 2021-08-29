@@ -3,7 +3,7 @@ require(stringr)
 
 
 path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
-email = "allanwu2001@gmail.com"
+email = "sourish.iyengar@gmail.com"
 drive_token = googledrive::drive_auth(email = c(email), path = path)
 
 sheetsToken = gs4_auth(token = drive_token())

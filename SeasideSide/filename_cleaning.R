@@ -43,7 +43,7 @@ name_processing <- function(files) {
   
   
   df = NULL
-  for (file_name in test_input){
+  for (file_name in files){
     values = strsplit(file_name, '_')
     df = rbind(df, data.frame(values[[1]][1],
                               values[[1]][2],
@@ -64,3 +64,6 @@ df <- name_processing(test_input)
 filter_data <- function(df, location, date, form_type, event_type){
   
 }
+
+
+# lubridate::as_date(df$date, format = "%d.%m.%y")
