@@ -126,7 +126,9 @@ preprocessing_multiple_fn <- function(excel_ls_name) {
 
 ## Code to call functions ##
 combined_data = preprocessing_multiple_fn(filenames)
-View(combined_data)
+
+## Code to get csv
+# write.csv(combined_data, "pre_event_cleaned_combined_dummy.csv")
 
 
 ```
