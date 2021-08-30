@@ -3,6 +3,7 @@ title: "cleaning_functions_pre_event"
 output: html_document
 ---
 # Why is GIT like this :(
+# biggest sadge :((((
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -16,6 +17,10 @@ library(tidyverse)
 attributes_ls <- c("Email", "What pronoun do you identify with?", "Age", "Postcode", "How many people under (5) years are you signing up for?", "How many people in the age range(5-10) are you signing up for?", "How many people in the age range(11-20) are you signing up for?", "How many people in the age range(21-30) are you signing up for?", "How many people in the age range(31-50) are you signing up for?", "How many people in the age range(51-70) are you signing up for?", "How many people in this age range(71+) are you signing up for?", "Have you previously attended an organised clean-up event (hosted by any organisation)?", "On a scale of 1-5 how invested are you in environmental impact?(1 being the least invested)", "How did you find out about this event?" ) 
 
 colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "invested_environmental_impact", "find_out_event" )
+
+total_colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "invested_environmental_impact", "find_out_event", "age_group", "location", "year")
+
+merge_colnames_ls <- c("location", "year")
 
 age_range_options <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71")
 
@@ -63,7 +68,16 @@ preprocessing_fn <- function(excel_name) {
   # creates new column for correct age bin of eventbrite responders
   pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE)
   
-  #View(pre_event_data)
+
+  # adds location and year as columns
+  name_split = strsplit(excel_name, "_", fixed = TRUE)
+  date = name_split[[1]][2]
+  date_split = strsplit(date, ".", fixed = TRUE)
+  pre_event_data <- pre_event_data %>% mutate(location = name_split[[1]][1])
+  pre_event_data <- pre_event_data %>% mutate(year = date_split[[1]][3])
+ 
+  # View(pre_event_data)
+
 
   return (pre_event_data)
 
@@ -86,8 +100,33 @@ valid_postcode <- function(input) {
 }
 
 ## Code to call functions ##
-pre_event_data = preprocessing_fn("pre-event_responses_v2.xlsx")
-summary(pre_event_data)
+# pre_event_data = preprocessing_fn("pre-event_responses_v2.xlsx")
+pre_event_data = preprocessing_fn("Dummy Location 1_03.02.2021_Pre_Participants.xlsx")
+# summary(pre_event_data)
+
+
+```
+
+
+
+```{r}
+########################### PREPROCESSING MULTIPLE ##########################
+filenames = c("Dummy Location 1_03.02.2021_Pre_Participants.xlsx","Dummy Location 2 !!`''`-^%##@'_03.02.2020_Pre_Participants.xlsx")
+
+# cleans up multiple excel file for columns required
+# input is multiple excel files as a list
+# output is total cleaned dataframe
+preprocessing_multiple_fn <- function(excel_ls_name) {
+  combined_data <- preprocessing_fn(excel_ls_name[1])
+  for (excel_name in excel_ls_name[2:length(excel_ls_name)]) {
+    combined_data <- rbind(combined_data, preprocessing_fn(excel_name))
+  }
+  return (combined_data)
+}
+
+## Code to call functions ##
+combined_data = preprocessing_multiple_fn(filenames)
+View(combined_data)
 
 
 ```
