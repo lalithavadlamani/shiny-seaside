@@ -38,12 +38,12 @@ character_ls <- c("email", "postcode")
 ############################## PREPROCESSING #############################
 
 # cleans up single excel file for columns required
-# input is single excel file
+# input is dataframe pre_event_all and name of excel file is excel_name_ls
 # output is cleaned dataframe
 
-preprocessing_fn <- function(excel_name) {
+preprocessing_fn <- function(pre_event_all,excel_name_ls) {
   
-  pre_event_all = read_excel(excel_name)
+  # pre_event_all = read_excel(excel_name)
   
   # names(pre_event_all)
   
@@ -70,7 +70,7 @@ preprocessing_fn <- function(excel_name) {
   
 
   # adds location and year as columns
-  name_split = strsplit(excel_name, "_", fixed = TRUE)
+  name_split = strsplit(excel_name_ls, "_", fixed = TRUE)
   date = name_split[[1]][2]
   date_split = strsplit(date, ".", fixed = TRUE)
   pre_event_data <- pre_event_data %>% mutate(location = name_split[[1]][1])
