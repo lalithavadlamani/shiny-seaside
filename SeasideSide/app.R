@@ -82,9 +82,7 @@ ui <- dashboardPage(
                         
                         # Prevent visualisation
                         conditionalPanel("input.sidebar == 'preEvent'",
-                            selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun", multiple = TRUE,  options = list(maxItems = 2))
-                            # selectizeInput("preVar2", "Demographic 2", choices = NULL, multiple = TRUE)
-                        )
+                            selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun", multiple = TRUE,  options = list(maxItems = 2))                        )
                     ),
                 )
             ),
@@ -136,7 +134,7 @@ server <- function(input, output, session) {
         sheetsToken = gs4_auth(token = drive_token())
         files = drive_ls(path)
     })
-    
+    metaData = reactive({name_processing(sheetInitialisation()$name)})
     
     # Updating Survey Choices
     observeEvent(input$driveID,{
@@ -155,19 +153,19 @@ server <- function(input, output, session) {
     observeEvent(input$analysisType,{
                  if (!(is.null(input$emailID) & is.null(input$driveID))){
                      
-                     files = sheetInitialisation()
+                     metaData = metaData()
                      if(input$analysisType == "Event"){
-                         # choices = paste(name_processing(files$name)$location, name_processing(files$name)$date)
-                         choices = files$name
+                         choices = paste(metaData$location, metaData$date)
+                         #choices = files$name
                      }else if (input$analysisType == "Yearly"){
-                         choices = name_processing(files$name)$date %>% 
+                         choices = metaData$date %>% 
                              lubridate::as_date(format = "%d.%m.%y") %>% 
                              lubridate::year() %>% 
                              unique() %>% 
                              sort()
                          
                      }else{
-                         choices = name_processing(files$name)$location
+                         choices = metaData$location
                      }
                      updateSelectizeInput(session,
                                           "sheet", 
@@ -178,7 +176,26 @@ server <- function(input, output, session) {
     })
     
     
-    preEventData = reactive({read_sheet(drive_get(input$sheet))})
+    preEventData = reactive({
+ 
+        if (input$analysisType == "Event"){
+            location = str_split(input$sheet," ")[[1]][[1]]
+            date = str_split(input$sheet," ")[[1]][[2]] %>% lubridate::as_date()
+            
+            file_names = filter_data(metaData(), location_filter = location, event_type_filter = "Pre")
+            file_names = filter_data(file_names, date_filter = date, event_type_filter = "Pre")$file_name
+            
+        }else if(input$analysisType == "Yearly"){
+            file_names = filter_data(metaData(), year_filter = input$sheet, event_type_filter = "Pre")$file_name            
+        }else{
+            file_names = filter_data(metaData(), location_filter = input$sheet, event_type_filter = "Pre")$file_name            
+        }
+        # browser()
+        # XYZ
+        # data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
+        read_sheet(drive_get(file_names))
+
+        })
 
     # Panel 1
     # Prevent Data Table
