@@ -76,14 +76,13 @@ age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = age_count
 
 ```{r}
 
-
 PreEventPlot <- function(data, varNames, title, yaxislabel, xaxislabel, legendlabel) {
   
   
   if(length(varNames) == 1) {
     # This line fixes it
-    #data = data %>% dplyr::rename(var1 = varNames[[1]])
-    if (varNames == "age_group"){
+    
+    if(varNames == ("age_group")){
       # Mukund's Code
       data2=select(data, -email, -pronoun, -previous_attendance, -find_out_event, -age_group)
       glimpse(data2)
@@ -96,8 +95,20 @@ PreEventPlot <- function(data, varNames, title, yaxislabel, xaxislabel, legendla
       age_count<- c(data2_agesums)
       age_df<- data.frame(age_count)
 
-age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = age_count)) + geom_bar(stat = "identity", fill='skyblue1')+ggtitle(title)+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
+      age_df %>%
+        rownames_to_column("groups") %>%
+        ggplot(aes(x = groups, y = age_count)) + 
+          geom_bar(stat = "identity", fill='skyblue1')+
+          ggtitle(title)+ 
+          theme(plot.title=element_text(hjust=0.5)) + 
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  +
+          theme_minimal() + 
+          scale_x_discrete(limits = c("age_under_5","age_5_to_10","age_11_to_20", "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71"),
+                           labels = c("Age Under 5", "Age 5 to 10", "Age 11 to 20", "Age 21 to 30", "Age 31 to 50", "Age 51 to 70", "Age Over 71")) 
+          
+          
     }else{
+      data = data %>% dplyr::rename(var1 = varNames[[1]])
       data  %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)))) + geom_bar()
     }
  
@@ -126,7 +137,7 @@ age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = age_count
 data = read_csv("pre_event_cleaned_dummy.csv")
 glimpse(data)
 PreEventPlot(data, c("previous_attendance", "pronoun"), "Previous Event Attendance by Gender", "Number of Responses", "Previous Attendance Type", "Pronoun")
-PreEventPlot(data, c("age_group"), "Age of All Participants at Event", "", "", "")
+PreEventPlot(data,varNames = c("age_group"), title = "Age of All Participants at Event", "", "", "")
 
 ```
 

@@ -38,12 +38,12 @@ character_ls <- c("email", "postcode")
 ############################## PREPROCESSING #############################
 
 # cleans up single excel file for columns required
-# input is single excel file
+# input is dataframe pre_event_all and name of excel file is excel_name_ls
 # output is cleaned dataframe
 
-preprocessing_fn <- function(excel_name) {
+preprocessing_fn <- function(pre_event_all,excel_name_ls) {
   
-  pre_event_all = read_excel(excel_name)
+  # pre_event_all = read_excel(excel_name)
   
   # names(pre_event_all)
   
@@ -70,7 +70,7 @@ preprocessing_fn <- function(excel_name) {
   
 
   # adds location and year as columns
-  name_split = strsplit(excel_name, "_", fixed = TRUE)
+  name_split = strsplit(excel_name_ls, "_", fixed = TRUE)
   date = name_split[[1]][2]
   date_split = strsplit(date, ".", fixed = TRUE)
   pre_event_data <- pre_event_data %>% mutate(location = name_split[[1]][1])
@@ -116,10 +116,12 @@ filenames = c("Dummy Location 1_03.02.2021_Pre_Participants.xlsx","Dummy Locatio
 # cleans up multiple excel file for columns required
 # input is multiple excel files as a list
 # output is total cleaned dataframe
-preprocessing_multiple_fn <- function(excel_ls_name) {
-  combined_data <- preprocessing_fn(excel_ls_name[1])
+preprocessing_multiple_fn <- function(dataframe_ls, excel_ls_name) {
+  combined_data <- preprocessing_fn(dataframe_ls[1], excel_ls_name[1])
+  i = 2
   for (excel_name in excel_ls_name[2:length(excel_ls_name)]) {
-    combined_data <- rbind(combined_data, preprocessing_fn(excel_name))
+    combined_data <- rbind(combined_data, preprocessing_fn(dataframe_ls[i], excel_name))
+    i = i + 1
   }
   return (combined_data)
 }
