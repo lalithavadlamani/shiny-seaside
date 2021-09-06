@@ -168,7 +168,7 @@ PostEventPlot <- function(data) {
   yaxislabel = paste("Percentage") %>% str_to_title()
   xaxislabel = paste("KPI")
    
-  data1  %>% ggplot() + geom_bar(fill="skyblue1") + labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + ggtitle(sub("_", " ", title))
+  data1  %>% ggplot(data, aes(x=biggest_takeaway_kpi_table)) + geom_bar(fill="skyblue1") + labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + ggtitle(sub("_", " ", title))
 }
 
 PostEventPlot(data1)
