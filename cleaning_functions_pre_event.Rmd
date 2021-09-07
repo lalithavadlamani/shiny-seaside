@@ -315,7 +315,7 @@ marketing_count(pre_event_data)
 write.csv(pre_event_data, "pre_event_cleaned_dummy.csv")
 =======
 # write.csv(pre_event_data, "pre_event_cleaned_dummy.csv")
-```
+
 >>>>>>> 610f15db4725ba4ea7b9ef24fcffdb9dd60dd0ef
 
 pre_event_cleaned <- read.csv("pre_event_cleaned_dummy.csv")

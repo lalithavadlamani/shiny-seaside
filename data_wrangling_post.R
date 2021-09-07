@@ -14,7 +14,7 @@ library('readxl')
 library(tidyverse)
 library(stringr)
 
-data <- read_excel("C:/Users/Lalitha Vadlamani/Desktop/180 DC/S2/post-event_responses_v2.xlsx")
+data <- read_excel("C:/Users/julia/OneDrive/Desktop/shiny-seaside/post-event_responses_v2.xlsx")
 
 # Check point
 class(data)
@@ -138,3 +138,7 @@ action_kpi <- function(df){
 } 
 
 action_kpi_table <- action_kpi(df)
+
+print(action_kpi_table)
+
+print(biggest_takeaway_kpi_table)
