@@ -10,7 +10,7 @@ library(googledrive)
 
 
 source("filename_cleaning.R")
-
+source("preEventCleaning.R")
 
 
 # path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
@@ -78,7 +78,7 @@ ui <- dashboardPage(
                         # Year by Year Analysis 
                         selectizeInput("analysisType", "Analysis:", choices = c("Event","Yearly", "Location")),
                         # Survey choice - Choices populated in server
-                        selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = FALSE),
+                        selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
                         
                         # Prevent visualisation
                         conditionalPanel("input.sidebar == 'preEvent'",
@@ -156,32 +156,36 @@ server <- function(input, output, session) {
                      metaData = metaData()
                      if(input$analysisType == "Event"){
                          choices = paste(metaData$location, metaData$date)
-                         #choices = files$name
+                         default = choices[1]
                      }else if (input$analysisType == "Yearly"){
                          choices = metaData$date %>% 
                              lubridate::as_date(format = "%d.%m.%y") %>% 
                              lubridate::year() %>% 
                              unique() %>% 
                              sort()
-                         
+                         default = choices
                      }else{
                          choices = metaData$location
+                         default = choices[1]
                      }
                      updateSelectizeInput(session,
                                           "sheet", 
                                           choices = choices, 
-                                          selected = choices[1],
+                                          selected = default,
+                                          options = list(maxItems = Inf),
                                           server = TRUE)
                  }
     })
     
     
     preEventData = reactive({
- 
+
         if (input$analysisType == "Event"){
-            location = str_split(input$sheet," ")[[1]][[1]]
-            date = str_split(input$sheet," ")[[1]][[2]] %>% lubridate::as_date()
-            
+            splitString = str_split(input$sheet," ")[[1]]
+            date = splitString[length(splitString)] 
+            location = splitString[splitString != date] %>% paste(collapse = " ")
+            date = date %>% lubridate::as_date()
+
             file_names = filter_data(metaData(), location_filter = location, event_type_filter = "Pre")
             file_names = filter_data(file_names, date_filter = date, event_type_filter = "Pre")$file_name
             
@@ -190,11 +194,10 @@ server <- function(input, output, session) {
         }else{
             file_names = filter_data(metaData(), location_filter = input$sheet, event_type_filter = "Pre")$file_name            
         }
-        # browser()
-        # XYZ
-        # data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
-        read_sheet(drive_get(file_names))
 
+        data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
+        processedData = preprocessing_multiple_fn(data, file_names)
+        processedData
         })
 
     # Panel 1
@@ -211,34 +214,21 @@ server <- function(input, output, session) {
     # PreEvent Visualisations 
     
     output$preViz = renderPlotly({
-        # input$preVar1
-        
-        if (length(input$preVar1)==1){
-            if (!("Age" %in% input$preVar1)){
-               g=  preEventData() %>% select(varViz = input$preVar1) %>% 
-                   ggplot(aes(x= reorder(varViz, varViz, function(x)-length(x)), fill = varViz)) + 
-                   geom_bar() +
-                   theme_minimal() +
-                   xlab(input$preVar1) + 
-                   theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) 
-               ggplotly(g)
-            }
+        validate(!is.null())
+        if (input$analysisType %in% c("Location", "Yearly")){
+            g = preEventData() %>% 
+                select(year,varViz = input$preVar1[[1]]) %>% 
+                ggplot(aes(x = year, fill = varViz)) +
+                    geom_bar() + 
+                    theme_minimal() 
+            ggplotly(g)  
+            
         }else{
-            if (!("Age" %in% input$preVar1)){
-                g=  preEventData() %>% select(varViz1 = input$preVar1[[1]], varViz2 = input$preVar1[[2]]) %>% 
-                    ggplot(aes(x= reorder(varViz1, varViz1, function(x)-length(x)), fill = varViz2)) + 
-                    geom_bar() +
-                    theme_minimal() +
-                    xlab(input$preVar1[[1]]) +
-                    theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) 
-                ggplotly(g)
-            }
+            PreEventPlot(preEventData(),input$preVar1) %>% ggplotly()
         }
         
-        # 
-        # if (!("Age" %in% input$preVar1)){
-        #     preEventData() %>% select(input$preVar1) %>% ggplot(aes(x=))
-        # }
+        
+
     })
     
     
