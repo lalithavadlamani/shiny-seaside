@@ -5,6 +5,8 @@ library(plotly)
 
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
+
 library(googlesheets4)
 library(googledrive)
 
@@ -76,13 +78,35 @@ ui <- dashboardPage(
                     sidebarPanel(
                         width = 12,
                         # Year by Year Analysis 
-                        selectizeInput("analysisType", "Analysis:", choices = c("Event","Yearly", "Location")),
+                        # selectizeInput("analysisType", "Analysis:", choices = c("Event","Yearly", "Location")),
+                        radioGroupButtons(
+                            inputId = "analysisType",
+                            label = "Analysis:", 
+                            choices = c("Event","Yearly", "Location"),
+                            status = "danger"
+                        ),
                         # Survey choice - Choices populated in server
                         selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
                         
                         # Prevent visualisation
                         conditionalPanel("input.sidebar == 'preEvent'",
-                            selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun", multiple = TRUE,  options = list(maxItems = 2))                        )
+                                         
+                            selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun"),
+                            
+                            conditionalPanel("input.analysisType == 'Event'",
+                                selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
+                                ),
+                            
+                            prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE),
+                            conditionalPanel("input.advancedPreOptions == 1",
+                                selectizeInput("prePlotOptions (Optional)",
+                                               "Plotting Options", 
+                                               choices = c("Horizontal", "Proportions", "Numeric Text"), 
+                                               selected = "Horizontal",
+                                               multiple = TRUE)
+                                )
+                        )
+                            
                     ),
                 )
             ),
@@ -96,7 +120,7 @@ ui <- dashboardPage(
                            collapsible = TRUE,
                            width = 12,
                            
-                           plotly::plotlyOutput("preViz", height = 300)
+                           plotly::plotlyOutput("preViz", height = 400)
                        )
                    )
             ),
@@ -111,7 +135,7 @@ ui <- dashboardPage(
                         collapsed = TRUE,
                         width = 12,
         
-                        DT::DTOutput("googleSheetData", height = 250)
+                        DT::DTOutput("googleSheetData", height = 300)
                         )
                 )
             )
@@ -150,9 +174,11 @@ server <- function(input, output, session) {
                  }
              }
         )
+    
+    # Updating inputs with choices corresponding to analysis type
     observeEvent(input$analysisType,{
+        
                  if (!(is.null(input$emailID) & is.null(input$driveID))){
-                     
                      metaData = metaData()
                      if(input$analysisType == "Event"){
                          choices = paste(metaData$location, metaData$date)
@@ -177,9 +203,28 @@ server <- function(input, output, session) {
                  }
     })
     
+    #
+    observeEvent(input$preVar1,{
+        updateSelectizeInput(session,
+                             "preVarColour", 
+                             choices = c("None", preVars)[c("None", preVars) != input$preVar1],
+                             selected = "None",
+                             server = TRUE)
+        }
+    )
+    
     
     preEventData = reactive({
-
+        validate(
+            need(input$sheet, "Select file please/File is being loaded from the drive.")
+        )
+        
+        if (input$analysisType == "Event"){
+            validate(
+                need(length(input$sheet) == 1, "Please select only 1 file.")
+            )
+        }
+        
         if (input$analysisType == "Event"){
             splitString = str_split(input$sheet," ")[[1]]
             date = splitString[length(splitString)] 
@@ -214,7 +259,7 @@ server <- function(input, output, session) {
     # PreEvent Visualisations 
     
     output$preViz = renderPlotly({
-        validate(!is.null())
+        
         if (input$analysisType %in% c("Location", "Yearly")){
             g = preEventData() %>% 
                 select(year,varViz = input$preVar1[[1]]) %>% 
@@ -224,7 +269,11 @@ server <- function(input, output, session) {
             ggplotly(g)  
             
         }else{
-            PreEventPlot(preEventData(),input$preVar1) %>% ggplotly()
+            if (input$preVarColour == "None"){
+                PreEventPlot(preEventData(),input$preVar1) %>% ggplotly()
+            }else{
+                PreEventPlot(preEventData(),c(input$preVar1, input$preVarColour)) %>% ggplotly()
+            }
         }
         
         

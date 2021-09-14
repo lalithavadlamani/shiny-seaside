@@ -17,8 +17,7 @@ library(stringr)
 
 ```
 
-<<<<<<< HEAD
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
 
 ## Attendance viz coloured by gender
 ```{R}
@@ -169,13 +168,22 @@ PreEventPlot(data,varNames = c("pronoun"))
 
 
 
-
-
-
-
-
-
-
+```{r}
+# levels = c("age_under_5","age_5_to_10","age_11_to_20", 
+#                                       "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71")
+# prePlot = function(data, varNames){
+#   if ("age_group" %in% varNames){
+#     data = data %>% mutate(age_group = factor(age_group,levels))
+#   
+# }
+# 
+# 
+# 
+# 
+# data = pre_event_data
+# 
+# data %>% ggplot(aes(x = age_group)) %>% +geom_bar()
+```
 
 
 
