@@ -169,13 +169,11 @@ PostEventPlot <- function(data) {
   xaxislabel = paste("KPI")
    
   df %>% ggplot(aes(x = KPI, y = Percentage)) + 
-    geom_bar(fill="skyblue1", stat = "identity") + 
+    geom_col(fill="skyblue1") + 
     labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
     ggtitle(sub("_", " ", title))
 }
 
 PostEventPlot(data1)
-
-
 ```
 
