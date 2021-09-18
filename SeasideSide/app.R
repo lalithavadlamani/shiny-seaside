@@ -88,7 +88,7 @@ ui <- dashboardPage(
                         # Survey choice - Choices populated in server
                         selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
                         
-                        # Prevent visualisation
+                        # Pre 
                         conditionalPanel("input.sidebar == 'preEvent'",
                                          
                             selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun"),
@@ -99,12 +99,41 @@ ui <- dashboardPage(
                             
                             prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE),
                             conditionalPanel("input.advancedPreOptions == 1",
-                                selectizeInput("prePlotOptions (Optional)",
-                                               "Plotting Options", 
+                             #selectizeInput
+                                checkboxGroupButtons("prePlotOptions",
+                                               "Plotting Options (Optional)", 
                                                choices = c("Horizontal", "Proportions", "Numeric Text"), 
-                                               selected = "Horizontal",
-                                               multiple = TRUE)
-                                )
+                                               selected = NULL),
+                                               # ,
+                                               # multiple = TRUE),
+                                textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
+                                textInput("preXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                textInput("preYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                ),
+                            downloadButton('downloadPreEvent',"Download the data")
+                                
+                        ),
+                        
+                        # Post
+                        conditionalPanel("input.sidebar == 'postEvent'",
+                                         radioGroupButtons(
+                                             inputId = "postEventKPI",
+                                             label = "KPI:", 
+                                             choices = c("Action","Learning", "Community")
+                                         ),
+                                         downloadButton('downloadPostEvent',"Download the data")
+                                         
+                        ),
+                        
+                        # Stratified
+                        conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                                         radioGroupButtons(
+                                             inputId = "stratifiedEventKPI",
+                                             label = "KPI:", 
+                                             choices = c("Action","Learning", "Community")
+                                         ),
+                                         downloadButton('downloadStratifiedEventKPIEvent',"Download the data")
+                                         
                         )
                             
                     ),
@@ -213,6 +242,24 @@ server <- function(input, output, session) {
         }
     )
     
+    observeEvent(input$advancedPreOptions,{
+        updateTextInput(session,
+                        "preTitle", 
+                         value = paste(input$preVar1,"Barplot") %>% str_to_title()
+                        )
+        
+        updateTextInput(session,
+                        "preXaxis", 
+                        value = input$preVar1 %>% str_to_title()
+                        )
+        
+        updateTextInput(session,
+                        "preYaxis", 
+                        value = "Count"
+                        )
+    }
+    )
+    
     
     preEventData = reactive({
         validate(
@@ -224,6 +271,8 @@ server <- function(input, output, session) {
                 need(length(input$sheet) == 1, "Please select only 1 file.")
             )
         }
+        
+
         
         if (input$analysisType == "Event"){
             splitString = str_split(input$sheet," ")[[1]]
@@ -259,26 +308,48 @@ server <- function(input, output, session) {
     # PreEvent Visualisations 
     
     output$preViz = renderPlotly({
-        
+
         if (input$analysisType %in% c("Location", "Yearly")){
             g = preEventData() %>% 
-                select(year,varViz = input$preVar1[[1]]) %>% 
+                select(year,varViz = input$preVar1) %>% 
                 ggplot(aes(x = year, fill = varViz)) +
                     geom_bar() + 
                     theme_minimal() 
-            ggplotly(g)  
+              
             
         }else{
             if (input$preVarColour == "None"){
-                PreEventPlot(preEventData(),input$preVar1) %>% ggplotly()
+                g = PreEventPlot(preEventData(),input$preVar1)
             }else{
-                PreEventPlot(preEventData(),c(input$preVar1, input$preVarColour)) %>% ggplotly()
+                g = PreEventPlot(preEventData(),c(input$preVar1, input$preVarColour)) 
             }
         }
+        
+        if (input$advancedPreOptions == TRUE){
+            if (!is.null(input$preTitle)){
+              g = g + ggtitle(input$preTitle)  
+            }
+            if (!is.null(input$preXaxis)){
+              g = g + xlab(input$preXaxis) 
+            }
+            if (!is.null(input$preYaxis)){
+              g = g + ylab(input$preYaxis) 
+            }
+            
+        }
+        ggplotly(g)
         
         
 
     })
+    
+
+    output$downloadPreEvent <- downloadHandler(
+        filename = function(){"preEvent.csv"}, 
+        content = function(fname){
+            write.csv(preEventData(), fname)
+        }
+    )    
     
     
 }
