@@ -163,18 +163,19 @@ data1 <- biggest_takeaway_kpi_table
 
 ```{r}
 PostEventPlot <- function(data) {
-  df = data1 %>% t() %>% as.data.frame.matrix() %>% rownames_to_column(var = "KPI")
+  df = data %>% t() %>% as.data.frame.matrix() %>% rownames_to_column(var = "KPI")
   title = paste("KPI Summary") %>% str_to_title()
   yaxislabel = paste("Percentage") %>% str_to_title()
   xaxislabel = paste("KPI")
    
-  df %>% ggplot(aes(x = KPI, y = Percentage, stat = "identity")) + 
+  df %>% ggplot(aes(x = KPI, y = Percentage)) + 
     geom_bar(fill="skyblue1", stat = "identity") + 
     labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
     ggtitle(sub("_", " ", title))
 }
 
 PostEventPlot(data1)
+
 
 ```
 
