@@ -14,7 +14,7 @@ library('readxl')
 library(tidyverse)
 library(stringr)
 
-data <- read_excel("C:/Users/julia/OneDrive/Desktop/shiny-seaside/post-event_responses_v2.xlsx")
+data <- read_excel("post-event_responses_v2.xlsx")
 
 # Check point
 class(data)
@@ -163,18 +163,18 @@ data1 <- biggest_takeaway_kpi_table
 
 ```{r}
 PostEventPlot <- function(data) {
-  data <- data1
+  df = data1 %>% t() %>% as.data.frame.matrix() %>% rownames_to_column(var = "KPI")
   title = paste("KPI Summary") %>% str_to_title()
   yaxislabel = paste("Percentage") %>% str_to_title()
   xaxislabel = paste("KPI")
    
-  data1  %>% ggplot(data, aes(x=biggest_takeaway_kpi_table)) + geom_bar(fill="skyblue1") + labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + ggtitle(sub("_", " ", title))
+  df %>% ggplot(aes(x = KPI, y = Percentage, stat = "identity")) + 
+    geom_bar(fill="skyblue1", stat = "identity") + 
+    labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
+    ggtitle(sub("_", " ", title))
 }
 
 PostEventPlot(data1)
-
-
-### duplicate this code for action KPi table once fixed 
 
 ```
 
