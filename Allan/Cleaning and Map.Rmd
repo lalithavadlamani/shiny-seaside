@@ -1,0 +1,204 @@
+---
+title: "Pre-event Cleaning code and Map"
+output: 
+  rmdformats::robobook:
+    code_folding: hide
+    fig_caption: yes
+    number_sections: no
+    self_contained: yes
+  html_document:
+    toc: true
+    toc_depth: 2
+    code_folding: hide
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE,message = FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+library(tmap)
+library(ggmap)
+library(rgdal)
+library(data.table)
+```
+
+
+```{r}
+bronte_eventbrite =  readxl::read_xlsx("Participants/Bronte 19.1.20 (Participant) Eventbrite.xlsx") %>% janitor::clean_names() 
+bronte_eventbrite = bronte_eventbrite[!duplicated(bronte_eventbrite),]
+
+
+# openxlsx::write.xlsx(bronte_eventbrite, "Participants/Bronte 19.1.20 (Eventbrite)2.xlsx")
+```
+
+
+
+# Cleaning
+```{r}
+files_excel <- list.files("Participants", pattern="*.xlsx")
+files_excel = files_excel[which(files_excel !="Bronte 19.1.20 (Participant) Eventbrite.xlsx" & files_excel != "Bronte 19.1.20.xlsx")]
+location_date = lapply(files_excel,function(x) str_split(str_split(x, pattern= ".xlsx")[[1]], " ")[[1]])
+location_date = location_date %>% lapply(function(x) x[which(!(x %in% c("Participants","Eventbrite","(Participants)", "(Participant)", "Registration")))])
+
+files = paste0("Participants/",files_excel) %>%  lapply(readxl::read_xlsx) %>% lapply(janitor::clean_names)
+
+
+
+```
+
+```{r}
+colsTokeep =c("postcode", "prev_cleanup", "birth_year","hear", "first_name", "last_name")
+
+keep_columns = function(x, colk = colsTokeep){
+ colnames(x)[which(str_detect(colnames(x), "clean"))] = "prev_cleanup"
+ colnames(x)[which(
+   (str_detect(colnames(x), "hear") & str_detect(colnames(x), "how")) |
+     str_detect(colnames(x), "found"))] = "hear"
+ 
+colnames(x)[which(str_detect(colnames(x), "year") | str_detect(colnames(x), "birth") |  str_detect(colnames(x), "dob") | str_detect(colnames(x), "age"))] = "birth_year"
+
+colnames(x)[which(str_detect(colnames(x), "zip"))] = "postcode"
+
+
+colnames(x)[which(str_detect(colnames(x), "first_name")|str_detect(colnames(x), "phone_number"))] = "first_name"
+colnames(x)[which(str_detect(colnames(x), "surname")|str_detect(colnames(x), "last"))] = "last_name"
+
+ keep_cols = colnames(x)[which(colnames(x) %in%  colk)] 
+ 
+ x %>% dplyr::select(keep_cols)
+}
+```
+
+
+```{r}
+files = files %>% lapply(keep_columns)
+
+for (i in 1:length(files)){
+  
+  files[[i]] = data.frame(files[[i]],location = (location_date[i][[1]])[1])
+  files[[i]] = data.frame(files[[i]],date = (location_date[i][[1]])[2])  
+  #mutate(date = lubridate::as_date(date, format = "%d.%m.%Y")+lubridate::years(2000))
+  
+  if ("postcode" %in% colnames(files[[i]])){
+    files[[i]] = files[[i]] %>% mutate(postcode = as.character(postcode))
+  }
+  
+  if ("birth_year" %in% colnames(files[[i]])){
+    files[[i]] = files[[i]] %>% mutate(birth_year = as.character(birth_year))
+  }
+  
+  # if ("birth_year" %in% colnames(files[[i]])){
+  #   if (is.numeric(files[[i]]$birth_year)){
+  #     if (max(as.numeric(files[[i]]$birth_year), na.rm = TRUE)>100){
+  #       files[[i]] = files[[i]] %>% mutate(birth_year = lubridate::as_date(as.character(birth_year), format = "%Y"))
+  #     }else{
+  #       files[[i]] = files[[i]] %>% mutate(birth_year = date -lubridate::years(birth_year))  
+  #     }
+  #   }else{
+  #     a = lubridate::as_date(files[[i]]$birth_year, format = "%d.%m.%Y")
+  #     a1 = a 
+  #     a1[is.na(a1)] = "1000-01-01"
+  #     a[which(a1 <= "1000-01-01")] = (lubridate::as_date(files[[i]]$birth_year, format = "%Y.%m.%d"))[which(a1 <= "1000-01-01")]
+  #     b = lubridate::as_date(files[[i]]$birth_year, format = "%Y")
+  #     a[is.na(a)] = b[is.na(a)] 
+  #     files[[i]] = files[[i]] %>% mutate(birth_year = a)
+  #   }
+  # }
+}
+
+
+```
+
+Note: Made some assumptions in the "how did you hear about this event column". If I saw that there were names (based on my interpretation) in these columns, I assumed that they were staff. If I incorrectly misinterpreted that some of the entries were names when they weren't, this can slightly hinder the validity of our analysis based on this column.
+```{r}
+# final_data = files %>% bind_rows() %>% filter(hear != "Test") %>% mutate(hear = tolower(hear)) %>%  mutate(hear = ifelse(hear == "facebook" | hear == "instagram"|hear == "fb"|hear == "ig", "facebook/instagram", hear))%>%  mutate(hear = ifelse(str_detect(hear, "friend"), "friend",hear)) %>% mutate(hear = ifelse(str_detect(hear, "beach"), "beach",hear))%>% mutate(hear = ifelse(str_detect(hear, "walk")|str_detect(hear, "passing"), "walking",hear)) %>% mutate(hear = ifelse(hear == "family" | hear == "daughter"|hear == "mum"|hear == "brother"|hear == "father"|hear == "dad"|hear == "mother"|hear == "sister", "family", hear))%>% mutate(hear = ifelse(str_detect(hear, "email"), "email",hear)) %>% mutate(hear = ifelse(str_detect(hear, "mum")|str_detect(hear, "dad")|str_detect(hear, "wife"), "family",hear))%>% mutate(hear = ifelse(str_detect(hear, "mosman"), "mosman",hear)) %>% mutate(hear = ifelse(str_detect(hear, "seaside")|str_detect(hear, "aj")|str_detect(hear, "staff")|str_detect(hear, "volunteer")|str_detect(hear, "josh")|str_detect(hear, "josie")|str_detect(hear, "tim")|str_detect(hear, "trent")|str_detect(hear, "amy")|str_detect(hear, "ash")|str_detect(hear, "anthony")|str_detect(hear, "rae")|str_detect(hear, "ellen")|str_detect(hear, "iris")|str_detect(hear, "rach"), "staff/named",hear))%>% mutate(hear = ifelse(str_detect(hear, "loc"), "local",hear)) %>%  mutate(hear = ifelse(str_detect(hear, "here")|str_detect(hear, "saw"), "here",hear)) %>% mutate(hear = ifelse(str_detect(hear, "poster")|str_detect(hear, "flyer"), "poster",hear))
+
+
+final_data = files %>% bind_rows() %>% filter(hear != "Test") %>% mutate(hear = tolower(hear)) %>% 
+    mutate(hear = ifelse(str_detect(hear, "faceb")|str_detect(hear, "fb")|str_detect(hear, "insta")|str_detect(hear, "ig"), "facebook/instagram",hear)) %>% 
+       mutate(hear = ifelse(str_detect(hear, "friend"), "friend",hear)) %>% 
+         mutate(hear = ifelse(str_detect(hear, "beach"), "beach",hear)) %>% 
+            mutate(hear = ifelse(str_detect(hear, "walk")|str_detect(hear, "passing"), "walking",hear)) %>% 
+              mutate(hear = ifelse(str_detect(hear, "mum")|str_detect(hear, "mother")|str_detect(hear, "father")|str_detect(hear, "dad")|str_detect(hear, "brother")|str_detect(hear, "sister")|str_detect(hear, "husband")|str_detect(hear, "gf")|str_detect(hear, "bf")|str_detect(hear, "wife")|str_detect(hear, "daughter")|str_detect(hear, "son"), "family",hear)) %>% 
+                mutate(hear = ifelse(str_detect(hear, "mosman"), "mosman",hear)) %>% 
+                    mutate(hear = ifelse(str_detect(hear, "poster")|str_detect(hear, "flyer"), "poster",hear))  %>% 
+                            mutate(hear = ifelse(str_detect(hear, "seaside")|str_detect(hear, "aj")|str_detect(hear, "staff")|str_detect(hear, "volunteer")|str_detect(hear, "josh")|str_detect(hear, "josie")|str_detect(hear, "tim")|str_detect(hear, "trent")|str_detect(hear, "amy")|str_detect(hear, "ash")|str_detect(hear, "anthony")|str_detect(hear, "rae")|str_detect(hear, "ellen")|str_detect(hear, "iris")|str_detect(hear, "rach")|str_detect(hear, "nic")|str_detect(hear, "acy")|str_detect(hear, "sharky"), "staff/named",hear))%>% mutate(hear = ifelse(str_detect(hear, "loc"), "local",hear)) %>% 
+                              mutate(hear = ifelse(str_detect(hear, "email"), "email",hear)) %>% 
+                                mutate(hear = ifelse(str_detect(hear, "previous")|str_detect(hear, "every"), "prior",hear)) %>% 
+                                  mutate(hear = ifelse(str_detect(hear, "school"), "school",hear)) %>% 
+                                     mutate(hear = ifelse(str_detect(hear, "news"), "news_medium",hear)) %>% 
+                                        mutate(hear = ifelse(str_detect(hear, "here")|str_detect(hear, "saw")|str_detect(hear, "bumped")|str_detect(hear, "stumbled"), "here",hear)) 
+
+final_data = final_data %>%  dplyr::mutate(prev_cleanup = ifelse(str_detect(tolower(prev_cleanup), "y"), "Yes", "No"))
+  
+  
+
+counted_final =  final_data %>% group_by(hear) %>% count() %>%  filter(n >= 5) %>% pull(hear)
+
+final_data =final_data %>% mutate(hear = ifelse(hear %in% counted_final, hear, "other")) 
+final_data = final_data[!duplicated(final_data),]
+
+
+# write.csv(final_data, "final_data.csv")
+
+```
+
+
+
+
+# Maps
+
+```{r}
+library(leaflet)
+library(leaflet.extras)
+library(rgdal)
+postcodes <- read_csv("au_postcodes.csv")
+
+```
+
+
+```{r, results = "hide"}
+nsw_shape <- readOGR(dsn = "/Users/souri/OneDrive/Desktop/180 Degrees/Pre-event Cleaning/NSW_STATE_POLYGON_shp_GDA2020.shp")
+```
+
+
+```{r}
+postcodes = postcodes %>% mutate(place_name = ifelse(str_detect(place_name, "Gold Coast"), "Gold Coast", place_name))   %>% mutate(place_name = ifelse(place_name == "Mosman", "Clifton Gardens", place_name))
+```
+
+
+```{r}
+final_data = final_data %>% mutate(location = ifelse(location == "Gold_Coast","Gold Coast", location)) %>% mutate(location = ifelse(location == "Burns_Beach","Burns Beach", location)) %>% mutate(location = ifelse(location == "Byron","Byron Bay", location)) %>% mutate(location = ifelse(location == "Clifton_Gardens","Clifton Gardens", location)) 
+
+joined_data = inner_join(postcodes %>% rename(location = "place_name", postcode1 = "postcode"), final_data) 
+```
+
+```{r}
+map_df  = as.data.frame(joined_data %>% group_by(location, longitude,latitude) %>% count()  %>% ungroup() )
+map_df = map_df[-c(6,9),]
+
+bins <- c(0,20,40, 60, 80, 100,  200)
+pal <- colorBin("YlOrRd", domain = map_df$n, bins = bins)
+
+```
+
+
+```{r}
+active_map_circles <- leaflet(map_df) %>% addTiles() %>%
+  addCircles(lng = ~longitude, lat = ~latitude, color= ~pal(map_df$n), weight = 3,
+             # radius will allow us to visualise the spread of the virus
+             radius = ~map_df$n * 7.5,  popup = ~map_df$location) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  setView(lng = 151.2016, 
+          lat = -33.86052, 
+          zoom = 11) %>%
+  addLegend("bottomright", pal = pal, values = ~map_df$n, 
+            title = "Number of Scavengers Registered")
+
+active_map_circles
+```
+
+
+

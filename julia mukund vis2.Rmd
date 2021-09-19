@@ -17,8 +17,7 @@ library(stringr)
 
 ```
 
-<<<<<<< HEAD
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
 
 ## Attendance viz coloured by gender
 ```{R}
@@ -108,9 +107,11 @@ PreEventPlot <- function(data, varNames) {
           theme(plot.title=element_text(hjust=0.5)) + 
           theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  +
           theme_minimal() + 
-          scale_x_discrete(limits = c("age_under_5","age_5_to_10","age_11_to_20", "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71"),
-                           labels = c("Age Under 5", "Age 5 to 10", "Age 11 to 20", "Age 21 to 30", "Age 31 to 50", "Age 51 to 70", "Age Over 71")) +
-        labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel), fill = legendlabel)
+          scale_x_discrete(limits = c("age_under_5","age_5_to_10","age_11_to_20", 
+                                      "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71"),
+                           labels = c("Age Under 5", "Age 5 to 10", "Age 11 to 20", "Age 21 to 30", "Age 31 to 50", 
+                                      "Age 51 to 70", "Age Over 71")) +
+          labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel), fill = legendlabel)
           
           
     }else{
@@ -118,7 +119,11 @@ PreEventPlot <- function(data, varNames) {
       data = data %>% dplyr::rename(var1 = varNames[[1]])
       xaxislabel = paste(varNames[1])
       legendlabel = paste(varNames[2])
-      data  %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)))) + geom_bar(fill="skyblue1") + labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + ggtitle(sub("_", " ", title))
+      data  %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)))) + 
+        theme_minimal() +
+        geom_bar(fill="skyblue1") + 
+        labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
+        ggtitle(sub("_", " ", title))
     }
  
     
@@ -156,5 +161,49 @@ PreEventPlot(data,varNames = c("age_group"))
 PreEventPlot(data,varNames = c("pronoun"))
 
 ```
+
+
+
+
+
+
+
+```{r}
+# levels = c("age_under_5","age_5_to_10","age_11_to_20", 
+#                                       "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71")
+# prePlot = function(data, varNames){
+#   if ("age_group" %in% varNames){
+#     data = data %>% mutate(age_group = factor(age_group,levels))
+#   
+# }
+# 
+# 
+# 
+# 
+# data = pre_event_data
+# 
+# data %>% ggplot(aes(x = age_group)) %>% +geom_bar()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

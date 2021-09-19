@@ -51,10 +51,11 @@ name_processing <- function(files) {
     df = rbind(df, data.frame(values[[1]][1],
                               values[[1]][2],
                               values[[1]][3],
-                              values[[1]][4]))
+                              values[[1]][4],
+                              file_name))
 
   }
-  colnames(df) <- c("location", "date", "form_type", "event_type")
+  colnames(df) <- c("location", "date", "form_type", "event_type", "file_name")
   df = df %>% 
     mutate(date = as.Date(date, format = "%d.%m.%Y"))
   df$year <- as.numeric(format(df$date, "%Y"))
@@ -74,7 +75,7 @@ filter_data <- function(df, location_filter = vector(), year_filter = vector(),
                                form_type %in% form_type_filter |
                                event_type %in% event_type_filter |
                                date %in% date_filter)
-
+  
   return(filter_df)
 }
 
@@ -91,7 +92,7 @@ filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"),
 filter_df
 
 filter_df <- filter_data(df, year_filter = c("2020"))
-filter_df
-
+filter_df$file_name
+  
 
 
