@@ -22,8 +22,9 @@ character_ls <- c("email", "postcode")
 
 
 nullConversion = function(x){
-  x %>% 
-    mutate_all(function(x) ifelse(is.null(unlist(x)), NA, unlist(x)))
+    x %>% 
+    rowwise() %>% 
+    mutate_all(function(x) ifelse(is.null(unlist(x)), NA, as.character(unlist(x))))
 }
 
 ## converts required values to numeric
@@ -35,6 +36,7 @@ valid_numeric <- function(input) {
   
   return (input_numeric)
 }
+
 
 # validates postcode values
 valid_postcode <- function(input) {
@@ -48,7 +50,7 @@ valid_postcode <- function(input) {
 
 
 ## Processing one dataset
-preprocessing_fn <- function(pre_event_all = dataframe_ls[[1]],excel_name_ls = excel_ls_name[[1]]) {
+preprocessing_fn <- function(pre_event_all = dataframe_ls,excel_name_ls = excel_ls_name) {
 
   pre_event_data = subset(pre_event_all, select = attributes_ls)
   colnames(pre_event_data) <- colnames_ls
@@ -62,8 +64,22 @@ preprocessing_fn <- function(pre_event_all = dataframe_ls[[1]],excel_name_ls = e
   pre_event_data = cbind(pre_event_data, pre_event_data_numeric)
   
   # creates new column for correct age bin of eventbrite responders
-  pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE)
-  
+  pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE) %>% 
+    factor(age_range_options)
+
+  ### Adding extra entries of people as rows ###
+  section = (pre_event_data %>% select(postcode, age_range_options, age_group))
+  for (num in 1:length(age_range_options)) {
+    single_age_section = section %>% filter(!!sym(age_range_options[num]) > 0)
+    for (row in 1:nrow(single_age_section)) {
+      duplicates <- single_age_section[row, age_range_options[num]]
+      for (duplicate_no in 1:duplicates) {
+        pre_event_data = pre_event_data %>% add_row(postcode = 
+                                                      single_age_section[row, "postcode"],
+                                                    age_group = age_range_options[num])      
+      }
+    }    
+  }
   
   # adds location and year as columns
   name_split = strsplit(excel_name_ls, "_", fixed = TRUE)
@@ -82,7 +98,7 @@ preprocessing_fn <- function(pre_event_all = dataframe_ls[[1]],excel_name_ls = e
 preprocessing_multiple_fn <- function(dataframe_ls, excel_ls_name) {
   # Changed [1] to [[1]]
   if (length(dataframe_ls) == 1){
-    combined_data = preprocessing_fn(dataframe_ls[[1]], excel_ls_name[[1]])
+    combined_data = preprocessing_fn(pre_event_all = dataframe_ls[[1]], excel_name_ls = excel_ls_name[[1]])
   }else{
     combined_data <- preprocessing_fn(dataframe_ls[[1]], excel_ls_name[[1]])
     i = 2

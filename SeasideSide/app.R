@@ -24,7 +24,10 @@ email = "sourish.iyengar@gmail.com"
 
 
 # Prevent Choices (Variables)
-preVars = list(Age = "age_group",Gender = "pronoun", "Previous Attendance" = "previous_attendance", "How did you hear about the event?" = "find_out_event") 
+preVars = list(Age = "age_group",Gender = "pronoun", 
+               "Previous Attendance" = "previous_attendance", 
+               "How did you hear about the event?" = "find_out_event",
+               "Perceived Environmental Investment"= "invested_environmental_impact") 
 
 
 
@@ -271,8 +274,6 @@ server <- function(input, output, session) {
                 need(length(input$sheet) == 1, "Please select only 1 file.")
             )
         }
-        
-
         
         if (input$analysisType == "Event"){
             splitString = str_split(input$sheet," ")[[1]]
