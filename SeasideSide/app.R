@@ -31,11 +31,6 @@ preVars = list(Age = "age_group",Gender = "pronoun",
                "Perceived Environmental Investment"= "invested_environmental_impact") 
 
 
-### UX/UI ###
-designText <- read_file("styles.txt")
-
-### UX/UI ###
-
 ui <- dashboardPage(
     # Colour
     skin = "blue",
@@ -105,7 +100,7 @@ ui <- dashboardPage(
             # Panel 1 sidebar
             column(4,
                 box(
-                    status = "primary", 
+                    status = "success", 
                     solidHeader = TRUE,
                     collapsible = TRUE,
                     title = "Controls",
@@ -181,7 +176,7 @@ ui <- dashboardPage(
             column(8,
                    conditionalPanel("input.sidebar == 'preEvent'",
                        box(title = "Demographic Analysis", 
-                           status = "primary", 
+                           status = "warning", 
                            solidHeader = TRUE,
                            collapsible = TRUE,
                            width = 12,
