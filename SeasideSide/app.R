@@ -79,8 +79,12 @@ ui <- dashboardPage(
     
     # Main Body
     dashboardBody(
+        
         tags$head(
-            tags$style(HTML(designText))
+            tags$link(
+                rel = "stylesheet", 
+                type = "text/css", 
+                href = "styles.css")
         ),
         # User inputted email and drive link
         fluidRow(
