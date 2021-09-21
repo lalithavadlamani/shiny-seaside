@@ -6,13 +6,14 @@ library(plotly)
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
-
+library(dashboardthemes)
 library(googlesheets4)
 library(googledrive)
-
+library(readr)
 
 source("filename_cleaning.R")
 source("preEventCleaning.R")
+
 
 
 # path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
@@ -30,17 +31,40 @@ preVars = list(Age = "age_group",Gender = "pronoun",
                "Perceived Environmental Investment"= "invested_environmental_impact") 
 
 
-
 ui <- dashboardPage(
-    
     # Colour
     skin = "blue",
+    # Include the custom styling
     
     # Application title
-    dashboardHeader(title = "Seashine"),
+    dashboardHeader(title = "Seashine",
+
+        # Google Drive Dropdown Box
+        dropdownMenu(
+            type = "notifications",
+            headerText = strong("QUICK TIPS"),
+            icon = icon("question"),
+            badgeStatus = NULL,
+            notificationItem(
+                text = "Some quick tips about the specific page you are on",
+                icon = icon("lightbulb")
+            )
+        ),
+        # Quick Tips Dropdown Box
+        dropdownMenu(
+            type = "notifications",
+            headerText = strong("QUICK TIPS"),
+            icon = icon("question"),
+            badgeStatus = NULL,
+            notificationItem(
+                text = "Some quick tips about the specific page you are on",
+                icon = icon("lightbulb")
+            )
+        )             
+    ),
     
     # Sidebar Menu
-    dashboardSidebar(    
+    dashboardSidebar( 
         sidebarMenu(id = "sidebar",
         menuItem("Pre-event", tabName = "preEvent", icon = icon("")),
         menuItem("Post-event", tabName = "postEvent", icon = icon("")),
@@ -51,7 +75,12 @@ ui <- dashboardPage(
     # Main Body
     dashboardBody(
         
-        
+        tags$head(
+            tags$link(
+                rel = "stylesheet", 
+                type = "text/css", 
+                href = "styles.css")
+        ),
         # User inputted email and drive link
         fluidRow(
             column(12,
@@ -71,7 +100,7 @@ ui <- dashboardPage(
             # Panel 1 sidebar
             column(4,
                 box(
-                    status = "primary", 
+                    status = "success", 
                     solidHeader = TRUE,
                     collapsible = TRUE,
                     title = "Controls",
@@ -147,7 +176,7 @@ ui <- dashboardPage(
             column(8,
                    conditionalPanel("input.sidebar == 'preEvent'",
                        box(title = "Demographic Analysis", 
-                           status = "primary", 
+                           status = "warning", 
                            solidHeader = TRUE,
                            collapsible = TRUE,
                            width = 12,
@@ -199,6 +228,7 @@ ui <- dashboardPage(
     
     
 )
+
 
 
 server <- function(input, output, session) {
