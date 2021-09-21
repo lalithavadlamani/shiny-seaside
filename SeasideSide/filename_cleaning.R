@@ -70,11 +70,12 @@ df <- name_processing(test_input)
 filter_data <- function(df, location_filter = vector(), year_filter = vector(), 
                         form_type_filter = vector(), event_type_filter = vector(),
                         date_filter = vector()){
-  filter_df <- df %>% filter(location %in% location_filter | 
+  
+  filter_df <- df %>% filter( (location %in% location_filter | 
                                year %in% year_filter |
-                               form_type %in% form_type_filter |
                                event_type %in% event_type_filter |
-                               date %in% date_filter)
+                               date %in% date_filter) & ((form_type %in% form_type_filter))
+                             )
   
   return(filter_df)
 }
