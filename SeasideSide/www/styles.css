@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;700&display=swap');
+
+:root {
+  --ssBlue:#4D6AB2;
+  --ssGreen:#4DC4AA;
+  --ssPink:#EB5D56;
+  --ssLightBlue:#6DCFCF;
+  --ssYellow:#FFC82C;
+  --ssOrange:#F27B34;
+  --ssGrey:#E8E9EB;
+}
+
+body, label, input, button, select, box,
+    .h1, .h2, .h3, .h4, .h5, h1, h2, h3, h4, h5 {
+  color: var(--ssPink);
+  font-family: 'Josefin Sans', sans-serif;
+
+}
+
+.h6, h6 {
+  font-family: 'Josefin Sans', sans-serif;
+  color: var(--ssGreen);
+
+}
+
+/* sidebar
+.skin-blue .main-sidebar {
+  background: var(--ssGreen);
+}
+*/
+
+
+
+/* box: primary color */
+.box.box-solid.box-primary>.box-header h3, .box.box-primary>.box-header h3 {
+  color: white;
+}
+.box.box-solid.box-primary>.box-header {
+  background: var(--ssBlue);
+}
+.box.box-solid.box-primary, .box.box-primary {
+  border-color: var(--ssBlue);
+  border-left-color: var(--ssBlue);
+  border-right-color: var(--ssBlue);
+  border-top-color: var(--ssBlue);
+}
+
+/* box: success color */
+.box.box-solid.box-success>.box-header h3, .box.box-success>.box-header h3 {
+  color: white;
+}
+.box.box-solid.box-success>.box-header {
+  background: var(--ssGreen);
+}
+.box.box-solid.box-success, .box.box-success {
+  border-color: var(--ssGreen);
+  border-left-color: ssGreen
+;
+  border-right-color: var(--ssGreen);
+  border-top-color: var(--ssGreen);
+}
+
+/* box: danger color */
+.box.box-solid.box-danger>.box-header h3, .box.box-danger>.box-header h3 {
+  color: white;
+}
+.box.box-solid.box-danger>.box-header {
+  background: var(--ssPink);
+}
+.box.box-solid.box-danger, .box.box-danger {
+  border-color: var(--ssPink);
+  border-left-color: ssPink
+;
+  border-right-color: var(--ssPink);
+  border-top-color: var(--ssPink);
+}
+
+/* box: warning color */
+.box.box-solid.box-warning>.box-header h3, .box.box-warning>.box-header h3 {
+  color: white;
+}
+.box.box-solid.box-warning>.box-header {
+  background: var(--ssPink);
+}
+.box.box-solid.box-warning, .box.box-warning {
+  border-color: var(--ssPink);
+  border-left-color: ssPink
+;
+  border-right-color: var(--ssPink);
+  border-top-color: var(--ssPink);
+}
+
+/* header */
+.skin-blue .main-header .navbar {
+  background: var(--ssBlue);
+  box-shadow: ', headerBoxShadowSize, ' ', headerBoxShadowColor, ';
+}
+
+/* sidebar: logo */
+.skin-blue .main-header .logo {
+  background: var(--ssOrange);
+}
+
