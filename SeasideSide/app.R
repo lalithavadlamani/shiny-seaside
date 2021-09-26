@@ -109,8 +109,7 @@ ui <- dashboardPage(
                     # Inputs
                     sidebarPanel(
                         width = 12,
-                        # Year by Year Analysis 
-                        # selectizeInput("analysisType", "Analysis:", choices = c("Event","Yearly", "Location")),
+                        # Year by Year Analysis     
                         radioGroupButtons(
                             inputId = "analysisType",
                             label = "Analysis:", 
