@@ -124,24 +124,42 @@ ui <- dashboardPage(
                                          
                             selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun"),
                             
-                            conditionalPanel("input.analysisType == 'Event'",
+                            # Only show for barplot
+                            conditionalPanel("input.analysisType == 'Event' & input.preTabViz == 1",
                                 selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
                                 ),
                             
-                            prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE),
+                            # Only show for barplot
+                            conditionalPanel("input.preTabViz == 1",
+                                prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE)
+                            ),
+                            
                             conditionalPanel("input.advancedPreOptions == 1",
                              #selectizeInput
                                 checkboxGroupButtons("prePlotOptions",
                                                "Plotting Options (Optional)", 
                                                choices = c("Horizontal", "Proportions", "Numeric Text","Remove Unknowns"), 
                                                selected = NULL),
-                                               # ,
-                                               # multiple = TRUE),
+
                                 textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
                                 textInput("preXaxis", "Choose x-axis label", value = NULL ,width = NULL),
                                 textInput("preYaxis", "Choose y-axis label", value = NULL,width = NULL)
                                 ),
-                            downloadButton('downloadPreEvent',"Download the data")
+                            
+                            
+                            # For map
+                            conditionalPanel("input.preTabViz == 2",
+                                             radioGroupButtons(
+                                                 inputId = "preMapAnalysisType",
+                                                 label = "Spatial Analysis:", 
+                                                 choices = c("Participants","Event")
+                                             )
+                            ),
+                            
+                            downloadButton('downloadPreEvent',"Download the data"),
+                            
+                            
+
                                 
                         ),
                         
@@ -171,18 +189,61 @@ ui <- dashboardPage(
                 )
             ),
             
-            # Panel 1 Age
+            
             column(8,
+                   # Panel 1 Viz
                    conditionalPanel("input.sidebar == 'preEvent'",
-                       box(title = "Demographic Analysis", 
-                           status = "warning", 
-                           solidHeader = TRUE,
-                           collapsible = TRUE,
+                        # box(
+                        #     # "Demographic Analysis", 
+                        #     status = "warning",
+                        #     solidHeader = TRUE,
+                        #     collapsible = TRUE,
+                        #     width = 12,
+                       tabBox(
+                           title = "Demographic Analysis",
+                           id = "preTabViz",    
                            width = 12,
-                           
-                           plotly::plotlyOutput("preViz", height = 400)
+                           tabPanel("Main Analysis", "",value = 1,
+                                    plotly::plotlyOutput("preViz", height = 400)
+                           ),
+                           tabPanel("Spatial Visualisation", "", value = 2,
+                                    leaflet::renderLeaflet("preVizMap")
+                           )
                        )
                    )
+                   # )
+                   ,
+                   
+                   # Panel 2
+                  conditionalPanel("input.sidebar == 'postEvent'",
+                                   tabBox(
+                                       title = "KPI Analysis",
+                                       id = "postTabViz",    
+                                       width = 12,
+                                       tabPanel("Main Analysis", "",value = 1,
+                                                plotly::plotlyOutput("postViz", height = 400)
+                                       ),
+                                       tabPanel("Spatial Visualisation", "", value = 2,
+                                                leaflet::renderLeaflet("postVizMap")
+                                       )
+                                   )
+                  ),
+                  
+                  # Panel 3
+                  conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                                   tabBox(
+                                       title = "KPI Analysis",
+                                       id = "stratifiedAnalysisTabViz",    
+                                       width = 12,
+                                       tabPanel("Main Analysis", "",value = 1,
+                                                plotly::plotlyOutput("stratifiedAnalysisViz", height = 400)
+                                       ),
+                                       tabPanel("Spatial Visualisation", "", value = 2,
+                                                leaflet::renderLeaflet("stratifiedAnalysisVizMap")
+                                       )
+                                   )
+                  )
+                  
             ),
             
             # Panel 1 Data
@@ -200,9 +261,9 @@ ui <- dashboardPage(
                 )
             ),
             
-
             
-            #Panel 2 Data
+            ## Panel 2 Data
+            
             column(12,
                    conditionalPanel("input.sidebar == 'postEvent'",
                                     box(title = "Data",
@@ -215,8 +276,23 @@ ui <- dashboardPage(
                                         DT::DTOutput("postCleanedData", height = 300)
                                     )
                    )
-            )
+            ),
             
+            ## Panel 3 Data
+            
+            column(12,
+                   conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                                    box(title = "Data",
+                                        status = "danger",
+                                        solidHeader = TRUE,
+                                        collapsible = TRUE,
+                                        collapsed = TRUE,
+                                        width = 12,
+                                        
+                                        DT::DTOutput("stratifiedAnalysisCleanedData", height = 300)
+                                    )
+                   )
+            )
             
             
             
