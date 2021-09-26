@@ -145,6 +145,7 @@ print(biggest_takeaway_kpi_table)
 
 data1 <- biggest_takeaway_kpi_table
 
+data2 <- #define year wrangling varaible
 ```
 
 
@@ -194,4 +195,24 @@ PostEventPlotyear(data1)
 
 ```
 
+
+```{r}
+#practice year plot
+ # library
+library(ggplot2)
+
+PostEventPlotyear <- function(data, years) {
+  df = data %>% t() %>% as.data.frame.matrix() %>% rownames_to_column(var = "KPI")
+  title = paste("KPI Summary by Year") %>% str_to_title()
+  yaxislabel = paste("Percentage") %>% str_to_title()
+  xaxislabel = paste("Year")
+   
+
+ df %>% ggplot(aes(fill=data1, x = data2, y = Percentage)) + 
+    geom_col(fill="skyblue1") + 
+    labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
+    ggtitle(sub("_", " ", title)) +geom_bar(position='dodge', stat=identity)
+
+
+```
 
