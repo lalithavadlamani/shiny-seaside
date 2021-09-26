@@ -176,4 +176,22 @@ PostEventPlot <- function(data) {
 
 PostEventPlot(data1)
 ```
+```{r}
+# year plots
+PostEventPlotyear <- function(data, years) {
+  df = data %>% t() %>% as.data.frame.matrix() %>% rownames_to_column(var = "KPI")
+  title = paste("KPI Summary") %>% str_to_title()
+  yaxislabel = paste("Percentage") %>% str_to_title()
+  xaxislabel = paste("KPI")
+   
+  df %>% ggplot(aes(x = Year, y = Percentage)) + 
+    geom_col(fill="skyblue1") + 
+    labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
+    ggtitle(sub("_", " ", title)) +geom_bar(position='dodge', stat=identity)
+}
+
+PostEventPlotyear(data1)
+
+```
+
 
