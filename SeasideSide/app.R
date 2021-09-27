@@ -109,8 +109,7 @@ ui <- dashboardPage(
                     # Inputs
                     sidebarPanel(
                         width = 12,
-                        # Year by Year Analysis 
-                        # selectizeInput("analysisType", "Analysis:", choices = c("Event","Yearly", "Location")),
+                        # Year by Year Analysis     
                         radioGroupButtons(
                             inputId = "analysisType",
                             label = "Analysis:", 
@@ -125,24 +124,42 @@ ui <- dashboardPage(
                                          
                             selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun"),
                             
-                            conditionalPanel("input.analysisType == 'Event'",
+                            # Only show for barplot
+                            conditionalPanel("input.analysisType == 'Event' & input.preTabViz == 1",
                                 selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
                                 ),
                             
-                            prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE),
+                            # Only show for barplot
+                            conditionalPanel("input.preTabViz == 1",
+                                prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE)
+                            ),
+                            
                             conditionalPanel("input.advancedPreOptions == 1",
                              #selectizeInput
                                 checkboxGroupButtons("prePlotOptions",
                                                "Plotting Options (Optional)", 
-                                               choices = c("Horizontal", "Proportions", "Numeric Text"), 
+                                               choices = c("Horizontal", "Proportions", "Numeric Text","Remove Unknowns"), 
                                                selected = NULL),
-                                               # ,
-                                               # multiple = TRUE),
+
                                 textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
                                 textInput("preXaxis", "Choose x-axis label", value = NULL ,width = NULL),
                                 textInput("preYaxis", "Choose y-axis label", value = NULL,width = NULL)
                                 ),
-                            downloadButton('downloadPreEvent',"Download the data")
+                            
+                            
+                            # For map
+                            conditionalPanel("input.preTabViz == 2",
+                                             radioGroupButtons(
+                                                 inputId = "preMapAnalysisType",
+                                                 label = "Spatial Analysis:", 
+                                                 choices = c("Participants","Event")
+                                             )
+                            ),
+                            
+                            downloadButton('downloadPreEvent',"Download the data"),
+                            
+                            
+
                                 
                         ),
                         
@@ -172,18 +189,61 @@ ui <- dashboardPage(
                 )
             ),
             
-            # Panel 1 Age
+            
             column(8,
+                   # Panel 1 Viz
                    conditionalPanel("input.sidebar == 'preEvent'",
-                       box(title = "Demographic Analysis", 
-                           status = "warning", 
-                           solidHeader = TRUE,
-                           collapsible = TRUE,
+                        # box(
+                        #     # "Demographic Analysis", 
+                        #     status = "warning",
+                        #     solidHeader = TRUE,
+                        #     collapsible = TRUE,
+                        #     width = 12,
+                       tabBox(
+                           title = "Demographic Analysis",
+                           id = "preTabViz",    
                            width = 12,
-                           
-                           plotly::plotlyOutput("preViz", height = 400)
+                           tabPanel("Main Analysis", "",value = 1,
+                                    plotly::plotlyOutput("preViz", height = 400)
+                           ),
+                           tabPanel("Spatial Visualisation", "", value = 2,
+                                    leaflet::renderLeaflet("preVizMap")
+                           )
                        )
                    )
+                   # )
+                   ,
+                   
+                   # Panel 2
+                  conditionalPanel("input.sidebar == 'postEvent'",
+                                   tabBox(
+                                       title = "KPI Analysis",
+                                       id = "postTabViz",    
+                                       width = 12,
+                                       tabPanel("Main Analysis", "",value = 1,
+                                                plotly::plotlyOutput("postViz", height = 400)
+                                       ),
+                                       tabPanel("Spatial Visualisation", "", value = 2,
+                                                leaflet::renderLeaflet("postVizMap")
+                                       )
+                                   )
+                  ),
+                  
+                  # Panel 3
+                  conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                                   tabBox(
+                                       title = "KPI Analysis",
+                                       id = "stratifiedAnalysisTabViz",    
+                                       width = 12,
+                                       tabPanel("Main Analysis", "",value = 1,
+                                                plotly::plotlyOutput("stratifiedAnalysisViz", height = 400)
+                                       ),
+                                       tabPanel("Spatial Visualisation", "", value = 2,
+                                                leaflet::renderLeaflet("stratifiedAnalysisVizMap")
+                                       )
+                                   )
+                  )
+                  
             ),
             
             # Panel 1 Data
@@ -196,10 +256,45 @@ ui <- dashboardPage(
                         collapsed = TRUE,
                         width = 12,
         
-                        DT::DTOutput("googleSheetData", height = 300)
+                        DT::DTOutput("preCleanedData", height = 300)
                         )
                 )
+            ),
+            
+            
+            ## Panel 2 Data
+            
+            column(12,
+                   conditionalPanel("input.sidebar == 'postEvent'",
+                                    box(title = "Data",
+                                        status = "danger",
+                                        solidHeader = TRUE,
+                                        collapsible = TRUE,
+                                        collapsed = TRUE,
+                                        width = 12,
+
+                                        DT::DTOutput("postCleanedData", height = 300)
+                                    )
+                   )
+            ),
+            
+            ## Panel 3 Data
+            
+            column(12,
+                   conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                                    box(title = "Data",
+                                        status = "danger",
+                                        solidHeader = TRUE,
+                                        collapsible = TRUE,
+                                        collapsed = TRUE,
+                                        width = 12,
+                                        
+                                        DT::DTOutput("stratifiedAnalysisCleanedData", height = 300)
+                                    )
+                   )
             )
+            
+            
             
         )
         
@@ -243,17 +338,18 @@ server <- function(input, output, session) {
                  if (!(is.null(input$emailID) & is.null(input$driveID))){
                      metaData = metaData()
                      if(input$analysisType == "Event"){
-                         choices = paste(metaData$location, metaData$date)
+                         choices = paste(metaData$location, metaData$date) %>% unique()
                          default = choices[1]
                      }else if (input$analysisType == "Yearly"){
                          choices = metaData$date %>% 
                              lubridate::as_date(format = "%d.%m.%y") %>% 
                              lubridate::year() %>% 
                              unique() %>% 
-                             sort()
+                             sort() %>% 
+                             unique()
                          default = choices
                      }else{
-                         choices = metaData$location
+                         choices = metaData$location %>% unique()
                          default = choices[1]
                      }
                      updateSelectizeInput(session,
@@ -265,7 +361,9 @@ server <- function(input, output, session) {
                  }
     })
     
-    #
+    # Panel 1
+    
+        ##  Prevent Colouring
     observeEvent(input$preVar1,{
         updateSelectizeInput(session,
                              "preVarColour", 
@@ -275,6 +373,7 @@ server <- function(input, output, session) {
         }
     )
     
+         ## Pre-event Advanced Options - Labelling
     observeEvent(input$advancedPreOptions,{
         updateTextInput(session,
                         "preTitle", 
@@ -293,8 +392,9 @@ server <- function(input, output, session) {
     }
     )
     
-    
+         ## PreEvent read data
     preEventData = reactive({
+        
         validate(
             need(input$sheet, "Select file please/File is being loaded from the drive.")
         )
@@ -311,13 +411,13 @@ server <- function(input, output, session) {
             location = splitString[splitString != date] %>% paste(collapse = " ")
             date = date %>% lubridate::as_date()
 
-            file_names = filter_data(metaData(), location_filter = location, event_type_filter = "Pre")
-            file_names = filter_data(file_names, date_filter = date, event_type_filter = "Pre")$file_name
+            file_names = filter_data(metaData(), location_filter = location, form_type = "Pre")
+            file_names = filter_data(file_names, date_filter = date, form_type = "Pre")$file_name
             
         }else if(input$analysisType == "Yearly"){
-            file_names = filter_data(metaData(), year_filter = input$sheet, event_type_filter = "Pre")$file_name            
+            file_names = filter_data(metaData(), year_filter = input$sheet, form_type = "Pre")$file_name            
         }else{
-            file_names = filter_data(metaData(), location_filter = input$sheet, event_type_filter = "Pre")$file_name            
+            file_names = filter_data(metaData(), location_filter = input$sheet, form_type = "Pre")$file_name            
         }
 
         data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
@@ -325,10 +425,11 @@ server <- function(input, output, session) {
         processedData
         })
 
-    # Panel 1
-    # Prevent Data Table
 
-    output$googleSheetData = renderDT({
+        ## PreEvent Datatable
+
+    
+    output$preCleanedData = renderDT({
             datatable(
                 preEventData(),
                 options = list(pageLength=10, scrollX='400px')
@@ -336,7 +437,7 @@ server <- function(input, output, session) {
         })
 
     
-    # PreEvent Visualisations 
+        ## PreEvent Visualisations 
     
     output$preViz = renderPlotly({
 
@@ -374,7 +475,7 @@ server <- function(input, output, session) {
 
     })
     
-
+        ## PreEvent download data
     output$downloadPreEvent <- downloadHandler(
         filename = function(){"preEvent.csv"}, 
         content = function(fname){
@@ -382,7 +483,48 @@ server <- function(input, output, session) {
         }
     )    
     
+    # Tab 2
     
+    
+    postEventData = reactive({
+        validate(
+            need(input$sheet, "Select file please/File is being loaded from the drive.")
+        )
+
+        if (input$analysisType == "Event"){
+            validate(
+                need(length(input$sheet) == 1, "Please select only 1 file.")
+            )
+        }
+
+        if (input$analysisType == "Event"){
+            splitString = str_split(input$sheet," ")[[1]]
+            date = splitString[length(splitString)]
+            location = splitString[splitString != date] %>% paste(collapse = " ")
+            date = date %>% lubridate::as_date()
+
+            file_names = filter_data(metaData(), location_filter = location, form_type = "Post")
+            file_names = filter_data(file_names, date_filter = date, form_type = "Post")$file_name
+
+        }else if(input$analysisType == "Yearly"){
+            file_names = filter_data(metaData(), year_filter = input$sheet, form_type = "Post")$file_name
+        }else{
+            file_names = filter_data(metaData(), location_filter = input$sheet, form_type = "Post")$file_name
+        }
+
+        data = read_sheet(drive_get(file_names))
+        # data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
+        # processedData = preprocessing_multiple_fn(data, file_names)
+        # processedData
+    })
+
+
+    output$postCleanedData = renderDT({
+        datatable(
+            postEventData(),
+            options = list(pageLength=10, scrollX='400px')
+        )
+    })
 }
 
 # Run the application 
