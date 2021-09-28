@@ -142,3 +142,4 @@ action_kpi_table <- action_kpi(df)
 print(action_kpi_table)
 
 print(biggest_takeaway_kpi_table)
+
