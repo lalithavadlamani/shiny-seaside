@@ -21,7 +21,7 @@ Examples:
 
 * Bondi Junction_2022_03.02.2021_Pre_Participants
 
-    * In this example, use a space if there are two words in the location. Make sure you do not use an underscore in the location name (e.g. Bondi_Junction_03.02.2021_Pre_Participants)
+    * In this example, use a space if there are two words in the location. Make sure you do not use an underscore in the location name (e.g. Bondi_Junction_2022_03.02.2021_Pre_Participants)
 
 Important things to note:
 
