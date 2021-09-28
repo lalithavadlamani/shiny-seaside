@@ -15,13 +15,13 @@
 
 ## File Naming Convention
 
-[Location Name]\_[Date (Format: DD.MM.YYYY)]\_[Form Type (Pre/Post)]\_[Event Type (Participants/Volunteers)]
+[Location Name]\_[Postcode]\_[Date (Format: DD.MM.YYYY)]\_[Form Type (Pre/Post)]\_[Event Type (Participants/Volunteers)]
 
 Examples:
 
-* Bondi Junction_03.02.2021_Pre_Participants
+* Bondi Junction_2022_03.02.2021_Pre_Participants
 
-    * In this example, use a space if there are two words in the location. Make sure you do not use an underscore in the location name (e.g. Bondi_Junction_03.02.2021_Pre_Participants)
+    * In this example, use a space if there are two words in the location. Make sure you do not use an underscore in the location name (e.g. Bondi_Junction_2022_03.02.2021_Pre_Participants)
 
 Important things to note:
 
