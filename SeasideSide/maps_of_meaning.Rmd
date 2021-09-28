@@ -99,3 +99,60 @@ l %>%
         }
     ")
 ```
+
+
+```{r}
+# Now all in a function
+# Function:
+
+# df: Pre event data with age, postcode
+
+map_ages <- function(df){
+  postcodes_loc <- read_csv("australian_postcodes.csv")
+  df$postcode = as.character(df$postcode)
+  df_joined <- left_join(df, postcodes_loc, by = c("postcode" = "postcode"))
+  df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+  
+  df_clean = df_joined[!is.na(df_joined$age),]
+  df_clean$age_group <- factor(df_clean$age_group, levels = c("age_under_5", "age_11_to_20", "age_21_to_30",
+                                                                  "age_31_to_50", "age_51_to_70",  "age_over_71"))
+  df_clean$age_group <- mapvalues(df_clean$age_group, 
+                                    from = c("age_under_5", "age_11_to_20", "age_21_to_30",
+                                             "age_31_to_50", "age_51_to_70", "age_over_71"), 
+                                    to = c("Under 5", "11 to 20", "21 to 30",
+                                             "31 to 50", "51 to 70", "Over 71"))
+  df_clean.df <- split(df_clean, df_clean$age_group)
+  
+  l <- leaflet() %>% addTiles()
+  
+  names(df_clean.df) %>%
+    purrr::walk(function(df) {
+      l <<- l %>%
+        addMarkers(data=df_clean.df[[df]],
+                            lng=~long, lat=~lat,
+                            label=~age,
+                            popup=~age,
+                            group = df,
+                            clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = F),
+                            labelOptions = labelOptions(noHide = F,
+                                                         direction = 'auto'))
+    })
+  
+  l %>%
+    addLayersControl(
+      overlayGroups = names(df_clean.df),
+      options = layersControlOptions(collapsed = FALSE)
+    ) %>%
+      htmlwidgets::onRender("
+          function() {
+              $('.leaflet-control-layers-list').prepend('<label style=\"text-align:center\">Age Groups</label>');
+          }
+      ")
+}
+```
+
+
+```{r}
+map_ages(test)
+```
+
