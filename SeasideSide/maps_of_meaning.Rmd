@@ -1,0 +1,101 @@
+---
+title: "Maps of Meaning"
+author: "Allan Wu"
+date: "14/09/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(leaflet)
+library(leaflet.extras)
+library(rgdal)
+require(plyr)
+#source("cleaning_functions_pre_event.Rmd")
+postcodes_loc <- read_csv("australian_postcodes.csv")
+test <- read_csv("pre_event_cleaned_dummy.csv")
+#data <- readxl::read_xlsx("Dummy Location 1_03.02.2021_Pre_Participants.xlsx")
+```
+
+# Maps
+
+
+```{r}
+postcodes_loc
+```
+
+```{r}
+test$postcode = as.character(test$postcode)
+test_joined <- left_join(test, postcodes_loc, by = c("postcode" = "postcode"))
+test_joined <- test_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+```
+
+
+
+
+```{r}
+test_clean = test_joined[!is.na(test_joined$age),]
+
+# This function needs to have no NAs
+getColor <- function(data) {
+  sapply(data$age, function(age) {
+  if(age <= 18) {
+    "yellow"
+  } else if(age <= 50) {
+    "orange"
+  } else {
+    "red"
+  } })
+}
+
+icons <- awesomeIcons(
+  icon = 'ios-close',
+  iconColor = 'black',
+  library = 'ion',
+  markerColor = getColor(test_clean)
+)
+
+# Map that provides info on each individual participant by one variable
+m <-  leaflet(test_clean) %>%
+  addTiles() %>%
+  addMarkers(~long, ~lat, icon = icons, label = ~age, clusterOptions = markerClusterOptions)
+m
+```
+
+```{r}
+test_clean$age_group <- factor(test_clean$age_group, levels = c("age_under_5", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70",  "age_over_71"))
+test_clean$age_group <- mapvalues(test_clean$age_group, 
+                                  from = c("age_under_5", "age_11_to_20", "age_21_to_30",
+                                           "age_31_to_50", "age_51_to_70", "age_over_71"), 
+                                  to = c("Under 5", "11 to 20", "21 to 30",
+                                           "31 to 50", "51 to 70", "Over 71"))
+test_clean.df <- split(test_clean, test_clean$age_group)
+
+l <- leaflet() %>% addTiles()
+
+names(test_clean.df) %>%
+  purrr::walk(function(df) {
+    l <<- l %>%
+      addMarkers(data=test_clean.df[[df]],
+                          lng=~long, lat=~lat,
+                          label=~age,
+                          popup=~age,
+                          group = df,
+                          clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = F),
+                          labelOptions = labelOptions(noHide = F,
+                                                       direction = 'auto'))
+  })
+
+l %>%
+  addLayersControl(
+    overlayGroups = names(test_clean.df),
+    options = layersControlOptions(collapsed = FALSE)
+  ) %>%
+    htmlwidgets::onRender("
+        function() {
+            $('.leaflet-control-layers-list').prepend('<label style=\"text-align:center\">Age Groups</label>');
+        }
+    ")
+```
