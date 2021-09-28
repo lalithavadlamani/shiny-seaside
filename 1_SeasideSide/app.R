@@ -480,7 +480,7 @@ server <- function(input, output, session) {
     output$preVizMap = leaflet::renderLeaflet({
         
         data = preEventData()
-        map_ages(data)
+        map_one_variable(data, input$preVar1)
     })
     
     
