@@ -6,7 +6,6 @@ library(stringr)
 
 
 data <- read_excel("C:/Users/Lalitha Vadlamani/Desktop/180 DC/S2/post_event_responses_v3.xlsx")
-data
 names(data)
 
 

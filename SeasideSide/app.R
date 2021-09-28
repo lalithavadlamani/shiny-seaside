@@ -13,6 +13,7 @@ library(readr)
 
 source("filename_cleaning.R")
 source("preEventCleaning.R")
+source("Visualisations.R")
 
 
 
@@ -207,7 +208,7 @@ ui <- dashboardPage(
                                     plotly::plotlyOutput("preViz", height = 400)
                            ),
                            tabPanel("Spatial Visualisation", "", value = 2,
-                                    leaflet::renderLeaflet("preVizMap")
+                                    leaflet::leafletOutput("preVizMap")
                            )
                        )
                    )
@@ -474,6 +475,14 @@ server <- function(input, output, session) {
         
 
     })
+    
+    
+    output$preVizMap = leaflet::renderLeaflet({
+        
+        data = preEventData()
+        map_ages(data)
+    })
+    
     
         ## PreEvent download data
     output$downloadPreEvent <- downloadHandler(

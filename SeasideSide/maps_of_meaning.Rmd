@@ -111,7 +111,7 @@ map_ages <- function(df){
   postcodes_loc <- read_csv("australian_postcodes.csv")
   df$postcode = as.character(df$postcode)
   df_joined <- left_join(df, postcodes_loc, by = c("postcode" = "postcode"))
-  df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+  # df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
   
   df_clean = df_joined[!is.na(df_joined$age),]
   df_clean$age_group <- factor(df_clean$age_group, levels = c("age_under_5", "age_11_to_20", "age_21_to_30",
