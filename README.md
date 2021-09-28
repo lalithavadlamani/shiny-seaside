@@ -1,5 +1,5 @@
 # Background
-Shiny App data analytics platform built for a 180DC project. 
+Shiny App data analytics platform built for a 180 Degrees Consulting project. 
 Key features are;
 - Personalised data wrangling to interpret Google Forms and Eventbrite information, including some flexibility for form type
 - Customisable visualisations, separated into event, year, and location views
@@ -11,3 +11,6 @@ Key features are;
 3. Visualisation Functions: Transforms wrangled dataframes into visualisations [Julia & Mukund]
 4. Reports: R Markdowns for export report functionality
 5. Testing Datasets: Dummy datasets
+
+## Credits
+Built by University of Sydney Students: Sourish Iyengar, Jennifer Chen, Allan Wu, Lalitha Vadlamani, Julia Page, Mukund Karthik, Kevin Hou
