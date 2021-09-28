@@ -1,0 +1,209 @@
+---
+title: "juliua mukund vis2"
+author: "JP"
+date: "28/08/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(dplyr)
+library(readxl)
+library(plotly)
+library(janitor)
+library(tidyverse)
+library(stringr)
+
+```
+
+
+
+## Attendance viz coloured by gender
+```{R}
+
+data = read_csv("pre_event_cleaned_dummy.csv")
+
+
+data  %>% group_by(previous_attendance) %>% dplyr::count() %>% ggplot(aes(x = previous_attendance)) + geom_bar()
+ 
+
+
+(data  %>% ggplot(aes(x = previous_attendance, fill = pronoun)) + geom_bar()+ggtitle('Previous Event Attendance by Gender')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) ) %>% plotly::ggplotly()
+
+```
+
+## Find out event filled by attendance previously
+```{r}
+
+data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_out_event, y=n)) + geom_bar(stat = "identity")
+ 
+
+(data  %>% ggplot(aes(x = find_out_event, fill = previous_attendance)) + geom_bar()+ggtitle('Found Out About Event by Previous Attendance')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) ) %>% plotly::ggplotly()
+```
+## Find out event alone
+```{r}
+
+data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_out_event, y=n)) + geom_bar(stat = "identity")
+ 
+
+data  %>% ggplot(aes(x = find_out_event)) + geom_bar(fill='skyblue1')+ggtitle('Found Out About Event by Previous Attendance')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
+```
+## Age alone
+```{r}
+glimpse(data)
+data  %>% group_by(age_group) %>% dplyr::count() %>% ggplot(aes(x = age_group, y=n)) + geom_bar(stat = "identity")
+ 
+
+data  %>% ggplot(aes(x = age_group)) + geom_bar(fill='skyblue1')+ggtitle('Age Group of Primary Participant')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
+```
+## Age 
+```{r}
+data2=select(data, -email, -pronoun, -previous_attendance, -find_out_event, -age_group)
+glimpse(data2)
+
+data2[is.na(data2)]  <- 0
+
+glimpse(data2)
+
+data2_agesums<- colSums(data2[3:9])
+age_count<- c(data2_agesums)
+age_df<- data.frame(age_count)
+
+age_df %>% rownames_to_column("groups") %>% ggplot(aes(x = groups, y = age_count)) + geom_bar(stat = "identity", fill='skyblue1')+ggtitle('Age Group of All Participants at Event')+ theme(plot.title=element_text(hjust=0.5)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  
+
+```
+
+```{r}
+#PreEventPlot <- function(data, varNames, yaxislabel, xaxislabel, legendlabel, naKeep)
+
+PreEventPlot <- function(data, varNames) {
+  
+  title = paste(varNames[1], "Barplot") %>% str_to_title()
+  yaxislabel = paste("Number of Responses") %>% str_to_title()
+  if(length(varNames) == 1) {
+    # This line fixes it
+    
+    if(varNames == ("age_group")){
+      # Mukund's Code
+      xaxislabel = ("Age Groups")
+      legendlabel = paste(varNames[2])
+      data2=select(data, -email, -pronoun, -previous_attendance, -find_out_event, -age_group)
+      glimpse(data2)
+  
+      data2[is.na(data2)]  <- 0
+
+      glimpse(data2)
+
+      data2_agesums<- colSums(data2[3:9])
+      age_count<- c(data2_agesums)
+      age_df<- data.frame(age_count)
+
+      age_df %>%
+        rownames_to_column("groups") %>%
+        ggplot(aes(x = groups, y = age_count)) + 
+          geom_bar(stat = "identity", fill='skyblue1')+
+          ggtitle(sub("_", " ", title))+ 
+          theme(plot.title=element_text(hjust=0.5)) + 
+          theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  +
+          theme_minimal() + 
+          scale_x_discrete(limits = c("age_under_5","age_5_to_10","age_11_to_20", 
+                                      "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71"),
+                           labels = c("Age Under 5", "Age 5 to 10", "Age 11 to 20", "Age 21 to 30", "Age 31 to 50", 
+                                      "Age 51 to 70", "Age Over 71")) +
+          labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel), fill = legendlabel)
+          
+          
+    }else{
+      
+      data = data %>% dplyr::rename(var1 = varNames[[1]])
+      xaxislabel = paste(varNames[1])
+      legendlabel = paste(varNames[2])
+      data  %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)))) + 
+        theme_minimal() +
+        geom_bar(fill="skyblue1") + 
+        labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
+        ggtitle(sub("_", " ", title))
+    }
+ 
+    
+  } else {
+    # This line fixes it
+    data = data %>% dplyr::rename(var1 = varNames[[1]], var2 = varNames[[2]])
+    xaxislabel = paste(varNames[1])
+    legendlabel = paste(varNames[2])
+    data %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)), fill = var2)) + 
+      geom_bar() + labs(y= str_to_title(yaxislabel), x = str_to_title(sub("_", " ", xaxislabel)))+labs(fill=legendlabel)+
+      ggtitle(sub("_", " ", title)) + 
+        theme(plot.title=element_text(hjust=0.5)) +
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+        theme_minimal()
+    
+  }
+  
+  
+}
+
+
+```
+
+
+```{r}
+
+data = read_csv("pre_event_cleaned_dummy.csv")
+glimpse(data)
+#PreEventPlot(data, c("previous_attendance", "pronoun"), "Previous Event Attendance by Gender", "Number of Responses", "Previous Attendance Type", "Pronoun")
+
+PreEventPlot(data, c("previous_attendance", "pronoun"))
+
+PreEventPlot(data,varNames = c("age_group"))
+
+PreEventPlot(data,varNames = c("pronoun"))
+
+```
+
+
+
+
+
+
+
+```{r}
+# levels = c("age_under_5","age_5_to_10","age_11_to_20", 
+#                                       "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71")
+# prePlot = function(data, varNames){
+#   if ("age_group" %in% varNames){
+#     data = data %>% mutate(age_group = factor(age_group,levels))
+#   
+# }
+# 
+# 
+# 
+# 
+# data = pre_event_data
+# 
+# data %>% ggplot(aes(x = age_group)) %>% +geom_bar()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
