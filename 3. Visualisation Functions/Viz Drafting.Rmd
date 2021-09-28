@@ -1,0 +1,38 @@
+---
+title: "Viz Drafting"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(plotly)
+```
+
+
+
+```{r}
+data = read_csv("pre_event_cleaned_dummy.csv")
+
+
+data  %>% group_by(find_out_event) %>% dplyr::count() %>% ggplot(aes(x = find_out_event, y = n)) + geom_bar()
+ 
+
+
+(data  %>% ggplot(aes(x = find_out_event, fill = find_out_event)) + geom_bar()+ theme_minimal() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) ) %>% plotly::ggplotly()
+```
+
+
+
+```{r}
+devtools::install_github()
+```
+
+
+
+
+
