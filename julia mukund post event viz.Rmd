@@ -207,9 +207,9 @@ PostEventPlotyear <- function(data, years) {
   yaxislabel = paste("Percentage") %>% str_to_title()
   xaxislabel = paste("Year")
    
-
- df %>% ggplot(aes(fill=data1, x = data2, y = Percentage)) + 
-    geom_col(fill="skyblue1") + 
+ 
+ df %>% ggplot(aes(fill=data1, x = data2, y = Percentage, group = data1)) + geom_point()
+    geom_line(fill="skyblue1") + 
     labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) + 
     ggtitle(sub("_", " ", title)) +geom_bar(position='dodge', stat=identity)
 
