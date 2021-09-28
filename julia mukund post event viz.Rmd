@@ -200,6 +200,15 @@ PostEventPlotyear(data1)
 #practice year plot
  # library
 library(ggplot2)
+kpi_data <- read_csv("kpi_data.csv")
+
+
+df <- kpi_data %>%
+  select(year, Action, Learning, Community) %>%
+  gather(key = "kpi_type", value = "value", -year)
+
+df %>% ggplot(aes(x = year, y = value)) +
+  geom_line(aes(colour = kpi_type, linetype = kpi_type))
 
 PostEventPlotyear <- function(data, years) {
   df = data %>% t() %>% as.data.frame.matrix() %>% rownames_to_column(var = "KPI")
