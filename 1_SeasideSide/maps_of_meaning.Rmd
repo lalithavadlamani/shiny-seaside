@@ -180,8 +180,10 @@ map_one_variable <- function(df, var1){
   df_joined <- left_join(df, postcodes_loc, by = c("postcode" = "postcode"))
   df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
   
-  df_clean = df_joined[!is.na(df_joined[[var1]]),]
-  #df_clean$age_group <- factor(df_clean$age_group, levels = c("age_under_5", "age_11_to_20", "age_21_to_30",
+  df_joined[[var1]] <- df_joined[[var1]] %>% replace_na('Missing')
+  
+  df_clean <- df_joined
+   #df_clean$age_group <- factor(df_clean$age_group, levels = c("age_under_5", "age_11_to_20", "age_21_to_30",
                                                                #   "age_31_to_50", "age_51_to_70",  "age_over_71"))
   # String cleaning for output
   df_clean <- df_clean %>% 
@@ -195,7 +197,7 @@ map_one_variable <- function(df, var1){
     
   
   df_clean$age_group <- factor(df_clean$age_group, levels = c("Under 5", "11 to 20", "21 to 30",
-                                                              "31 to 50", "51 to 70",  "Over 71"))
+                                                              "31 to 50", "51 to 70",  "Over 71", "Missing"))
   
 
   df_clean.df <- split(df_clean, df_clean[[var1]])
@@ -228,7 +230,7 @@ map_one_variable <- function(df, var1){
       ", sep = ""))
 }
 
-map_one_variable(test, "previous_attendance")
+map_one_variable(test, "find_out_event")
 ```
 
 ```{r}
