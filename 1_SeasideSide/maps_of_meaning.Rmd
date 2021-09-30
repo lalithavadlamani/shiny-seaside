@@ -199,7 +199,10 @@ map_one_variable <- function(df, var1){
   df_clean$age_group <- factor(df_clean$age_group, levels = c("Under 5", "11 to 20", "21 to 30",
                                                               "31 to 50", "51 to 70",  "Over 71", "Missing"))
   
-
+  df_clean[[var1]] <- factor(df_clean[[var1]])
+  df_clean[[var1]] <- forcats::fct_relevel(df_clean[[var1]], "Missing", after = Inf)
+  print(df_clean[[var1]])
+  
   df_clean.df <- split(df_clean, df_clean[[var1]])
   
   l <- leaflet() %>% addTiles()
