@@ -65,6 +65,8 @@ preprocessing_fn <- function(pre_event_all,excel_name_ls) {
   # creates new column for correct age bin of eventbrite responders
   pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE)
   
+  # Convert invested enviro impact to factor
+  pre_event_data$invested_environmental_impact = factor(pre_event_data$invested_environmental_impact, levels = c(1,2,3,4,5))
 
   ### Adding extra entries of people as rows ###
 

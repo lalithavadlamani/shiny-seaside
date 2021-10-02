@@ -11,8 +11,8 @@ colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to
 total_colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "invested_environmental_impact", "find_out_event", "age_group", "location", "year")
 merge_colnames_ls <- c("location", "year")
 age_range_options <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71")
-numeric_ls <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71", "age", "invested_environmental_impact")
-factor_ls <- c("pronoun", "previous_attendance", "find_out_event")
+numeric_ls <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71", "age")
+factor_ls <- c("pronoun", "previous_attendance", "find_out_event",  "invested_environmental_impact")
 character_ls <- c("email", "postcode")
 
 
@@ -67,6 +67,9 @@ preprocessing_fn <- function(pre_event_all = dataframe_ls,excel_name_ls = excel_
   pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE) %>% 
     factor(age_range_options)
 
+ # Convert invested enviro impact to factor
+  pre_event_data$invested_environmental_impact = factor(pre_event_data$invested_environmental_impact, levels = c(1,2,3,4,5))
+  
   ### Adding extra entries of people as rows ###
   section = (pre_event_data %>% select(postcode, age_range_options, age_group))
   for (num in 1:length(age_range_options)) {

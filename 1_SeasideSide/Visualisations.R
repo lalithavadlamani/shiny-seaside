@@ -133,17 +133,77 @@ require(plyr)
 #           }
 #       ")
 # }
+# 
+# map_one_variable <- function(df, var1){
+#   postcodes_loc <- read_csv("australian_postcodes.csv")
+#   df$postcode = as.character(df$postcode)
+#   df$`...1` = seq(nrow(df)) 
+#   df_joined <- left_join(df, postcodes_loc, by = c("postcode" = "postcode"))
+#   
+#   df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+#   
+#   df_clean = df_joined[!is.na(df_joined[[var1]]),]
+# 
+#   # String cleaning for output
+#   df_clean <- df_clean %>% 
+#     mutate(age_group = str_replace_all(age_group, "age_", "")) %>%
+#     mutate(age_group = str_replace_all(age_group, "_", " ")) %>%
+#     mutate(age_group = str_to_sentence(age_group))
+#   
+#   clean_var <- var1 %>% 
+#     str_replace_all("_", " ") %>%
+#     str_to_title()
+#   
+#   
+#   df_clean$age_group <- factor(df_clean$age_group, levels = c("Under 5", "11 to 20", "21 to 30",
+#                                                               "31 to 50", "51 to 70",  "Over 71"))
+#   
+#   
+#   df_clean.df <- split(df_clean, df_clean[[var1]])
+#   
+#   l <- leaflet() %>% addTiles()
+#   
+#   names(df_clean.df) %>%
+#     purrr::walk(function(df) {
+#       l <<- l %>%
+#         addMarkers(data=df_clean.df[[df]],
+#                    lng=~long, lat=~lat,
+#                    popup = paste("Location: ", df_clean.df[[df]]$locality %>% str_to_title(), 
+#                                  #"<br>", "Age: ", df_clean.df[[df]]$age, 
+#                                  sep = ""),
+#                    group = df,
+#                    clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = F),
+#                    labelOptions = labelOptions(noHide = F,
+#                                                direction = 'auto'))
+#     })
+#   
+#   l %>%
+#     addLayersControl(
+#       overlayGroups = names(df_clean.df),
+#       options = layersControlOptions(collapsed = FALSE)
+#     ) %>%
+#     htmlwidgets::onRender(paste("
+#           function() {
+#               $('.leaflet-control-layers-list').prepend('<label style=\"text-align:center\">", clean_var,"</label>');
+#           }
+#       ", sep = ""))
+# }
+# 
+# map_one_variable(test, "previous_attendance")
+
 
 map_one_variable <- function(df, var1){
   postcodes_loc <- read_csv("australian_postcodes.csv")
   df$postcode = as.character(df$postcode)
   df$`...1` = seq(nrow(df)) 
   df_joined <- left_join(df, postcodes_loc, by = c("postcode" = "postcode"))
-  
   df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
   
-  df_clean = df_joined[!is.na(df_joined[[var1]]),]
-
+  df_joined[[var1]] <- df_joined[[var1]] %>% replace_na('Missing')
+  
+  df_clean <- df_joined
+  #df_clean$age_group <- factor(df_clean$age_group, levels = c("age_under_5", "age_11_to_20", "age_21_to_30",
+  #   "age_31_to_50", "age_51_to_70",  "age_over_71"))
   # String cleaning for output
   df_clean <- df_clean %>% 
     mutate(age_group = str_replace_all(age_group, "age_", "")) %>%
@@ -156,8 +216,11 @@ map_one_variable <- function(df, var1){
   
   
   df_clean$age_group <- factor(df_clean$age_group, levels = c("Under 5", "11 to 20", "21 to 30",
-                                                              "31 to 50", "51 to 70",  "Over 71"))
+                                                              "31 to 50", "51 to 70",  "Over 71", "Missing"))
   
+  df_clean[[var1]] <- factor(df_clean[[var1]])
+  df_clean[[var1]] <- forcats::fct_relevel(df_clean[[var1]], "Missing", after = Inf)
+  print(df_clean[[var1]])
   
   df_clean.df <- split(df_clean, df_clean[[var1]])
   
@@ -189,4 +252,18 @@ map_one_variable <- function(df, var1){
       ", sep = ""))
 }
 
-map_one_variable(test, "previous_attendance")
+
+
+map_0_var <- function(df){
+  postcodes_loc <- read_csv("australian_postcodes.csv")
+  df$postcode = as.character(df$postcode)
+  df$`...1` = seq(nrow(df)) 
+  df_joined <- left_join(df, postcodes_loc, by = c("postcode" = "postcode"))
+  df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+  
+  m <- leaflet(df_joined) %>%
+    addTiles() %>%
+    addMarkers(~long, ~lat, popup = paste("Location: ", df_joined$locality %>% str_to_title(),
+                                          sep = ""), clusterOptions = markerClusterOptions)
+  m
+}
