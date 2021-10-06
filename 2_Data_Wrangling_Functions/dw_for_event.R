@@ -74,7 +74,7 @@ full_event_analysis <- function(data,excel_name_ls){
 }
 
 
-full_event_analysis(data,'Bondi_03.02.2021_Post.xlsx')
+# full_event_analysis(data,'Bondi_03.02.2021_Post.xlsx')
 
 
 
