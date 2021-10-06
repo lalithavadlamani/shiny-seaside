@@ -28,7 +28,7 @@ comparison_data$percentage_change <- round(((as.numeric(comparison_data$`After a
 comparison_data$email <- linked_data$Email
 
 
-return(comparison_data)
+return(list(comparison_data,linked_data))
 
 }
 
