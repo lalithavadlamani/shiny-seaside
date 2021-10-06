@@ -55,7 +55,6 @@ learning_kpi <- function(data){
   return(l_kpi)
 }
 
-learning_kpi(data)
 
 community_kpi <- function(data) {
   
@@ -77,7 +76,7 @@ community_kpi <- function(data) {
   return(c_kpi)
 }
 
-community_kpi(data)
+
 
 
 action_kpi <- function(data){
@@ -111,31 +110,44 @@ action_kpi <- function(data){
   return(as.table(percentages))
 }
 
-action_kpi(data)
 
 return(list(learning_kpi(data),community_kpi(data),action_kpi(data)))
 }
+
 
 unique_locations <- unique(data[c('location')])
 no_of_unique_locations <- nrow(unique_locations)
 
 all_loc_analysis <- vector()
 loc_names <- c()
+mat = matrix(ncol = 0, nrow = 0)
+final_df=data.frame(mat)
 
 for (i in 1:no_of_unique_locations){
   
   location_name = unique_locations[i,1]
-  loc_names <- c(loc_names,location_name)
+  final_df[i,'location'] <- location_name
+  # loc_names <- c(loc_names,location_name)
   data_required <- subset(data ,location == location_name)
   
   loc_analysis <- kpi_analysis(data_required)
   
-  all_loc_analysis <- c(all_loc_analysis,list(loc_analysis))
+  # all_loc_analysis <- c(all_loc_analysis,list(loc_analysis))
+  
+  final_df[i,'learning_kpi'] <- loc_analysis[1]
+  final_df[i,'community_kpi'] <- loc_analysis[2]
+  temp <- loc_analysis[[3]]
+  final_df[i,'action_doing_before_the_event'] <- temp[,'Doing before event']
+  final_df[i,'action_doing_after_the_event'] <- temp[,'Doing after event']
+  final_df[i,'action_likely_to_do'] <- temp[,'Likely to do']
+  final_df[i,'action_unlikely_to_do'] <- temp[,'Unlikely to do']
+  final_df[i,'env_habits'] <- mean(data_required$on.a.scale.of.1.5..how.would.you.rate.your.environmental.habits.after.the.activity.,na.rm=TRUE)
+  
 }
 
-names(all_loc_analysis) <- loc_names
+# names(all_loc_analysis) <- loc_names
 
-return(all_loc_analysis)
+return(final_df)
 }
 
 location_wise_analysis_for_a_year(list_of_df)
