@@ -17,11 +17,11 @@ Key features are;
 ## Excel Input Requirements 
 This app requires specific excel data inputs in order function as intended.
 
-Pre-Event Excel requires the following *exact* headings:
+### Pre-Event Excel requires the following *exact* headings:
 * Email
 * What pronoun do you identify with?
 * Age
-* Postcode
+* Postcode<br/>
 _Age Range Questions_
 * How many people under (5) years are you signing up for?
 * How many people in the age range(11-20) are you signing up for?
@@ -35,7 +35,7 @@ _Age Range Questions_
 * How did you find out about this event?
 * Are you of Aboriginal or Torres Strait Islander Origin?
 
-Post-Event Excel has more flexibility, but requires the following:
+### Post-Event Excel has more flexibility, but requires the following:
 * To calculate a specific KPI, you **must** add the word "community", "learning", or "action" into the excel heading in order for it to be interpreted correctly.
 * Community and learning KPI questions must be in the format of:
   * Question with options which are proposed learning/community outcomes
@@ -46,7 +46,7 @@ Post-Event Excel has more flexibility, but requires the following:
 
 * **Note:** With the current post-event survey format, it would be required to insert "action" into each heading of the excel spreadsheet manually, whereas the "learning" and "community" questions already have the headings embedded. 
 
-Key Notes:
+### Key Notes:
 * Ensure to not re-use the words "community", "action", or "learning" in the incorrect context, as this would be misinterpreted as a different KPI.
 * Any differences in post-event questions between years will not affect the calculations.
 * Community & Learning KPIs are calculated for each individual as proportion of the number of responses they have chosen against the total number of options are available. The overall KPI of a dataset is given as the mean of all individuals.
