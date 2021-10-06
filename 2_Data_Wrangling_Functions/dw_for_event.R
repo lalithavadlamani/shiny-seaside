@@ -63,10 +63,12 @@ full_event_analysis <- function(data,excel_name_ls){
   final_df$env_habits <- data$`on a scale of 1-5, how would you rate your environmental habits after the activity?`
 
   name_split = strsplit(excel_name_ls, "_", fixed = TRUE)
-  date = name_split[[1]][2]
+  date = name_split[[1]][3]
   date_split = strsplit(date, ".", fixed = TRUE)
   final_df <- final_df %>% mutate(location = name_split[[1]][1])
+  final_df <- final_df %>% mutate(postcode_event = name_split[[1]][2])
   final_df <- final_df %>% mutate(year = date_split[[1]][3])
+  
   
   return(final_df)
 }
