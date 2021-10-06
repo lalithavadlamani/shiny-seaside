@@ -187,12 +187,10 @@ preprocessing_fn <- function(pre_event_all = dataframe_ls,excel_name_ls = excel_
     factor(age_range_options)
   
   # Convert invested enviro impact to factor
-<<<<<<< HEAD
   pre_event_data$invested_environmental_impact = factor(pre_event_data$invested_environmental_impact, levels = c(1,2,3,4,5))
-=======
+  
   # pre_event_data$invested_environmental_impact = factor(pre_event_data$invested_environmental_impact, levels = c(1,2,3,4,5))
 
->>>>>>> cf511a8ea8f1ef33233130a600c64d74d4d1e1ac
 
   ### Adding extra entries of people as rows ###
   section = (pre_event_data %>% select(postcode, age_range_options, age_group))
