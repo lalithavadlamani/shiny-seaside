@@ -12,6 +12,7 @@ pre <- read_excel("C:/Users/Lalitha Vadlamani/Desktop/180 DC/S2/pre-event_respon
 colnames(pre)
 colnames(post)
 
+linked <- function(pre,post){
 linked_data <- merge(x=pre,y=post,by.x = 'Email',by.y = 'Email Address') 
 
 
@@ -24,3 +25,11 @@ comparison_data[is.na(comparison_data)] <- 1
 
 comparison_data$percentage_change <- round(((as.numeric(comparison_data$`After activity`) - as.numeric(comparison_data$`Before activity`)) / as.numeric(comparison_data$`Before activity`))*100,2) 
 
+comparison_data$email <- linked_data$Email
+
+
+return(comparison_data)
+
+}
+
+linked(pre,post)
