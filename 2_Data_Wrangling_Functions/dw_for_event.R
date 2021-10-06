@@ -61,6 +61,7 @@ full_event_analysis <- function(data,excel_name_ls){
   final_df$action_likely_to_do <- action_data_df$`action-likely_to_do_per`
   final_df$action_unlikely_to_do <- action_data_df$`action-unlikely_to_do_per`
   final_df$env_habits <- data$`on a scale of 1-5, how would you rate your environmental habits after the activity?`
+  final_df$action_summary <- (final_df$action_Doing_after_the_event + final_df$action_likely_to_do) / (final_df$action_Doing_after_the_event + final_df$action_likely_to_do + final_df$action_unlikely_to_do)
 
   name_split = strsplit(excel_name_ls, "_", fixed = TRUE)
   date = name_split[[1]][3]
