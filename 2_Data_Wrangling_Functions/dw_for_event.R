@@ -20,7 +20,7 @@ full_event_analysis <- function(data,excel_name_ls){
   
   learning_data$learning_options_per_row <- str_count(learning_data$chosen_learning_options, ',') + 1
   
-  learning_data$learning_per_per_row <- (learning_data$learning_options_per_row / learning_options)*100
+  learning_data$learning_per_per_row <- (learning_data$learning_options_per_row / learning_options)
   learning_data$learning_per_per_row[is.na(learning_data$learning_per_per_row)] <- 0
   
   indx_c <- grepl('community',colnames(data))
@@ -31,7 +31,7 @@ full_event_analysis <- function(data,excel_name_ls){
   
   community_data$community_options_per_row <- str_count(community_data$chosen_community_options, ',') + 1
   
-  community_data$community_per_per_row <- (community_data$community_options_per_row / community_options)*100
+  community_data$community_per_per_row <- (community_data$community_options_per_row / community_options)
   community_data$community_per_per_row[is.na(community_data$community_per_per_row)] <- 0
   
   
@@ -43,10 +43,10 @@ full_event_analysis <- function(data,excel_name_ls){
   
   
   for (i in 1:rows){
-    action_data_df[i,'action-Doing_before_the_event_per'] <- (sum(str_count(unlist(action_data[i,]),'Doing before the event')) / number_of_actions) * 100
-    action_data_df[i,'action-Doing_after_the_event_per'] <- (sum(str_count(unlist(action_data[i,]),'Started doing after the event')) / number_of_actions) * 100
-    action_data_df[i,'action-likely_to_do_per'] <- (sum(str_count(unlist(action_data[i,]),'Likely to do in the next 3 months')) / number_of_actions) * 100
-    action_data_df[i,'action-unlikely_to_do_per'] <- (sum(str_count(unlist(action_data[i,]),'Unlikely to do in the next 3 months')) / number_of_actions) * 100
+    action_data_df[i,'action-Doing_before_the_event_per'] <- (sum(str_count(unlist(action_data[i,]),'Doing before the event')) / number_of_actions) 
+    action_data_df[i,'action-Doing_after_the_event_per'] <- (sum(str_count(unlist(action_data[i,]),'Started doing after the event')) / number_of_actions) 
+    action_data_df[i,'action-likely_to_do_per'] <- (sum(str_count(unlist(action_data[i,]),'Likely to do in the next 3 months')) / number_of_actions) 
+    action_data_df[i,'action-unlikely_to_do_per'] <- (sum(str_count(unlist(action_data[i,]),'Unlikely to do in the next 3 months')) / number_of_actions) 
   }
   
   mat = matrix(ncol = 0, nrow = 0)
