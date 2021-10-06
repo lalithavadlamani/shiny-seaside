@@ -7,12 +7,12 @@ library(tidyverse)
 
 # definitions
 attributes_ls <- c("Email", "What pronoun do you identify with?", "Age", "Postcode", "How many people under (5) years are you signing up for?", "How many people in the age range(5-10) are you signing up for?", "How many people in the age range(11-20) are you signing up for?", "How many people in the age range(21-30) are you signing up for?", "How many people in the age range(31-50) are you signing up for?", "How many people in the age range(51-70) are you signing up for?", "How many people in this age range(71+) are you signing up for?", "Have you previously attended an organised clean-up event (hosted by any organisation)?", "On a scale of 1-5 how invested are you in environmental impact?(1 being the least invested)", "How did you find out about this event?" ) 
-colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "invested_environmental_impact", "find_out_event", "origin"  )
-total_colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "invested_environmental_impact", "find_out_event", "age_group", "location", "year", "postcode_event",  "origin")
+colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "pre_environmental_impact", "find_out_event", "origin"  )
+total_colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "pre_environmental_impact", "find_out_event", "age_group", "location", "year", "postcode_event",  "origin")
 merge_colnames_ls <- c("location", "year")
 age_range_options <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71")
 numeric_ls <- c("age_under_5", "age_5_to_10", "age_11_to_20", "age_21_to_30", "age_31_to_50", "age_51_to_70", "age_over_71", "age")
-factor_ls <- c("pronoun", "previous_attendance", "find_out_event",  "invested_environmental_impact")
+factor_ls <- c("pronoun", "previous_attendance", "find_out_event",  "pre_environmental_impact")
 character_ls <- c("email", "postcode")
 
 
@@ -68,7 +68,7 @@ preprocessing_fn <- function(pre_event_all = dataframe_ls,excel_name_ls = excel_
     factor(age_range_options)
 
  # Convert invested enviro impact to factor
-  pre_event_data$invested_environmental_impact = factor(pre_event_data$invested_environmental_impact, levels = c(1,2,3,4,5))
+  pre_event_data$pre_environmental_impact = factor(pre_event_data$pre_environmental_impact, levels = c(1,2,3,4,5))
   
   ### Adding extra entries of people as rows ###
   section = (pre_event_data %>% select(postcode, age_range_options, age_group))
