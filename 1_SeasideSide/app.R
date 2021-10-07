@@ -29,7 +29,7 @@ email = "sourish.iyengar@gmail.com"
 preVars = list(Age = "age_group",Gender = "pronoun", 
                "Previous Attendance" = "previous_attendance", 
                "How did you hear about the event?" = "find_out_event",
-               "Perceived Environmental Investment"= "invested_environmental_impact") 
+               "Perceived Environmental Investment"= "pre_environmental_impact") 
 
 
 ui <- dashboardPage(
@@ -139,7 +139,8 @@ ui <- dashboardPage(
                              #selectizeInput
                                 checkboxGroupButtons("prePlotOptions",
                                                "Plotting Options (Optional)", 
-                                               choices = c("Horizontal", "Proportions", "Numeric Text","Remove Unknowns"), 
+                                               choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
+                                                              "Remove Unknowns" = "missing"), 
                                                selected = NULL),
 
                                 textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
@@ -441,32 +442,32 @@ server <- function(input, output, session) {
         ## PreEvent Visualisations 
     
     output$preViz = renderPlotly({
-
+        
+        data = preEventData()
+        data$age_group = data$age_group %>% factor(age_range_options)
+        additional = input$prePlotOptions
+        # browser()
         if (input$analysisType %in% c("Location", "Yearly")){
-            g = preEventData() %>% 
-                select(year,varViz = input$preVar1) %>% 
-                ggplot(aes(x = year, fill = varViz)) +
-                    geom_bar() + 
-                    theme_minimal() 
-              
+            g = PreEventPlot(data,varNames = c("year", input$preVar1), additional = additional)
+            
             
         }else{
             if (input$preVarColour == "None"){
-                g = PreEventPlot(preEventData(),input$preVar1)
+                g = PreEventPlot(data,varNames = c(input$preVar1), additional = additional)
             }else{
-                g = PreEventPlot(preEventData(),c(input$preVar1, input$preVarColour)) 
+                g = PreEventPlot(data,varNames = c(input$preVar1, input$preVarColour), additional = additional)
             }
         }
         
         if (input$advancedPreOptions == TRUE){
             if (!is.null(input$preTitle)){
-              g = g + ggtitle(input$preTitle)  
+                g = g + ggtitle(input$preTitle)  
             }
             if (!is.null(input$preXaxis)){
-              g = g + xlab(input$preXaxis) 
+                g = g + xlab(input$preXaxis) 
             }
             if (!is.null(input$preYaxis)){
-              g = g + ylab(input$preYaxis) 
+                g = g + ylab(input$preYaxis) 
             }
             
         }
