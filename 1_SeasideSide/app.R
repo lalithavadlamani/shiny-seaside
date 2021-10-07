@@ -67,9 +67,11 @@ ui <- dashboardPage(
     # Sidebar Menu
     dashboardSidebar( 
         sidebarMenu(id = "sidebar",
-        menuItem("Pre-event", tabName = "preEvent", icon = icon("")),
-        menuItem("Post-event", tabName = "postEvent", icon = icon("")),
-        menuItem("Stratified-Analysis", tabName = "stratifiedAnalysis", icon = icon(""))
+        menuItem("Pre-event", tabName = "preEvent", icon = icon("chart-bar")),
+        menuItem("Post-event", tabName = "postEvent", icon = icon("seedling")),
+        menuItem("Stratified-Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
+        menuItem("Report", tabName = "report", icon = icon("file-invoice"))
+        
         )
     ),
     
@@ -101,7 +103,7 @@ ui <- dashboardPage(
             # Panel 1 sidebar
             column(4,
                 box(
-                    status = "success", 
+                    status = "danger", 
                     solidHeader = TRUE,
                     collapsible = TRUE,
                     title = "Controls",
