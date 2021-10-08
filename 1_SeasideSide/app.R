@@ -378,20 +378,29 @@ server <- function(input, output, session) {
     )
     
          ## Pre-event Advanced Options - Labelling
-    observeEvent(input$advancedPreOptions,{
+    observeEvent(c(input$preVar1,input$preVarColour, input$analysisType),{
+        
+        if (input$analysisType == "Event"){
+            title = paste(input$preVar1,"Barplot") %>% str_replace_all("_", " ") %>% str_to_title()
+            xaxis = input$preVar1 %>% str_replace_all("_", " ") %>% str_to_title()
+        }else{
+            title = paste(input$preVar1,"Barplot by Year") %>% str_replace_all("_", " ") %>% str_to_title()
+            xaxis = "year" %>% str_to_title()
+        }
+        
         updateTextInput(session,
                         "preTitle", 
-                         value = paste(input$preVar1,"Barplot") %>% str_to_title()
+                         value = title
                         )
         
         updateTextInput(session,
                         "preXaxis", 
-                        value = input$preVar1 %>% str_to_title()
+                        value = xaxis
                         )
         
         updateTextInput(session,
                         "preYaxis", 
-                        value = "Count"
+                        value =  "Number of Responses"
                         )
     }
     )
@@ -483,7 +492,13 @@ server <- function(input, output, session) {
     output$preVizMap = leaflet::renderLeaflet({
         
         data = preEventData()
-        map_one_variable(data, input$preVar1)
+        if (input$preMapAnalysisType == "Participants"){
+            map_one_variable(data, input$preVar1)            
+        }else{
+            data %>% dplyr::select(-postcode) %>% dplyr::rename(postcode = "postcode_event") %>% 
+                map_one_variable(input$preVar1) 
+        }
+
     })
     
     

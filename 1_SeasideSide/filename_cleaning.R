@@ -2,8 +2,8 @@ require(stringr)
 require(tidyverse)
 
 # Example input
-test_input = c("Bondi Junction_03.02.2021_Pre_Participants", "Turramurra_04.01.2020_Pre_Participants",
-               "Camperdown_04.01.2020_Pre_Participants", "Lithgow_04.01.2019_Pre_Participants")
+test_input = c("Bondi Junction_2026_03.02.2021_Pre_Participants", "Turramurra_2026_04.01.2020_Pre_Participants",
+               "Camperdown_2026_04.01.2020_Pre_Participants", "Lithgow_2026_04.01.2019_Pre_Participants")
 
 setClass(Class="NameData", slots = c(locations = "character", 
                                      dates = "character", 
@@ -52,10 +52,11 @@ name_processing <- function(files) {
                               values[[1]][2],
                               values[[1]][3],
                               values[[1]][4],
+                              values[[1]][5],
                               file_name))
 
   }
-  colnames(df) <- c("location", "date", "form_type", "event_type", "file_name")
+  colnames(df) <- c("location", "postcode","date", "form_type", "event_type", "file_name")
   df = df %>% 
     mutate(date = as.Date(date, format = "%d.%m.%Y"))
   df$year <- as.numeric(format(df$date, "%Y"))

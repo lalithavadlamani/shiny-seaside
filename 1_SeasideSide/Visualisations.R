@@ -162,10 +162,6 @@ PreEventPlot <- function(data, varNames, additional = c("horizontal", "text", "p
     g = g + scale_x_discrete(labels = levelsVar1)
   }
   
-  # if (!is.na(levelsVar2)){
-  #   g = g + scale_colour_manual(values = levelsVar2)
-  # }
-  # 
   g
   
 }
