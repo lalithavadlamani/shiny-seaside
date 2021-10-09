@@ -14,6 +14,7 @@ library(readr)
 source("filename_cleaning.R")
 source("preEventCleaning.R")
 source("Visualisations.R")
+source("postEventCleaning.R")
 
 
 
@@ -538,11 +539,12 @@ server <- function(input, output, session) {
         }else{
             file_names = filter_data(metaData(), location_filter = input$sheet, form_type = "Post")$file_name
         }
-
-        data = read_sheet(drive_get(file_names))
-        # data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
-        # processedData = preprocessing_multiple_fn(data, file_names)
-        # processedData
+        
+        validate(need(file_names, "The file selected doesn't have post-event data available"))
+        # data = read_sheet(drive_get(file_names))
+        data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
+        processedData = postprocessing_multiple_fn(data, file_names)
+        processedData
     })
 
 
