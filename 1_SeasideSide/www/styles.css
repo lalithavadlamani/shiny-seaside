@@ -28,14 +28,14 @@
 
 body, label, input, button, select, box,
     .h1, .h2, .h3, .h4, .h5, h1, h2, h3, h4, h5 {
-  color: var(--ssGrey)!important;
+  color: var(--ssBlue);
   font-family: var(--ssFont);
 
 }
 
 .h6, h6 {
   font-family: var(--ssFont);
-  color: var(--ssGrey)!important;
+  color: var(--ssBlue);
 
 }
 
@@ -49,29 +49,29 @@ body, label, input, button, select, box,
   color: white;
 }
 .box.box-solid.box-primary>.box-header {
-  background: var(--ssBlue);
+  background: var(--ssLightBlue);
 }
 .box.box-solid.box-primary, .box.box-primary {
-  border-color: var(--ssBlue);
-  border-left-color: var(--ssBlue);
-  border-right-color: var(--ssBlue);
-  border-top-color: var(--ssBlue);
-}
-
-/* box: info color */
-.box.box-solid.box-info>.box-header h3, .box.box-info>.box-header h3 {
-  color: white;
-}
-.box.box-solid.box-info>.box-header {
-  background: var(--ssLightBlue);
-  border-radius: ', boxBorderRadius, 'px;
-}
-.box.box-solid.box-info, .box.box-info {
   border-color: var(--ssLightBlue);
   border-left-color: var(--ssLightBlue);
   border-right-color: var(--ssLightBlue);
   border-top-color: var(--ssLightBlue);
+}
+
+/* box: warning color */
+.box.box-solid.box-warning>.box-header h3, .box.box-warning>.box-header h3 {
+  color: white;
+}
+.box.box-solid.box-warning>.box-header {
+  background: var(--ssOrange);
   border-radius: ', boxBorderRadius, 'px;
+}
+.box.box-solid.box-warning, .box.box-warning {
+  border-color: var(--ssOrange);
+  border-left-color: var(--ssOrange);
+  border-right-color: var(--ssOrange);
+  border-top-color: var(--ssOrange);
+  border-radius: var(--ssOrange)px;
 }
 
 /* box: success color */
@@ -107,21 +107,6 @@ body, label, input, button, select, box,
   border-top-color: var(--ssPink);
 }
 
-/* box: warning color */
-.box.box-solid.box-warning>.box-header h3, .box.box-warning>.box-header h3 {
-  color: white;
-  font-family: var(--ssFont);
-
-}
-.box.box-solid.box-warning>.box-header {
-  background: var(--ssOrange);
-}
-.box.box-solid.box-warning, .box.box-warning {
-  border-color: var(--ssOrange);
-  border-left-color: var(--ssOrange);
-  border-right-color: var(--ssOrange);
-  border-top-color: var(--ssOrange);
-}
 
 /* header */
 .skin-blue .main-header .navbar {
@@ -137,7 +122,7 @@ body, label, input, button, select, box,
 
 /* header side hover */
 .skin-blue .main-header .navbar .sidebar-toggle:hover {
-  background:var(--ssBlue);
+  background:var(--ssGrey);
   color:var(--ssLightBlue);
 }
 
@@ -167,8 +152,8 @@ body, label, input, button, select, box,
 /* tabbox: tab color */
 .nav-tabs-custom, .nav-tabs-custom .nav-tabs li.active:hover a,
 .nav-tabs-custom .nav-tabs li.active a {
-  background: var(--ssPink);
-  color: var(--ssPink);
+
+  color: var(--ssBlue);
 }
 
 /* box: title */
