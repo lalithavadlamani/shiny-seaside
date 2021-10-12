@@ -561,7 +561,52 @@ server <- function(input, output, session) {
         content = function(fname){
             write.csv(postEventData(), fname)
         }
-    ) 
+    )
+    
+    
+    
+    
+    
+    
+    output$postViz = renderPlotly({
+        
+        data = postEventData()
+        data = data %>% dplyr::select(action_kpi, learning_kpi, community_kpi, year) %>% mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year() )
+        if (input$analysisType %in% c("Location", "Yearly")){
+            data = data %>% group_by(year) %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
+            g = data %>% ggplot(aes(x = year, y = score, colour = KPI )) + geom_line() + geom_point() +
+                scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) + theme_minimal()
+            
+        }else{
+            data = data %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
+            g = data %>% ggplot(aes(x = KPI, score )) + geom_bar(stat = "identity", fill = "skyblue") + theme_minimal()
+        }
+        
+        # if (input$advancedPostOptions == TRUE){
+        #     if (!is.null(input$preTitle)){
+        #         g = g + ggtitle(input$preTitle)  
+        #     }
+        #     if (!is.null(input$preXaxis)){
+        #         g = g + xlab(input$preXaxis) 
+        #     }
+        #     if (!is.null(input$preYaxis)){
+        #         g = g + ylab(input$preYaxis) 
+        #     }
+        #     
+        # }
+        ggplotly(g)
+        
+        
+        
+    })
+    
+    
+    
+    
+    
+    
+    
+    
 }
 
 # Run the application 
