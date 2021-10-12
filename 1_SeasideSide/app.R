@@ -584,13 +584,13 @@ server <- function(input, output, session) {
         
         # if (input$advancedPostOptions == TRUE){
         #     if (!is.null(input$preTitle)){
-        #         g = g + ggtitle(input$preTitle)  
+        #         g = g + ggtitle(input$postTitle)  
         #     }
         #     if (!is.null(input$preXaxis)){
-        #         g = g + xlab(input$preXaxis) 
+        #         g = g + xlab(input$postXaxis) 
         #     }
         #     if (!is.null(input$preYaxis)){
-        #         g = g + ylab(input$preYaxis) 
+        #         g = g + ylab(input$postYaxis) 
         #     }
         #     
         # }
@@ -599,6 +599,21 @@ server <- function(input, output, session) {
         
         
     })
+    
+    output$postVizMap = leaflet::renderLeaflet({
+        
+        data = preEventData()
+        # if (input$preMapAnalysisType == "Participants"){
+        #     map_one_variable(data, input$preVar1)            
+        # }else{
+        #     data %>% dplyr::select(-postcode) %>% dplyr::rename(postcode = "postcode_event") %>% 
+        #         map_one_variable(input$preVar1) 
+        # }
+        
+        
+        
+    })
+    
     
     
     
