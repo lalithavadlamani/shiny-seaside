@@ -14,6 +14,7 @@ library(readr)
 source("filename_cleaning.R")
 source("preEventCleaning.R")
 source("Visualisations.R")
+source("postEventCleaning.R")
 
 
 
@@ -29,7 +30,7 @@ email = "sourish.iyengar@gmail.com"
 preVars = list(Age = "age_group",Gender = "pronoun", 
                "Previous Attendance" = "previous_attendance", 
                "How did you hear about the event?" = "find_out_event",
-               "Perceived Environmental Investment"= "invested_environmental_impact") 
+               "Perceived Environmental Investment"= "pre_environmental_impact") 
 
 
 ui <- dashboardPage(
@@ -67,9 +68,11 @@ ui <- dashboardPage(
     # Sidebar Menu
     dashboardSidebar( 
         sidebarMenu(id = "sidebar",
-        menuItem("Pre-event", tabName = "preEvent", icon = icon("")),
-        menuItem("Post-event", tabName = "postEvent", icon = icon("")),
-        menuItem("Stratified-Analysis", tabName = "stratifiedAnalysis", icon = icon(""))
+        menuItem("Pre-event", tabName = "preEvent", icon = icon("chart-bar")),
+        menuItem("Post-event", tabName = "postEvent", icon = icon("seedling")),
+        menuItem("Stratified-Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
+        menuItem("Report", tabName = "report", icon = icon("file-invoice"))
+        
         )
     ),
     
@@ -101,7 +104,7 @@ ui <- dashboardPage(
             # Panel 1 sidebar
             column(4,
                 box(
-                    status = "success", 
+                    status = "danger", 
                     solidHeader = TRUE,
                     collapsible = TRUE,
                     title = "Controls",
@@ -139,7 +142,8 @@ ui <- dashboardPage(
                              #selectizeInput
                                 checkboxGroupButtons("prePlotOptions",
                                                "Plotting Options (Optional)", 
-                                               choices = c("Horizontal", "Proportions", "Numeric Text","Remove Unknowns"), 
+                                               choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
+                                                              "Remove Unknowns" = "missing"), 
                                                selected = NULL),
 
                                 textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
@@ -375,20 +379,29 @@ server <- function(input, output, session) {
     )
     
          ## Pre-event Advanced Options - Labelling
-    observeEvent(input$advancedPreOptions,{
+    observeEvent(c(input$preVar1,input$preVarColour, input$analysisType),{
+        
+        if (input$analysisType == "Event"){
+            title = paste(input$preVar1,"Barplot") %>% str_replace_all("_", " ") %>% str_to_title()
+            xaxis = input$preVar1 %>% str_replace_all("_", " ") %>% str_to_title()
+        }else{
+            title = paste(input$preVar1,"Barplot by Year") %>% str_replace_all("_", " ") %>% str_to_title()
+            xaxis = "year" %>% str_to_title()
+        }
+        
         updateTextInput(session,
                         "preTitle", 
-                         value = paste(input$preVar1,"Barplot") %>% str_to_title()
+                         value = title
                         )
         
         updateTextInput(session,
                         "preXaxis", 
-                        value = input$preVar1 %>% str_to_title()
+                        value = xaxis
                         )
         
         updateTextInput(session,
                         "preYaxis", 
-                        value = "Count"
+                        value =  "Number of Responses"
                         )
     }
     )
@@ -441,32 +454,32 @@ server <- function(input, output, session) {
         ## PreEvent Visualisations 
     
     output$preViz = renderPlotly({
-
+        
+        data = preEventData()
+        data$age_group = data$age_group %>% factor(age_range_options)
+        additional = input$prePlotOptions
+        # browser()
         if (input$analysisType %in% c("Location", "Yearly")){
-            g = preEventData() %>% 
-                select(year,varViz = input$preVar1) %>% 
-                ggplot(aes(x = year, fill = varViz)) +
-                    geom_bar() + 
-                    theme_minimal() 
-              
+            g = PreEventPlot(data,varNames = c("year", input$preVar1), additional = additional)
+            
             
         }else{
             if (input$preVarColour == "None"){
-                g = PreEventPlot(preEventData(),input$preVar1)
+                g = PreEventPlot(data,varNames = c(input$preVar1), additional = additional)
             }else{
-                g = PreEventPlot(preEventData(),c(input$preVar1, input$preVarColour)) 
+                g = PreEventPlot(data,varNames = c(input$preVar1, input$preVarColour), additional = additional)
             }
         }
         
         if (input$advancedPreOptions == TRUE){
             if (!is.null(input$preTitle)){
-              g = g + ggtitle(input$preTitle)  
+                g = g + ggtitle(input$preTitle)  
             }
             if (!is.null(input$preXaxis)){
-              g = g + xlab(input$preXaxis) 
+                g = g + xlab(input$preXaxis) 
             }
             if (!is.null(input$preYaxis)){
-              g = g + ylab(input$preYaxis) 
+                g = g + ylab(input$preYaxis) 
             }
             
         }
@@ -480,7 +493,13 @@ server <- function(input, output, session) {
     output$preVizMap = leaflet::renderLeaflet({
         
         data = preEventData()
-        map_one_variable(data, input$preVar1)
+        if (input$preMapAnalysisType == "Participants"){
+            map_one_variable(data, input$preVar1)            
+        }else{
+            data %>% dplyr::select(-postcode) %>% dplyr::rename(postcode = "postcode_event") %>% 
+                map_one_variable(input$preVar1) 
+        }
+
     })
     
     
@@ -520,11 +539,12 @@ server <- function(input, output, session) {
         }else{
             file_names = filter_data(metaData(), location_filter = input$sheet, form_type = "Post")$file_name
         }
-
-        data = read_sheet(drive_get(file_names))
-        # data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
-        # processedData = preprocessing_multiple_fn(data, file_names)
-        # processedData
+        
+        validate(need(file_names, "The file selected doesn't have post-event data available"))
+        # data = read_sheet(drive_get(file_names))
+        data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
+        processedData = postprocessing_multiple_fn(data, file_names)
+        processedData
     })
 
 
