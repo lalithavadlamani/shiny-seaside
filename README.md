@@ -15,13 +15,13 @@ Key features are;
 # Input requirements
 
 ## Excel Input Requirements 
-This app requires specific excel data inputs in order function as intended.
+This app requires specific excel data inputs in order to function as intended.
 
 ### Pre-Event Excel requires the following *exact* headings:
 * Email
 * What pronoun do you identify with?
 * Age
-* Postcode<br/>
+* Postcode<br/><br/>
 _Age Range Questions_
 * How many people under (5) years are you signing up for?
 * How many people in the age range(11-20) are you signing up for?
