@@ -28,14 +28,14 @@
 
 body, label, input, button, select, box,
     .h1, .h2, .h3, .h4, .h5, h1, h2, h3, h4, h5 {
-  color: var(--ssBlue);
+  color: var(--ssGrey)!important;
   font-family: var(--ssFont);
 
 }
 
 .h6, h6 {
   font-family: var(--ssFont);
-  color: var(--ssBlue);
+  color: var(--ssGrey)!important;
 
 }
 
@@ -43,9 +43,6 @@ body, label, input, button, select, box,
 .skin-blue .main-sidebar {
   background: var(--ssGreen);
 }
-
-
-
 
 /* box: primary color */
 .box.box-solid.box-primary>.box-header h3, .box.box-primary>.box-header h3 {
@@ -61,17 +58,34 @@ body, label, input, button, select, box,
   border-top-color: var(--ssBlue);
 }
 
+/* box: info color */
+.box.box-solid.box-info>.box-header h3, .box.box-info>.box-header h3 {
+  color: white;
+}
+.box.box-solid.box-info>.box-header {
+  background: var(--ssLightBlue);
+  border-radius: ', boxBorderRadius, 'px;
+}
+.box.box-solid.box-info, .box.box-info {
+  border-color: var(--ssLightBlue);
+  border-left-color: var(--ssLightBlue);
+  border-right-color: var(--ssLightBlue);
+  border-top-color: var(--ssLightBlue);
+  border-radius: ', boxBorderRadius, 'px;
+}
+
 /* box: success color */
 .box.box-solid.box-success>.box-header h3, .box.box-success>.box-header h3 {
   color: white;
+  font-family: var(--ssFont);
+
 }
 .box.box-solid.box-success>.box-header {
   background: var(--ssGreen);
 }
 .box.box-solid.box-success, .box.box-success {
   border-color: var(--ssGreen);
-  border-left-color: ssGreen
-;
+  border-left-color: var(--ssGreen);
   border-right-color: var(--ssGreen);
   border-top-color: var(--ssGreen);
 }
@@ -79,14 +93,16 @@ body, label, input, button, select, box,
 /* box: danger color */
 .box.box-solid.box-danger>.box-header h3, .box.box-danger>.box-header h3 {
   color: white;
+  font-family: var(--ssFont);
+
 }
 .box.box-solid.box-danger>.box-header {
   background: var(--ssPink);
+
 }
 .box.box-solid.box-danger, .box.box-danger {
   border-color: var(--ssPink);
-  border-left-color: ssPink
-;
+  border-left-color: var(--ssPink);
   border-right-color: var(--ssPink);
   border-top-color: var(--ssPink);
 }
@@ -94,16 +110,17 @@ body, label, input, button, select, box,
 /* box: warning color */
 .box.box-solid.box-warning>.box-header h3, .box.box-warning>.box-header h3 {
   color: white;
+  font-family: var(--ssFont);
+
 }
 .box.box-solid.box-warning>.box-header {
-  background: var(--ssPink);
+  background: var(--ssOrange);
 }
 .box.box-solid.box-warning, .box.box-warning {
-  border-color: var(--ssPink);
-  border-left-color: ssPink
-;
-  border-right-color: var(--ssPink);
-  border-top-color: var(--ssPink);
+  border-color: var(--ssOrange);
+  border-left-color: var(--ssOrange);
+  border-right-color: var(--ssOrange);
+  border-top-color: var(--ssOrange);
 }
 
 /* header */
@@ -114,8 +131,8 @@ body, label, input, button, select, box,
 
 /* header side */
 .skin-blue .main-header .navbar .sidebar-toggle {
-  background:var(--ssLightBlue);
-  color:var(--ssBlue);
+  background:var(--ssBlue);
+  color:var(--ssLightBlue);
 }
 
 /* header side hover */
@@ -142,7 +159,19 @@ body, label, input, button, select, box,
   color: ', sidebarTabTextColorHover, ';
   font-size: ', sidebarTabTextSize, 'px;
   border-style: ', sidebarTabBorderStyleHover, ';
-  border-color: var(ssLightBlue);
+  border-color: var(ssBlue);
   border-width: ', sidebarTabBorderWidthHover, 'px;
   border-radius: ', sidebarTabRadiusHover, ';
+}
+
+/* tabbox: tab color */
+.nav-tabs-custom, .nav-tabs-custom .nav-tabs li.active:hover a,
+.nav-tabs-custom .nav-tabs li.active a {
+  background: var(--ssPink);
+  color: var(--ssPink);
+}
+
+/* box: title */
+.box-header .box-title {
+  color: white;
 }

@@ -87,7 +87,14 @@ ui <- dashboardPage(
         # User inputted email and drive link
         fluidRow(
             column(12,
-                box("File Information",
+                box(
+                    status = "danger", 
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    # collapsed = TRUE,
+                    # width = 12,
+                    
+                    title = "File Information",
                     textInput("emailID", "Paste drive email address:", value = email ,width = NULL, placeholder = email),
                     textInput("driveID", "Paste folder drive link:", value = path,width = NULL, placeholder = path),
                     width = 12
@@ -103,7 +110,7 @@ ui <- dashboardPage(
             # Panel 1 sidebar
             column(4,
                 box(
-                    status = "danger", 
+                    status = "success", 
                     solidHeader = TRUE,
                     collapsible = TRUE,
                     title = "Controls",
@@ -117,8 +124,12 @@ ui <- dashboardPage(
                             inputId = "analysisType",
                             label = "Analysis:", 
                             choices = c("Event","Yearly", "Location"),
-                            status = "danger"
-                        ),
+                            status = "warning"
+                        ),  
+                        tags$script("$(\"input:radio[name='analysisType'][value='Event']\").parent().css('background-color', '#F27B34');"),
+                        tags$script("$(\"input:radio[name='analysisType'][value='Yearly']\").parent().css('background-color', '#F27B34');"),
+                        tags$script("$(\"input:radio[name='analysisType'][value='Location']\").parent().css('background-color', '#F27B34');"),
+                        
                         # Survey choice - Choices populated in server
                         selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
                         
@@ -196,14 +207,14 @@ ui <- dashboardPage(
             column(8,
                    # Panel 1 Viz
                    conditionalPanel("input.sidebar == 'preEvent'",
-                        # box(
-                        #     # "Demographic Analysis", 
-                        #     status = "warning",
-                        #     solidHeader = TRUE,
-                        #     collapsible = TRUE,
-                        #     width = 12,
+                        box(
+                            title = "Demographic Analysis",
+                            status = "warning",
+                            solidHeader = TRUE,
+                            collapsible = TRUE,
+                            width = 12,
                        tabBox(
-                           title = "Demographic Analysis",
+                           # title = "Demographic Analysis",
                            id = "preTabViz",    
                            width = 12,
                            tabPanel("Main Analysis", "",value = 1,
@@ -213,6 +224,7 @@ ui <- dashboardPage(
                                     leaflet::leafletOutput("preVizMap")
                            )
                        )
+                     )
                    )
                    # )
                    ,
@@ -253,11 +265,11 @@ ui <- dashboardPage(
             column(12,
                 conditionalPanel("input.sidebar == 'preEvent'",   
                     box(title = "Data",
-                        status = "danger", 
                         solidHeader = TRUE,
                         collapsible = TRUE,
                         collapsed = TRUE,
                         width = 12,
+                        status = "success",
         
                         DT::DTOutput("preCleanedData", height = 300)
                         )
