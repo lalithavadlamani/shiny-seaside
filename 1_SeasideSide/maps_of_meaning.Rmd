@@ -237,7 +237,6 @@ map_one_variable(test, "find_out_event")
 ```
 
 ```{r}
-
 map_0_var <- function(df){
   postcodes_loc <- read_csv("australian_postcodes.csv")
   df$postcode = as.character(df$postcode)
@@ -255,6 +254,89 @@ map_0_var(test)
 ```
 
 
+```{r}
+# Loading post-event data
+
+post = read_csv("postEvent2.csv")
+```
+
+```{r}
+
+val = "action_kpi"
 
 
+post$postcode_event = as.character(post$postcode_event)
+post$`...1` = seq(nrow(post)) 
+post_joined <- left_join(post, postcodes_loc, by = c("postcode_event" = "postcode"))
+post_joined <- post_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+post_joined <- post_joined %>%
+                dplyr::rename(action_kpi = action_summary)
+
+post_joined %>% dplyr::group_by(postcode_event, lat, long, locality) %>%
+  dplyr::summarise(
+    action_kpi = mean(action_kpi),
+    count = n()
+  )
+```
+
+
+```{r}
+# Function for KPIs
+
+# Input:
+# df - R DataFrame
+map_kpi <- function(df, kpi){
+  postcodes_loc <- read_csv("australian_postcodes.csv")
+  df$postcode_event = as.character(df$postcode_event)
+  df$`...1` = seq(nrow(df)) 
+  df_joined <- left_join(df, postcodes_loc, by = c("postcode_event" = "postcode"))
+  df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+  df_joined <- df_joined %>%
+                  dplyr::rename(action_kpi = action_summary)
+  
+  if (kpi == "action"){
+    kpi_col = "action_kpi"
+  }
+  if (kpi == "community"){
+    kpi_col = "community_kpi"
+  }
+  if (kpi == "learning"){
+    kpi_col = "learning_kpi"
+  }
+  
+  df_joined <- df_joined %>% dplyr::group_by(postcode_event, lat, long, locality) %>%
+  dplyr::summarise(
+    vis_kpi = mean(get(kpi_col)),
+    count = n()
+  )
+  
+  # Colour Palette
+  pal <- colorNumeric("viridis", df_joined$vis_kpi, n = 5)
+  
+  # Rescaling count column to 0-50
+  df_joined$count_scaled <- df_joined$count %>% scale(center = FALSE, scale = max(df_joined$count, na.rm = TRUE)/50)
+  
+  # Map
+  m <- leaflet(df_joined) %>%
+  addTiles() %>%
+  addCircleMarkers(~long, ~lat, 
+                   popup = paste("Location: ", df_joined$locality %>% str_to_title(),
+                                 "<br>", "Average KPI: ", round(df_joined$vis_kpi, 2),
+                                 "<br>", "Number of Participants: ", df_joined$count, sep = ""),
+                   color = ~pal(vis_kpi), fillOpacity = 0.5,
+                   radius = ~count_scaled
+                   ) %>%
+    addLegend(pal = pal, values = ~vis_kpi, opacity = 1.0,
+              title = paste((kpi_col %>% str_split("_"))[[1]][1] %>% str_to_title(), 'KPI'),
+              labFormat = labelFormat(transform = function(x) round(x, 2)))
+m
+}
+
+```
+
+```{r}
+map_kpi(post, "action")
+map_kpi(post, "community")
+map_kpi(post, "learning")
+```
 
