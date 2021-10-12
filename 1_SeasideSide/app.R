@@ -554,6 +554,14 @@ server <- function(input, output, session) {
             options = list(pageLength=10, scrollX='400px')
         )
     })
+    
+    
+    output$downloadPostEvent <- downloadHandler(
+        filename = function(){"postEvent.csv"}, 
+        content = function(fname){
+            write.csv(postEventData(), fname)
+        }
+    ) 
 }
 
 # Run the application 
