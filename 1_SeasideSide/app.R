@@ -111,7 +111,7 @@ ui <- dashboardPage(
             # Panel 1 sidebar
             column(4,
                 box(
-                    status = "success", 
+                    status = "warning", 
                     solidHeader = TRUE,
                     collapsible = TRUE,
                     title = "Controls",
@@ -211,10 +211,11 @@ ui <- dashboardPage(
                    conditionalPanel("input.sidebar == 'preEvent'",
                         box(
                             title = "Demographic Analysis",
-                            status = "warning",
                             solidHeader = TRUE,
                             collapsible = TRUE,
                             width = 12,
+                            status = "success",
+                            
                        tabBox(
                            # title = "Demographic Analysis",
                            id = "preTabViz",    
@@ -271,7 +272,7 @@ ui <- dashboardPage(
                         collapsible = TRUE,
                         collapsed = TRUE,
                         width = 12,
-                        status = "success",
+                        status = "danger",
         
                         DT::DTOutput("preCleanedData", height = 300)
                         )
@@ -284,7 +285,7 @@ ui <- dashboardPage(
             column(12,
                    conditionalPanel("input.sidebar == 'postEvent'",
                                     box(title = "Data",
-                                        status = "danger",
+                                        status = "primary",
                                         solidHeader = TRUE,
                                         collapsible = TRUE,
                                         collapsed = TRUE,
