@@ -296,3 +296,66 @@ map_0_var <- function(df){
                                           sep = ""), clusterOptions = markerClusterOptions)
   m
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+map_kpi <- function(df, kpi){
+  postcodes_loc <- read_csv("australian_postcodes.csv")
+  df$postcode_event = as.character(df$postcode_event)
+  df$`...1` = seq(nrow(df)) 
+  df_joined <- left_join(df, postcodes_loc, by = c("postcode_event" = "postcode"))
+  df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
+  
+  if (kpi == "action"){
+    kpi_col = "action_kpi"
+  }
+  if (kpi == "community"){
+    kpi_col = "community_kpi"
+  }
+  if (kpi == "learning"){
+    kpi_col = "learning_kpi"
+  }
+  
+  df_joined <- df_joined %>% dplyr::group_by(postcode_event, lat, long, locality) %>%
+    dplyr::summarise(
+      vis_kpi = mean(get(kpi_col)),
+      count = n()
+    )
+  
+  # Colour Palette
+  pal <- colorNumeric("viridis", df_joined$vis_kpi, n = 5)
+  
+  # Rescaling count column to 0-50
+  df_joined$count_scaled <- df_joined$count %>% scale(center = FALSE, scale = max(df_joined$count, na.rm = TRUE)/50)
+  
+  # Map
+  m <- leaflet(df_joined) %>%
+    addTiles() %>%
+    addCircleMarkers(~long, ~lat, 
+                     popup = paste("Location: ", df_joined$locality %>% str_to_title(),
+                                   "<br>", "Average KPI: ", round(df_joined$vis_kpi, 2),
+                                   "<br>", "Number of Participants: ", df_joined$count, sep = ""),
+                     color = ~pal(vis_kpi), fillOpacity = 0.5,
+                     radius = ~count_scaled
+    ) %>%
+    addLegend(pal = pal, values = ~vis_kpi, opacity = 1.0,
+              title = paste((kpi_col %>% str_split("_"))[[1]][1] %>% str_to_title(), 'KPI'),
+              labFormat = labelFormat(transform = function(x) round(x, 2)))
+  m
+}

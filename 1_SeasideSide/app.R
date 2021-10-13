@@ -241,7 +241,7 @@ ui <- dashboardPage(
                                                 plotly::plotlyOutput("postViz", height = 400)
                                        ),
                                        tabPanel("Spatial Visualisation", "", value = 2,
-                                                leaflet::renderLeaflet("postVizMap")
+                                                leaflet::leafletOutput("postVizMap")
                                        )
                                    )
                   ),
@@ -256,7 +256,7 @@ ui <- dashboardPage(
                                                 plotly::plotlyOutput("stratifiedAnalysisViz", height = 400)
                                        ),
                                        tabPanel("Spatial Visualisation", "", value = 2,
-                                                leaflet::renderLeaflet("stratifiedAnalysisVizMap")
+                                                leaflet::leafletOutput("stratifiedAnalysisVizMap")
                                        )
                                    )
                   )
@@ -613,14 +613,16 @@ server <- function(input, output, session) {
     })
     
     output$postVizMap = leaflet::renderLeaflet({
-        
-        data = preEventData()
+        # browser()
+        data = postEventData()
         # if (input$preMapAnalysisType == "Participants"){
         #     map_one_variable(data, input$preVar1)            
         # }else{
         #     data %>% dplyr::select(-postcode) %>% dplyr::rename(postcode = "postcode_event") %>% 
         #         map_one_variable(input$preVar1) 
         # }
+        kpi = str_to_lower(input$postEventKPI)
+        map_kpi(data, kpi)
         
         
         
