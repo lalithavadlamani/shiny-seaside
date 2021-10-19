@@ -181,11 +181,31 @@ ui <- dashboardPage(
                         
                         # Post
                         conditionalPanel("input.sidebar == 'postEvent'",
-                                         radioGroupButtons(
-                                             inputId = "postEventKPI",
-                                             label = "KPI:", 
-                                             choices = c("Action","Learning", "Community")
+                                         
+                                         conditionalPanel("input.postTabViz == 2",
+                                             radioGroupButtons(
+                                                 inputId = "postEventKPI",
+                                                 label = "KPI:", 
+                                                 choices = c("Action","Learning", "Community")
+                                             )
                                          ),
+                                         conditionalPanel("input.postTabViz == 1",
+                                                          prettySwitch("advancedPostOptions", "More Plotting Options?", slim = TRUE)
+                                         ),
+                                         conditionalPanel("input.advancedPostOptions == 1",
+                                                          checkboxGroupButtons("postPlotOptions",
+                                                                               "Plotting Options (Optional)", 
+                                                                               choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
+                                                                               selected = NULL),
+                                                          
+                                                          textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
+                                                          textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                                          textInput("postYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                         ),
+                                         
+                                         
+                                         
+                                         
                                          downloadButton('downloadPostEvent',"Download the data")
                                          
                         ),
@@ -242,7 +262,7 @@ ui <- dashboardPage(
                                                 plotly::plotlyOutput("postViz", height = 400)
                                        ),
                                        tabPanel("Spatial Visualisation", "", value = 2,
-                                                leaflet::renderLeaflet("postVizMap")
+                                                leaflet::leafletOutput("postVizMap")
                                        )
                                    )
                   ),
@@ -257,7 +277,7 @@ ui <- dashboardPage(
                                                 plotly::plotlyOutput("stratifiedAnalysisViz", height = 400)
                                        ),
                                        tabPanel("Spatial Visualisation", "", value = 2,
-                                                leaflet::renderLeaflet("stratifiedAnalysisVizMap")
+                                                leaflet::leafletOutput("stratifiedAnalysisVizMap")
                                        )
                                    )
                   )
@@ -423,7 +443,7 @@ server <- function(input, output, session) {
     preEventData = reactive({
         
         validate(
-            need(input$sheet, "Select file please/File is being loaded from the drive.")
+            need(input$sheet, "Please select file/File is being loaded from the drive.")
         )
         
         if (input$analysisType == "Event"){
@@ -529,7 +549,7 @@ server <- function(input, output, session) {
     
     postEventData = reactive({
         validate(
-            need(input$sheet, "Select file please/File is being loaded from the drive.")
+            need(input$sheet, "Please select file/File is being loaded from the drive.")
         )
 
         if (input$analysisType == "Event"){
@@ -578,35 +598,67 @@ server <- function(input, output, session) {
     
     
     
-    
+    ## Pre-event Advanced Options - Labelling
+    observeEvent(c(input$postPlotOptions, input$analysisType),{
+        
+        if (input$analysisType == "Event"){
+            title = paste("KPI","Barplot") 
+            xaxis = "KPI" 
+            yaxis = "Number of Responses"
+        }else{
+            title = paste("Yearly KPI Scores")
+            xaxis = "Year"
+            yaxis = "KPI"
+        }
+        
+        updateTextInput(session,
+                        "postTitle", 
+                        value = title
+        )
+        
+        updateTextInput(session,
+                        "postXaxis", 
+                        value = xaxis
+        )
+        
+        updateTextInput(session,
+                        "postYaxis", 
+                        value =  yaxis
+        )
+    }
+    )
     
     
     output$postViz = renderPlotly({
         
         data = postEventData()
-        data = data %>% dplyr::select(action_kpi, learning_kpi, community_kpi, year) %>% mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year() )
+        data = data %>% 
+            dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>% 
+            mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+
         if (input$analysisType %in% c("Location", "Yearly")){
-            data = data %>% group_by(year) %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
-            g = data %>% ggplot(aes(x = year, y = score, colour = KPI )) + geom_line() + geom_point() +
-                scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) + theme_minimal()
+            # data = data %>% group_by(year) %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
+            # g = data %>% ggplot(aes(x = year, y = score, colour = KPI )) + geom_line() + geom_point() +
+            #     scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) + theme_minimal()
+            g = postEventYearPlot(data)
             
         }else{
             data = data %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
             g = data %>% ggplot(aes(x = KPI, score )) + geom_bar(stat = "identity", fill = "skyblue") + theme_minimal()
         }
         
-        # if (input$advancedPostOptions == TRUE){
-        #     if (!is.null(input$preTitle)){
-        #         g = g + ggtitle(input$postTitle)  
-        #     }
-        #     if (!is.null(input$preXaxis)){
-        #         g = g + xlab(input$postXaxis) 
-        #     }
-        #     if (!is.null(input$preYaxis)){
-        #         g = g + ylab(input$postYaxis) 
-        #     }
-        #     
-        # }
+        if (input$advancedPostOptions == TRUE){
+            if (!is.null(input$preTitle)){
+                g = g + ggtitle(input$postTitle)
+            }
+            if (!is.null(input$preXaxis)){
+                g = g + xlab(input$postXaxis)
+            }
+            if (!is.null(input$preYaxis)){
+                g = g + ylab(input$postYaxis)
+            }
+
+        }
         ggplotly(g)
         
         
@@ -614,14 +666,16 @@ server <- function(input, output, session) {
     })
     
     output$postVizMap = leaflet::renderLeaflet({
-        
-        data = preEventData()
+        # browser()
+        data = postEventData()
         # if (input$preMapAnalysisType == "Participants"){
         #     map_one_variable(data, input$preVar1)            
         # }else{
         #     data %>% dplyr::select(-postcode) %>% dplyr::rename(postcode = "postcode_event") %>% 
         #         map_one_variable(input$preVar1) 
         # }
+        kpi = str_to_lower(input$postEventKPI)
+        map_kpi(data, kpi)
         
         
         
