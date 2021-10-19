@@ -311,7 +311,7 @@ map_0_var <- function(df){
 
 
 
-
+# Post
 
 
 
@@ -359,3 +359,39 @@ map_kpi <- function(df, kpi){
               labFormat = labelFormat(transform = function(x) round(x, 2)))
   m
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Yearly KPI
+
+postEventYearPlot <- function(data){
+  data = data %>% group_by(year) %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
+  df = data %>% gather(-year, key = "KPI", value = "score") 
+  
+  plot <- data %>% ggplot(aes(x = year, y = score, colour = KPI )) + 
+    geom_point(color='black') + 
+    geom_line() + 
+    xlab('Year') + 
+    ylab('KPI Score') +
+    scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
+    # scale_y_continuous(limits=c(0,1),breaks = seq(0, 1, by = 0.1)) +
+    ggtitle("Yearly KPI Scores") +
+    guides(color = guide_legend(title = "KPI")) + 
+    theme_classic()
+  
+  return(plot)
+}
+
+
+
+
