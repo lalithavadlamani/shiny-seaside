@@ -413,7 +413,7 @@ PostEventPlot <- function(df ,additional = c("horizontal", "numeric_text")) {
   }
   
   if("numeric_text" %in% additional){
-    g = g + geom_text(aes(label=scores), position = position_stack(vjust = 0.5), size = 5) 
+    g = g + geom_text(aes(label=score), position = position_stack(vjust = 0.5), size = 5) 
   }
   
   g
