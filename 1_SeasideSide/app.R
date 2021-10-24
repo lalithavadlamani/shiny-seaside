@@ -68,6 +68,7 @@ ui <- dashboardPage(
     # Sidebar Menu
     dashboardSidebar( 
         sidebarMenu(id = "sidebar",
+        menuItem("Home", tabName = "home", icon = icon("home")),
         menuItem("Pre-event", tabName = "preEvent", icon = icon("chart-bar")),
         menuItem("Post-event", tabName = "postEvent", icon = icon("seedling")),
         menuItem("Stratified-Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
@@ -110,6 +111,9 @@ ui <- dashboardPage(
             
             # Panel 1 sidebar
             column(4,
+                                    
+               conditionalPanel("input.sidebar != 'home'",
+                                    
                 box(
                     status = "warning", 
                     solidHeader = TRUE,
@@ -177,7 +181,8 @@ ui <- dashboardPage(
                             
 
                                 
-                        ),
+                        )
+                    ),
                         
                         # Post
                         conditionalPanel("input.sidebar == 'postEvent'",
@@ -227,8 +232,20 @@ ui <- dashboardPage(
                 )
             ),
             
-            
+            conditionalPanel("input.sidebar == 'home'",
+                 box(
+                     status = "warning", 
+                     solidHeader = TRUE,
+                     collapsible = TRUE,
+                     title = "Helpful Demo Videos",
+                     width = 12,
+                     HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
+                     HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                     
+                 )
+            ),  
             column(8,
+
                    # Panel 1 Viz
                    conditionalPanel("input.sidebar == 'preEvent'",
                         box(
@@ -256,8 +273,13 @@ ui <- dashboardPage(
                    
                    # Panel 2
                   conditionalPanel("input.sidebar == 'postEvent'",
+                       box(
+                           title = "KPI Analysis",
+                           solidHeader = TRUE,
+                           collapsible = TRUE,
+                           width = 12,
+                           status = "success",
                                    tabBox(
-                                       title = "KPI Analysis",
                                        id = "postTabViz",    
                                        width = 12,
                                        tabPanel("Main Analysis", "",value = 1,
@@ -267,12 +289,18 @@ ui <- dashboardPage(
                                                 leaflet::leafletOutput("postVizMap")
                                        )
                                    )
+                       )
                   ),
                   
                   # Panel 3
                   conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                       box(
+                           title = "Stratified Analysis",
+                           solidHeader = TRUE,
+                           collapsible = TRUE,
+                           width = 12,
+                           status = "success",
                                    tabBox(
-                                       title = "KPI Analysis",
                                        id = "stratifiedAnalysisTabViz",    
                                        width = 12,
                                        tabPanel("Main Analysis", "",value = 1,
@@ -282,7 +310,22 @@ ui <- dashboardPage(
                                                 leaflet::leafletOutput("stratifiedAnalysisVizMap")
                                        )
                                    )
-                  )
+                       )
+                  ),
+                  # Panel 4
+                  conditionalPanel("input.sidebar == 'report'",
+                                   box(title = "Download Report",
+                                       solidHeader = TRUE,
+                                       collapsible = TRUE,
+                                       collapsed = FALSE,
+                                       width = 12,
+                                       status = "success",
+                                       ## DOESN'T DOWNLOAD ANYTHING
+                                       downloadButton(outputId = "downloadData",
+                                                      label ="Download Output",
+                                                      icon = shiny::icon("download")))
+                                   )
+                  
                   
             ),
             
