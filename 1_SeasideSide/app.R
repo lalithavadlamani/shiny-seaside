@@ -149,7 +149,7 @@ ui <- dashboardPage(
                                 prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE)
                             ),
                             
-                            conditionalPanel("input.advancedPreOptions == 1",
+                            conditionalPanel("input.advancedPreOptions == 1 & input.preTabViz == 1",
                              #selectizeInput
                                 checkboxGroupButtons("prePlotOptions",
                                                "Plotting Options (Optional)", 
@@ -193,10 +193,12 @@ ui <- dashboardPage(
                                                           prettySwitch("advancedPostOptions", "More Plotting Options?", slim = TRUE)
                                          ),
                                          conditionalPanel("input.advancedPostOptions == 1",
-                                                          checkboxGroupButtons("postPlotOptions",
-                                                                               "Plotting Options (Optional)", 
-                                                                               choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
-                                                                               selected = NULL),
+                                                          conditionalPanel("input.analysisType == 'Event'",
+                                                              checkboxGroupButtons("postPlotOptions",
+                                                                                   "Plotting Options (Optional)", 
+                                                                                   choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
+                                                                                   selected = NULL)
+                                                          ),
                                                           
                                                           textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
                                                           textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
@@ -643,8 +645,10 @@ server <- function(input, output, session) {
             g = postEventYearPlot(data)
             
         }else{
+            additional = input$postPlotOptions
             data = data %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
-            g = data %>% ggplot(aes(x = KPI, score )) + geom_bar(stat = "identity", fill = "skyblue") + theme_minimal()
+            # g = data %>% ggplot(aes(x = KPI, score )) + geom_bar(stat = "identity", fill = "skyblue") + theme_minimal()
+            g = PostEventPlot(df = data, additional = additional)
         }
         
         if (input$advancedPostOptions == TRUE){
