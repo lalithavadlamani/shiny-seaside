@@ -666,8 +666,10 @@ server <- function(input, output, session) {
     })
     
     output$postVizMap = leaflet::renderLeaflet({
+
         # browser()
         data = postEventData()
+
         # if (input$preMapAnalysisType == "Participants"){
         #     map_one_variable(data, input$preVar1)            
         # }else{
