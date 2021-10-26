@@ -42,17 +42,6 @@ ui <- dashboardPage(
     # Application title
     dashboardHeader(title = "Seashine",
 
-        # Google Drive Dropdown Box
-        dropdownMenu(
-            type = "notifications",
-            headerText = strong("QUICK TIPS"),
-            icon = icon("question"),
-            badgeStatus = NULL,
-            notificationItem(
-                text = "Some quick tips about the specific page you are on",
-                icon = icon("lightbulb")
-            )
-        ),
         # Quick Tips Dropdown Box
         dropdownMenu(
             type = "notifications",
@@ -60,7 +49,7 @@ ui <- dashboardPage(
             icon = icon("question"),
             badgeStatus = NULL,
             notificationItem(
-                text = "Some quick tips about the specific page you are on",
+                text = textOutput("tips"),
                 icon = icon("lightbulb")
             )
         )             
@@ -177,7 +166,7 @@ ui <- dashboardPage(
                                              )
                             ),
                             
-                            downloadButton('downloadPreEvent',"Download the data"),
+                            downloadLink('downloadPreEvent',"Download the data"),
                             
                             
 
@@ -331,9 +320,9 @@ ui <- dashboardPage(
                                        width = 12,
                                        status = "success",
                                        ## DOESN'T DOWNLOAD ANYTHING
-                                       downloadButton(outputId = "downloadData",
-                                                      label ="Download Output",
-                                                      icon = shiny::icon("download")))
+                                       downloadButton("downloadData",
+                                                      "Download Output"
+                                                      ))
                                    )
                   
                   
@@ -782,9 +771,30 @@ server <- function(input, output, session) {
 
     })
     
+    p1 = reactive({
+        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+
+    })
+    
+    p2 = reactive({
+        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    })
+    
+    p3 = reactive({
+        PreEventPlot(preEventData(),varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+
+    })
+    
+    p4 = reactive({
+        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+
+    })
+
+    
     output$downloadData <- downloadHandler(
         # For PDF output, change this to "report.pdf"
         filename = "report.html",
+        
         content = function(file) {
             # Copy the report file to a temporary directory before processing it, in
             # case we don't have write permissions to the current working dir (which
@@ -794,19 +804,15 @@ server <- function(input, output, session) {
             
             # Set up parameters to pass to Rmd document
             
+            id <- showNotification(
+                "Rendering report...", 
+                duration = NULL, 
+                closeButton = FALSE
+            )
+            on.exit(removeNotification(id), add = TRUE)
             
-            if (!is.null(spicyTest1())){
-                params = list(v1 = p1(), v3 = p3())
-                
-                if (input$specific_interactions == FALSE){
-                    params$v2 = p2() 
-                    params$v4 = p4() 
-                }else{
-                    params$v2 = NA
-                    params$v4 =  NA
-                }
-                
-            }
+            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
+
             # Knit the document, passing in the params list, and eval it in a
             # child of the global environment (this isolates the code in the document
             # from the code in this app).
