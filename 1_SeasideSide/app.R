@@ -72,7 +72,7 @@ ui <- dashboardPage(
         menuItem("Home", tabName = "home", icon = icon("home")),
         menuItem("Pre-event", tabName = "preEvent", icon = icon("chart-bar")),
         menuItem("Post-event", tabName = "postEvent", icon = icon("seedling")),
-        menuItem("Stratified-Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
+        menuItem("Combined Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
         menuItem("Report", tabName = "report", icon = icon("file-invoice"))
         
         )
@@ -347,7 +347,7 @@ ui <- dashboardPage(
                         collapsible = TRUE,
                         collapsed = TRUE,
                         width = 12,
-                        status = "danger",
+                        status = "primary",
         
                         DT::DTOutput("preCleanedData", height = 300)
                         )
@@ -376,7 +376,7 @@ ui <- dashboardPage(
             column(12,
                    conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
                                     box(title = "Data",
-                                        status = "danger",
+                                        status = "primary",
                                         solidHeader = TRUE,
                                         collapsible = TRUE,
                                         collapsed = TRUE,
@@ -782,6 +782,40 @@ server <- function(input, output, session) {
 
     })
     
+    output$downloadData <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
+        filename = "report.html",
+        content = function(file) {
+            # Copy the report file to a temporary directory before processing it, in
+            # case we don't have write permissions to the current working dir (which
+            # can happen when deployed).
+            tempReport <- file.path(tempdir(), "report.Rmd")
+            file.copy("report.Rmd", tempReport, overwrite = TRUE)
+            
+            # Set up parameters to pass to Rmd document
+            
+            
+            if (!is.null(spicyTest1())){
+                params = list(v1 = p1(), v3 = p3())
+                
+                if (input$specific_interactions == FALSE){
+                    params$v2 = p2() 
+                    params$v4 = p4() 
+                }else{
+                    params$v2 = NA
+                    params$v4 =  NA
+                }
+                
+            }
+            # Knit the document, passing in the params list, and eval it in a
+            # child of the global environment (this isolates the code in the document
+            # from the code in this app).
+            rmarkdown::render(tempReport, output_file = file,
+                              params = params,
+                              envir = new.env(parent = globalenv())
+            )
+        }
+    )
     
     output$stratifiedViz = renderPlotly({
         # browser()
