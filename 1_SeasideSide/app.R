@@ -10,6 +10,7 @@ library(dashboardthemes)
 library(googlesheets4)
 library(googledrive)
 library(readr)
+library(sortable)
 
 source("filename_cleaning.R")
 source("preEventCleaning.R")
@@ -153,7 +154,7 @@ ui <- dashboardPage(
                                 prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE)
                             ),
                             
-                            conditionalPanel("input.advancedPreOptions == 1",
+                            conditionalPanel("input.advancedPreOptions == 1 & input.preTabViz == 1",
                              #selectizeInput
                                 checkboxGroupButtons("prePlotOptions",
                                                "Plotting Options (Optional)", 
@@ -198,10 +199,12 @@ ui <- dashboardPage(
                                                           prettySwitch("advancedPostOptions", "More Plotting Options?", slim = TRUE)
                                          ),
                                          conditionalPanel("input.advancedPostOptions == 1",
-                                                          checkboxGroupButtons("postPlotOptions",
-                                                                               "Plotting Options (Optional)", 
-                                                                               choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
-                                                                               selected = NULL),
+                                                          conditionalPanel("input.analysisType == 'Event'",
+                                                              checkboxGroupButtons("postPlotOptions",
+                                                                                   "Plotting Options (Optional)", 
+                                                                                   choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
+                                                                                   selected = NULL)
+                                                          ),
                                                           
                                                           textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
                                                           textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
@@ -222,6 +225,15 @@ ui <- dashboardPage(
                                              label = "KPI:", 
                                              choices = c("Action","Learning", "Community")
                                          ),
+                                         selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars)),
+                                         selectizeInput(
+                                             "filteringVariable", "Variable to filter by:", choices = c("None",preVars)
+                                         ),
+                                         tabItem(tabName = "drag",
+                                                 uiOutput("bucket")
+                                         ),
+                                         
+
                                          downloadButton('downloadStratifiedEventKPIEvent',"Download the data")
                                          
                         )
@@ -302,10 +314,10 @@ ui <- dashboardPage(
                                        id = "stratifiedAnalysisTabViz",    
                                        width = 12,
                                        tabPanel("Main Analysis", "",value = 1,
-                                                plotly::plotlyOutput("stratifiedAnalysisViz", height = 400)
+                                                plotly::plotlyOutput("stratifiedViz", height = 400)
                                        ),
                                        tabPanel("Spatial Visualisation", "", value = 2,
-                                                leaflet::leafletOutput("stratifiedAnalysisVizMap")
+                                                leaflet::leafletOutput("stratifiedVizMap")
                                        )
                                    )
                        )
@@ -686,8 +698,10 @@ server <- function(input, output, session) {
             g = postEventYearPlot(data)
             
         }else{
+            additional = input$postPlotOptions
             data = data %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
-            g = data %>% ggplot(aes(x = KPI, score )) + geom_bar(stat = "identity", fill = "skyblue") + theme_minimal()
+            # g = data %>% ggplot(aes(x = KPI, score )) + geom_bar(stat = "identity", fill = "skyblue") + theme_minimal()
+            g = PostEventPlot(df = data, additional = additional)
         }
         
         if (input$advancedPostOptions == TRUE){
@@ -709,8 +723,10 @@ server <- function(input, output, session) {
     })
     
     output$postVizMap = leaflet::renderLeaflet({
+
         # browser()
         data = postEventData()
+
         # if (input$preMapAnalysisType == "Participants"){
         #     map_one_variable(data, input$preVar1)            
         # }else{
@@ -727,6 +743,61 @@ server <- function(input, output, session) {
     
     
     
+    
+    # Stratified tab
+    
+    stratifiedData = reactive({
+        preEventData() %>% inner_join(postEventData() %>% select(-year, -postcode_event) %>% dplyr::rename(email = "email address"), by = c("email", "location"))
+        })
+    
+
+    output$stratifiedAnalysisCleanedData = renderDT({
+        datatable(
+            stratifiedData(),
+            options = list(pageLength=10, scrollX='400px')
+        )
+    })
+
+    
+    output$bucket <- renderUI({
+
+        if (input$filteringVariable == "None"){
+            NULL
+        } else{
+            fv = input$filteringVariable
+            filterVars = stratifiedData() %>% dplyr::rename(var1 = fv) %>% pull(var1) %>% unique()
+            bucket_list(
+                header = "Please drag away the columns you don't want in the KPI calculation:",
+                group_name = "bucket_list_group",
+                orientation = "horizontal",
+                add_rank_list(text = "Not Filtered Categories",
+                              labels = filterVars, input_id = "nonFiltered"),
+                add_rank_list(text = "Filtered Categores",
+                              labels = NULL,
+                              input_id = "bucket2")
+            )  
+        }
+        
+
+
+    })
+    
+    
+    output$stratifiedViz = renderPlotly({
+        # browser()
+        if (input$filteringVariable == "None"){
+            data = stratifiedData()
+            # g = ggplot(data, aes_string(x = stratifiedEventKPI)) + geom_bar()
+        }else{
+            fv = input$filteringVariable
+            data = stratifiedData() %>%
+                dplyr::rename(var1 = input$filteringVariable) %>%
+                filter(var1 %in% input$nonFiltered) %>%
+                dplyr::rename_with(~ fv, all_of("var1")) 
+        }
+
+        # ggplotly(g)
+    })
     
     
     

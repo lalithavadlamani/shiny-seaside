@@ -321,8 +321,9 @@ map_kpi <- function(df, kpi){
   df$`...1` = seq(nrow(df))
   df_joined <- left_join(df, postcodes_loc, by = c("postcode_event" = "postcode"))
   df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
-  df_joined <- df_joined %>%
-    dplyr::rename(action_kpi = action_summary)
+  df_joined <- df_joined 
+  # %>%
+  #   dplyr::rename(action_kpi = action_summary)
 
   if (kpi == "action"){
     kpi_col = "action_kpi"
@@ -393,3 +394,31 @@ postEventYearPlot <- function(data){
 
   return(plot)
 }
+
+
+# Postevent barplot
+
+# c("horizontal", "numeric_text")
+PostEventPlot <- function(df ,additional = c("horizontal", "numeric_text")) {
+  
+  g <- df %>% ggplot() + aes(x=KPI, y = score) + 
+    geom_bar(stat='identity', fill="skyblue") + 
+    ggtitle("KPI Scores") + 
+    theme_minimal() + 
+    xlab("KPI") + 
+    ylab("Score")
+  
+  if("horizontal" %in% additional){
+    g = g + coord_flip()
+    
+  }
+  
+  if("numeric_text" %in% additional){
+    g = g + geom_text(aes(label=score), position = position_stack(vjust = 0.5), size = 5) 
+  }
+  
+  g
+}
+
+PostEventPlot(df, additional = c("horizontal", "text"))
+
