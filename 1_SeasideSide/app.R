@@ -206,10 +206,13 @@ ui <- dashboardPage(
                                                                                    selected = NULL)
                                                           ),
                                                           
-                                                          textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
-                                                          textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
-                                                          textInput("postYaxis", "Choose y-axis label", value = NULL,width = NULL)
-                                         ),
+                                                          
+                                                          conditionalPanel("input.postTabViz == 1",
+                                                              textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
+                                                              textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                                              textInput("postYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                                          )
+                                             ),
                                          
                                          
                                          
@@ -225,7 +228,9 @@ ui <- dashboardPage(
                                              label = "KPI:", 
                                              choices = c("Action","Learning", "Community")
                                          ),
-                                         selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars)),
+                                         conditionalPanel("input.stratifiedAnalysisTabViz == 1",
+                                             selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
+                                         ),
                                          selectizeInput(
                                              "filteringVariable", "Variable to filter by:", choices = c("None",preVars)
                                          ),
@@ -784,19 +789,15 @@ server <- function(input, output, session) {
     
     
     output$stratifiedViz = renderPlotly({
-        # browser()
         if (input$filteringVariable == "None"){
-            data = stratifiedData()
-            # g = ggplot(data, aes_string(x = stratifiedEventKPI)) + geom_bar()
+           data = stratifiedData()
         }else{
-            fv = input$filteringVariable
-            data = stratifiedData() %>%
-                dplyr::rename(var1 = input$filteringVariable) %>%
-                filter(var1 %in% input$nonFiltered) %>%
-                dplyr::rename_with(~ fv, all_of("var1")) 
+           data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
         }
 
-        # ggplotly(g)
+        ggplotly(g)
+        
+        
     })
     
     
