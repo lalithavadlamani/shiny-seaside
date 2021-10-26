@@ -321,8 +321,9 @@ map_kpi <- function(df, kpi){
   df$`...1` = seq(nrow(df))
   df_joined <- left_join(df, postcodes_loc, by = c("postcode_event" = "postcode"))
   df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
-  df_joined <- df_joined %>%
-    dplyr::rename(action_kpi = action_summary)
+  df_joined <- df_joined 
+  # %>%
+  #   dplyr::rename(action_kpi = action_summary)
 
   if (kpi == "action"){
     kpi_col = "action_kpi"
