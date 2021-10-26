@@ -2,8 +2,8 @@ require(stringr)
 require(tidyverse)
 
 # Example input
-test_input = c("Bondi Junction_2026_03.02.2021_Pre_Participants", "Turramurra_2026_04.01.2020_Pre_Participants",
-               "Camperdown_2026_04.01.2020_Pre_Participants", "Lithgow_2026_04.01.2019_Pre_Participants")
+#test_input = c("Bondi Junction_2026_03.02.2021_Pre_Participants", "Turramurra_2026_04.01.2020_Pre_Participants",
+#               "Camperdown_2026_04.01.2020_Pre_Participants", "Lithgow_2026_04.01.2019_Pre_Participants")
 
 setClass(Class="NameData", slots = c(locations = "character", 
                                      dates = "character", 
@@ -14,7 +14,7 @@ setClass(Class="NameData", slots = c(locations = "character",
 # Input: files$name from google drive
 # Output: Class with list of values
 
-name_processing <- function(files) {
+name_processing_to_class <- function(files) {
   
   # Initialisng lists
   locations = vector()
@@ -38,7 +38,7 @@ name_processing <- function(files) {
              event_type = event_type))
 }
 
-name_data <- name_processing(test_input)
+#name_data <- name_processing(test_input)
 
 # Function: Extracts values from file name into a DF
 
@@ -63,7 +63,7 @@ name_processing <- function(files) {
   return(df)
 }
 
-df <- name_processing(test_input)
+#df <- name_processing(test_input)
 
 # Function: Takes in filter values and outputs the names of the files
 # Use optional arguments
@@ -86,15 +86,15 @@ filter_data <- function(df, location_filter = vector(), year_filter = vector(),
 
 # Examples
 
-filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"))
-filter_df
-
-filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"),
-                         year_filter = c("2021", "2020"))
-filter_df
-
-filter_df <- filter_data(df, year_filter = c("2020"))
-filter_df$file_name
+#filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"))
+#filter_df
+#
+#filter_df <- filter_data(df, location_filter = c("Lithgow", "Camperdown"),
+#                         year_filter = c("2021", "2020"))
+#filter_df
+#
+#filter_df <- filter_data(df, year_filter = c("2020"))
+#filter_df$file_name
   
 
 
