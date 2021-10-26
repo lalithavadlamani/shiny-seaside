@@ -393,3 +393,31 @@ postEventYearPlot <- function(data){
 
   return(plot)
 }
+
+
+# Postevent barplot
+
+# c("horizontal", "numeric_text")
+PostEventPlot <- function(df ,additional = c("horizontal", "numeric_text")) {
+  
+  g <- df %>% ggplot() + aes(x=KPI, y = score) + 
+    geom_bar(stat='identity', fill="skyblue") + 
+    ggtitle("KPI Scores") + 
+    theme_minimal() + 
+    xlab("KPI") + 
+    ylab("Score")
+  
+  if("horizontal" %in% additional){
+    g = g + coord_flip()
+    
+  }
+  
+  if("numeric_text" %in% additional){
+    g = g + geom_text(aes(label=score), position = position_stack(vjust = 0.5), size = 5) 
+  }
+  
+  g
+}
+
+PostEventPlot(df, additional = c("horizontal", "text"))
+
