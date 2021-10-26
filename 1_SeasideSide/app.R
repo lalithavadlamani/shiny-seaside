@@ -42,17 +42,6 @@ ui <- dashboardPage(
     # Application title
     dashboardHeader(title = "Seashine",
 
-        # Google Drive Dropdown Box
-        dropdownMenu(
-            type = "notifications",
-            headerText = strong("QUICK TIPS"),
-            icon = icon("question"),
-            badgeStatus = NULL,
-            notificationItem(
-                text = "Some quick tips about the specific page you are on",
-                icon = icon("lightbulb")
-            )
-        ),
         # Quick Tips Dropdown Box
         dropdownMenu(
             type = "notifications",
@@ -60,7 +49,7 @@ ui <- dashboardPage(
             icon = icon("question"),
             badgeStatus = NULL,
             notificationItem(
-                text = "Some quick tips about the specific page you are on",
+                text = textOutput("tips"),
                 icon = icon("lightbulb")
             )
         )             
@@ -72,7 +61,7 @@ ui <- dashboardPage(
         menuItem("Home", tabName = "home", icon = icon("home")),
         menuItem("Pre-event", tabName = "preEvent", icon = icon("chart-bar")),
         menuItem("Post-event", tabName = "postEvent", icon = icon("seedling")),
-        menuItem("Stratified-Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
+        menuItem("Combined Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
         menuItem("Report", tabName = "report", icon = icon("file-invoice"))
         
         )
@@ -177,7 +166,7 @@ ui <- dashboardPage(
                                              )
                             ),
                             
-                            downloadButton('downloadPreEvent',"Download the data"),
+                            downloadLink('downloadPreEvent',"Download the data"),
                             
                             
 
@@ -310,7 +299,7 @@ ui <- dashboardPage(
                   # Panel 3
                   conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
                        box(
-                           title = "Stratified Analysis",
+                           title = "Combined Analysis",
                            solidHeader = TRUE,
                            collapsible = TRUE,
                            width = 12,
@@ -336,9 +325,9 @@ ui <- dashboardPage(
                                        width = 12,
                                        status = "success",
                                        ## DOESN'T DOWNLOAD ANYTHING
-                                       downloadButton(outputId = "downloadData",
-                                                      label ="Download Output",
-                                                      icon = shiny::icon("download")))
+                                       downloadButton("downloadData",
+                                                      "Download Output"
+                                                      ))
                                    )
                   
                   
@@ -352,7 +341,7 @@ ui <- dashboardPage(
                         collapsible = TRUE,
                         collapsed = TRUE,
                         width = 12,
-                        status = "danger",
+                        status = "primary",
         
                         DT::DTOutput("preCleanedData", height = 300)
                         )
@@ -381,7 +370,7 @@ ui <- dashboardPage(
             column(12,
                    conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
                                     box(title = "Data",
-                                        status = "danger",
+                                        status = "primary",
                                         solidHeader = TRUE,
                                         collapsible = TRUE,
                                         collapsed = TRUE,
@@ -787,6 +776,57 @@ server <- function(input, output, session) {
 
     })
     
+    p1 = reactive({
+        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+
+    })
+    
+    p2 = reactive({
+        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    })
+    
+    p3 = reactive({
+        PreEventPlot(preEventData(),varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+
+    })
+    
+    p4 = reactive({
+        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+
+    })
+
+    
+    output$downloadData <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
+        filename = "report.html",
+        
+        content = function(file) {
+            # Copy the report file to a temporary directory before processing it, in
+            # case we don't have write permissions to the current working dir (which
+            # can happen when deployed).
+            tempReport <- file.path(tempdir(), "report.Rmd")
+            file.copy("report.Rmd", tempReport, overwrite = TRUE)
+            
+            # Set up parameters to pass to Rmd document
+            
+            id <- showNotification(
+                "Rendering report...", 
+                duration = NULL, 
+                closeButton = FALSE
+            )
+            on.exit(removeNotification(id), add = TRUE)
+            
+            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
+
+            # Knit the document, passing in the params list, and eval it in a
+            # child of the global environment (this isolates the code in the document
+            # from the code in this app).
+            rmarkdown::render(tempReport, output_file = file,
+                              params = params,
+                              envir = new.env(parent = globalenv())
+            )
+        }
+    )
     
     output$stratifiedViz = renderPlotly({
         if (input$filteringVariable == "None"){
