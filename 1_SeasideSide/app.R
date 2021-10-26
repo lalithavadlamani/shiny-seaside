@@ -293,7 +293,7 @@ ui <- dashboardPage(
                   # Panel 3
                   conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
                        box(
-                           title = "Stratified Analysis",
+                           title = "Combined Analysis",
                            solidHeader = TRUE,
                            collapsible = TRUE,
                            width = 12,
