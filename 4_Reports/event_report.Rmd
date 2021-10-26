@@ -11,10 +11,23 @@ output:
       highlight: tango
       code_folding: hide
       css: styles.css
+params:
+  v1: NA
+  v2: NA
+  v3: NA
+  v4: NA
+      
 ---
 
 ```{r setup, include=FALSE}
 
+```
+
+```{js logo-js, echo=FALSE}
+$(document).ready(function() {
+  $('#header').parent().prepend('<div id=\"logo\"><img src=\"SS_Logo_Blue.png\" style=\"position:absolute; top:0; right:0; padding:20px; height:120px\"></div>');
+  $('#header').css('margin-right', '120px')
+});
 ```
 
 ## Demographic Summary
@@ -44,4 +57,36 @@ Explanation of how the KPIs are derived here.
 ## Stratified KPI Plots
 
 Dummy Text
+
+### P-value table
+```{r, message = FALSE, warning = FALSE}
+params$v1
+```
+
+
+```{r, message = FALSE, warning = FALSE}
+eqn = params$v3 # paste0("$",params$v3, "$") 
+```
+`r  eqn`
+
+
+### P-Value Histogram
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+if (!is.na(params$v4)){
+  params$v4
+}else{
+  print("Histogram cannot be created when specific interactions are tested")
+}
+```
+
+
+### Spatial interaction heatmap
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+if (!is.na(params$v2)){
+  params$v2
+}else{
+  print("Spatial correlation heatmap cannot be created when specific interactions are tested")
+}
+```
+
 
