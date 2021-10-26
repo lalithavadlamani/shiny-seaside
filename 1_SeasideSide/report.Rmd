@@ -1,0 +1,87 @@
+---
+title: "Spicy report"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+    toc_depth: 3
+    code_folding: hide
+    fig_caption: yes
+    number_sections: no
+    self_contained: yes
+    theme: flatly
+params:
+  v1: NA
+  v2: NA
+  v3: NA
+  v4: NA
+
+---
+
+
+```{r setup, include=FALSE}
+
+```
+
+```{js logo-js, echo=FALSE}
+$(document).ready(function() {
+  $('#header').parent().prepend('<div id=\"logo\"><img src=\"SS_Logo_Blue.png\" style=\"position:absolute; top:0; right:0; padding:20px; height:120px\"></div>');
+  $('#header').css('margin-right', '120px')
+});
+```
+
+```{r}
+library(plotly)
+library(tidyverse)
+```
+
+
+## Demographic Summary
+
+Plots:
+- Age Bar Plot
+- Gender Bar Plot
+- Ethnicity Bar Plot (After changes to pre-event survey)
+- Environmental Habits
+- Map Visualisation
+
+
+```{r, echo=FALSE}
+
+```
+
+## Event KPI Plots
+
+Explanation of how the KPIs are derived here.
+
+
+```{r pressure, echo=FALSE}
+
+```
+
+## Stratified KPI Plots
+
+Dummy Text
+
+
+```{r, message = FALSE, warning = FALSE}
+params$v1 %>% ggplotly()
+```
+
+
+```{r, message = FALSE, warning = FALSE}
+params$v2 %>% ggplotly()
+```
+
+
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+params$v3 %>% ggplotly()
+```
+
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+params$v4 %>% ggplotly()
+```
+
+
