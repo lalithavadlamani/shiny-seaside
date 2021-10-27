@@ -41,18 +41,95 @@ ui <- dashboardPage(
     
     # Application title
     dashboardHeader(title = "Seashine",
-
+                    tags$li(class = "dropdown",
+                            tags$a(href="https://www.seasidescavenge.org/", target="_blank", 
+                                   tags$img(height = "20px", alt="Seaside Logo", src="SS_Logo_Blue.png")
+                            )
+                    ),
         # Quick Tips Dropdown Box
         dropdownMenu(
             type = "notifications",
             headerText = strong("QUICK TIPS"),
             icon = icon("question"),
             badgeStatus = NULL,
-            notificationItem(
-                text = textOutput("tips"),
-                icon = icon("lightbulb")
+            messageItem(
+                from = "HOME",
+                message = tags$div(
+                    "Welcome to the home page! Start",
+                    tags$br(),
+                    "by clicking one of the tabs in the",
+                    tags$br(),
+                    "side menu, or watch the demo ",
+                    tags$br(),
+                    "videos below for more information."),
+                icon = icon("home")
+            ),
+            messageItem(
+                from = "PRE-EVENT",
+                message = tags$div(
+                    "Use the 'controls' box to choose ",
+                    tags$br(),
+                    "between event, yearly, and location",
+                    tags$br(),
+                    " analysis of demographic data for ",
+                    tags$br(),
+                    "the pre-event survey. You can also ",
+                    tags$br(),
+                    "view and download the data used",
+                    tags$br(),
+                    "in the 'data' section."),
+                
+                icon = icon("chart-bar")
+            ),
+            messageItem(
+                from = "POST-EVENT",
+                message = tags$div(
+                    "Use the 'controls' box to choose ",
+                    tags$br(),
+                    "between event, yearly, and location",
+                    tags$br(),
+                    " analysis of KPI data for ",
+                    tags$br(),
+                    "the post-event survey. You can also ",
+                    tags$br(),
+                    "view and download the data used",
+                    tags$br(),
+                    "in the 'data' section."),
+                icon = icon("seedling")
+            ),
+            messageItem(
+                from = "Combined Analysis",
+                message = tags$div(
+                    "Use the 'controls' box to choose ",
+                    tags$br(),
+                    "between event, yearly, and location,",
+                    tags$br(),
+                    "as well as a KPI category to analyse. ",
+                    tags$br(),
+                    "BLAHBBOACASKJDJKSAHDJ. You can also ",
+                    tags$br(),
+                    "view and download the combined data",
+                    tags$br(),
+                    "used in the 'data' section."),
+                icon = icon("project-diagram")
+            ),
+            messageItem(
+                from = "Export Report",
+                message = tags$div(
+                    "Download a report with pre-made",
+                    tags$br(),
+                    "visualisastions of the surveys ",
+                    tags$br(),
+                    "you are looking for. "),
+                icon = icon("file-invoice")
             )
-        )             
+
+            
+            
+            
+        )   
+        
+        
     ),
     
     # Sidebar Menu
@@ -520,12 +597,15 @@ server <- function(input, output, session) {
         processedData = preprocessing_multiple_fn(data, file_names)
         processedData
         })
-
-
-        ## PreEvent Datatable
-
     
-    output$preCleanedData = renderDT({
+    
+    
+    
+    
+    
+        ## PreEvent Datatable
+    
+    output$preCleanedData =  renderDT({
             datatable(
                 preEventData(),
                 options = list(pageLength=10, scrollX='400px')
@@ -827,7 +907,10 @@ server <- function(input, output, session) {
             )
         }
     )
-    
+    output$messageMenu <- renderMenu({
+        dropdownMenu(type = "messages", 
+                     messageItem(from = "HELP", message = "PLEASEs"))
+    })
     output$stratifiedViz = renderPlotly({
         if (input$filteringVariable == "None"){
            data = stratifiedData()
