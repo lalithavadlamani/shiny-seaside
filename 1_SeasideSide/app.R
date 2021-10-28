@@ -297,6 +297,16 @@ ui <- dashboardPage(
                                          conditionalPanel("input.stratifiedAnalysisTabViz == 1",
                                              selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
                                          ),
+                                         
+                                         # For map
+                                         conditionalPanel("input.stratifiedAnalysisTabViz == 2",
+                                                          radioGroupButtons(
+                                                              inputId = "stratifiedMapAnalysisType",
+                                                              label = "Spatial Analysis:", 
+                                                              choices = c("Participants","Event")
+                                                          )
+                                         ),
+                                         
                                          selectizeInput(
                                              "filteringVariable", "Variable to filter by:", choices = c("None",preVars)
                                          ),
@@ -324,6 +334,7 @@ ui <- dashboardPage(
                                                           )
                                          ),
                                          
+
 
                                          downloadButton('downloadStratifiedEventKPIEvent',"Download the data")
                                          
@@ -927,20 +938,24 @@ server <- function(input, output, session) {
     # 
     
     output$stratifiedVizMap = leaflet::renderLeaflet({
+        
         if (input$filteringVariable == "None"){
             data = stratifiedData()
         }else{
             data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
         }
-        # if (input$preMapAnalysisType == "Participants"){
-        #     map_one_variable(data, input$preVar1)            
-        # }else{
-        #     data %>% dplyr::select(-postcode) %>% dplyr::rename(postcode = "postcode_event") %>% 
-        #         map_one_variable(input$preVar1) 
-        # }
         
         kpi = str_to_lower(input$stratifiedEventKPI)
-        map_kpi(data, kpi)
+        if (input$stratifiedMapAnalysisType == "Participants"){
+            # Note: postcode (preEventdata) is switched to postcode_event just for function purposes - this is a little inconsistent with other function and tab
+            data %>% dplyr::select(-postcode_event) %>% dplyr::rename(postcode_event = "postcode") %>%
+                map_kpi(kpi)
+        }else{
+            map_kpi(data, kpi)
+        }
+
+        
+        # map_kpi(data, kpi)
     
         
     })
