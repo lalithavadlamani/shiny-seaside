@@ -1,5 +1,5 @@
 ---
-title: "Spicy report"
+title: "Seaside report"
 output: 
   html_document:
     toc: yes
@@ -69,19 +69,19 @@ params$v1 %>% ggplotly()
 ```
 
 
-```{r, message = FALSE, warning = FALSE}
-params$v2 %>% ggplotly()
-```
+<!-- ```{r, message = FALSE, warning = FALSE} -->
+<!-- params$v2 %>% ggplotly() -->
+<!-- ``` -->
 
 
 
-```{r, message = FALSE, warning = FALSE, echo = TRUE}
-params$v3 %>% ggplotly()
-```
+<!-- ```{r, message = FALSE, warning = FALSE, echo = TRUE} -->
+<!-- params$v3 %>% ggplotly() -->
+<!-- ``` -->
 
 
-```{r, message = FALSE, warning = FALSE, echo = TRUE}
-params$v4 %>% ggplotly()
-```
+<!-- ```{r, message = FALSE, warning = FALSE, echo = TRUE} -->
+<!-- params$v4 %>% ggplotly() -->
+<!-- ``` -->
 
 

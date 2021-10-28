@@ -861,19 +861,19 @@ server <- function(input, output, session) {
 
     })
     
-    p2 = reactive({
-        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-    })
-    
-    p3 = reactive({
-        PreEventPlot(preEventData(),varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-
-    })
-    
-    p4 = reactive({
-        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-
-    })
+    # p2 = reactive({
+    #     PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    # })
+    # 
+    # p3 = reactive({
+    #     PreEventPlot(preEventData(),varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    # 
+    # })
+    # 
+    # p4 = reactive({
+    #     PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    # 
+    # })
 
     
     output$downloadData <- downloadHandler(
@@ -896,8 +896,10 @@ server <- function(input, output, session) {
             )
             on.exit(removeNotification(id), add = TRUE)
             
-            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
-
+            # params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
+            params = list(v1 = p1())
+            
+            
             # Knit the document, passing in the params list, and eval it in a
             # child of the global environment (this isolates the code in the document
             # from the code in this app).
@@ -911,17 +913,36 @@ server <- function(input, output, session) {
         dropdownMenu(type = "messages", 
                      messageItem(from = "HELP", message = "PLEASEs"))
     })
-    output$stratifiedViz = renderPlotly({
+    
+    
+    
+    # output$stratifiedViz = renderPlotly({
+    #     if (input$filteringVariable == "None"){
+    #        data = stratifiedData()
+    #     }else{
+    #        data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
+    #     }
+    # 
+    #     ggplotly(g)
+    #     
+    #     
+    # })
+    
+    
+    output$stratifiedVizMap = leaflet::renderLeaflet({
         if (input$filteringVariable == "None"){
            data = stratifiedData()
         }else{
            data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
         }
 
-        ggplotly(g)
-        
+# 
+#         data = stratifiedData()
+        kpi = str_to_lower(input$stratifiedEventKPI)
+        map_kpi(data, kpi)
         
     })
+    
     
     
     
