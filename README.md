@@ -31,7 +31,7 @@ _Age Range Questions_
 * How many people in the age range(71+) are you signing up for?
 * Have you previously attended an organised clean-up event (hosted by any organisation)?
 
-* On a scale of 1-5 how invested are you in environmental impact?(1 being the least invested)
+* On a scale of 1 to 5, where 1 is not engaged at all and 5 is very engaged, how engaged are you in making changes that positively impact the environment?
 * How did you find out about this event?
 * Are you of Aboriginal or Torres Strait Islander Origin?
 
@@ -42,7 +42,7 @@ _Age Range Questions_
   * Question must also include the total number of options (i.e. Select all **3** that apply)
 * Action KPI questions must be in the format of:
   * Question with sub questions, with the **exact** options of ("Doing before the event", "Started doing after the event", "Likely to do in the next 3 months", "Unlikely to do in the next 3 months")
-* Also the extra question "On a scale of 1-5, how would you rate your environmental habits after the activity?"
+* Also the extra question "On a scale of 1 to 5, where 1 is not engaged at all and 5 is very engaged, how engaged are you in making changes that positively impact the environment?"
 
 * **Note:** With the current post-event survey format, it would be required to insert "action" into each heading of the excel spreadsheet manually, whereas the "learning" and "community" questions already have the headings embedded. 
 
