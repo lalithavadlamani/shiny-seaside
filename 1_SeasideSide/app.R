@@ -297,13 +297,44 @@ ui <- dashboardPage(
                                          conditionalPanel("input.stratifiedAnalysisTabViz == 1",
                                              selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
                                          ),
+                                         
+                                         # For map
+                                         conditionalPanel("input.stratifiedAnalysisTabViz == 2",
+                                                          radioGroupButtons(
+                                                              inputId = "stratifiedMapAnalysisType",
+                                                              label = "Spatial Analysis:", 
+                                                              choices = c("Participants","Event")
+                                                          )
+                                         ),
+                                         
                                          selectizeInput(
                                              "filteringVariable", "Variable to filter by:", choices = c("None",preVars)
                                          ),
                                          tabItem(tabName = "drag",
                                                  uiOutput("bucket")
                                          ),
+                                         conditionalPanel("input.stratifiedAnalysisTabViz == 1",
+                                                          prettySwitch("advancedStratifiedOptions", "More Plotting Options?", slim = TRUE)
+                                         ),
                                          
+                                         conditionalPanel("input.advancedStratifiedOptions == 1",
+                                                          conditionalPanel("input.analysisType == 'Event'",
+                                                                           checkboxGroupButtons("stratifiedPlotOptions",
+                                                                                                "Plotting Options (Optional)", 
+                                                                                                choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
+                                                                                                                "Remove Unknowns" = "missing"), 
+                                                                                                selected = NULL)
+                                                          ),
+                                                          
+                                                          
+                                                          conditionalPanel("input.stratifiedAnalysisTabViz == 1",
+                                                                           textInput("stratifiedTitle", "Choose plot title", value = NULL ,width = NULL),
+                                                                           textInput("stratifiedXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                                                           textInput("stratifiedYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                                          )
+                                         ),
+                                         
+
 
                                          downloadButton('downloadStratifiedEventKPIEvent',"Download the data")
                                          
@@ -779,13 +810,13 @@ server <- function(input, output, session) {
         }
         
         if (input$advancedPostOptions == TRUE){
-            if (!is.null(input$preTitle)){
+            if (!is.null(input$postTitle)){
                 g = g + ggtitle(input$postTitle)
             }
-            if (!is.null(input$preXaxis)){
+            if (!is.null(input$postXaxis)){
                 g = g + xlab(input$postXaxis)
             }
-            if (!is.null(input$preYaxis)){
+            if (!is.null(input$postYaxis)){
                 g = g + ylab(input$postYaxis)
             }
 
@@ -797,16 +828,7 @@ server <- function(input, output, session) {
     })
     
     output$postVizMap = leaflet::renderLeaflet({
-
-        # browser()
         data = postEventData()
-
-        # if (input$preMapAnalysisType == "Participants"){
-        #     map_one_variable(data, input$preVar1)            
-        # }else{
-        #     data %>% dplyr::select(-postcode) %>% dplyr::rename(postcode = "postcode_event") %>% 
-        #         map_one_variable(input$preVar1) 
-        # }
         kpi = str_to_lower(input$postEventKPI)
         map_kpi(data, kpi)
         
@@ -856,24 +878,123 @@ server <- function(input, output, session) {
 
     })
     
+    
+    
+    
+    observeEvent(c(input$postStratifiedOptions, input$analysisType),{
+        
+            if (input$analysisType == "Event"){
+                title = paste("KPI","Barplot") 
+                xaxis = "KPI" 
+                yaxis = "Number of Responses"
+            }else{
+                title = paste("Yearly KPI Scores")
+                xaxis = "Year"
+                yaxis = "KPI"
+            }
+            
+            updateTextInput(session,
+                            "stratifiedTitle", 
+                            value = title
+            )
+            
+            updateTextInput(session,
+                            "stratifiedXaxis", 
+                            value = xaxis
+            )
+            
+            updateTextInput(session,
+                            "stratifiedYaxis", 
+                            value =  yaxis
+            )
+        }
+    )
+    
+    
+    # output$stratifiedViz = renderPlotly({
+    #     if (input$filteringVariable == "None"){
+    #        data = stratifiedData()
+    #     }else{
+    #        data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
+    #     }
+    # 
+    #     
+    #     
+    #     if (input$advancedstratifiedOptions == TRUE){
+    #         if (!is.null(input$stratifiedTitle)){
+    #             g = g + ggtitle(input$stratifiedTitle)
+    #         }
+    #         if (!is.null(input$postXaxis)){
+    #             g = g + xlab(input$stratifiedXaxis)
+    #         }
+    #         if (!is.null(input$postYaxis)){
+    #             g = g + ylab(input$stratifiedYaxis)
+    #         }
+    #         
+    #     }
+    #     ggplotly(g)
+    # 
+    # })
+    # 
+    
+    output$stratifiedVizMap = leaflet::renderLeaflet({
+        
+        if (input$filteringVariable == "None"){
+            data = stratifiedData()
+        }else{
+            data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
+        }
+        
+        kpi = str_to_lower(input$stratifiedEventKPI)
+        if (input$stratifiedMapAnalysisType == "Participants"){
+            # Note: postcode (preEventdata) is switched to postcode_event just for function purposes - this is a little inconsistent with other function and tab
+            data %>% dplyr::select(-postcode_event) %>% dplyr::rename(postcode_event = "postcode") %>%
+                map_kpi(kpi)
+        }else{
+            map_kpi(data, kpi)
+        }
+
+        
+        # map_kpi(data, kpi)
+    
+        
+    })
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # Report
+    
+    
+    
     p1 = reactive({
         PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
 
     })
     
-    p2 = reactive({
-        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-    })
-    
-    p3 = reactive({
-        PreEventPlot(preEventData(),varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-
-    })
-    
-    p4 = reactive({
-        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-
-    })
+    # p2 = reactive({
+    #     PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    # })
+    # 
+    # p3 = reactive({
+    #     PreEventPlot(preEventData(),varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    # 
+    # })
+    # 
+    # p4 = reactive({
+    #     PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+    # 
+    # })
 
     
     output$downloadData <- downloadHandler(
@@ -896,8 +1017,10 @@ server <- function(input, output, session) {
             )
             on.exit(removeNotification(id), add = TRUE)
             
-            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
-
+            # params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
+            params = list(v1 = p1())
+            
+            
             # Knit the document, passing in the params list, and eval it in a
             # child of the global environment (this isolates the code in the document
             # from the code in this app).
@@ -911,17 +1034,10 @@ server <- function(input, output, session) {
         dropdownMenu(type = "messages", 
                      messageItem(from = "HELP", message = "PLEASEs"))
     })
-    output$stratifiedViz = renderPlotly({
-        if (input$filteringVariable == "None"){
-           data = stratifiedData()
-        }else{
-           data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
-        }
+    
+    
+    
 
-        ggplotly(g)
-        
-        
-    })
     
     
     
