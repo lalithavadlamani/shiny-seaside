@@ -20,7 +20,11 @@ source("postEventCleaning.R")
 
 
 # path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
-path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+
+# path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+# path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+path = "https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+
 # driveToken = googledrive::drive_auth(email = c("sourish.iyengar@gmail.com"), path = path)
 # sheetsToken = gs4_auth(token = drive_token())
 # files = drive_ls(path)
@@ -295,7 +299,7 @@ ui <- dashboardPage(
                                              choices = c("Action","Learning", "Community")
                                          ),
                                          conditionalPanel("input.stratifiedAnalysisTabViz == 1",
-                                             selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
+                                             selectizeInput("stratifiedVarColour", "Colouring Variable", choices = c("None",preVars))
                                          ),
                                          
                                          # For map
@@ -318,7 +322,7 @@ ui <- dashboardPage(
                                          ),
                                          
                                          conditionalPanel("input.advancedStratifiedOptions == 1",
-                                                          conditionalPanel("input.analysisType == 'Event'",
+                                                          conditionalPanel("input.analysisType == 'Event' &  input.stratifiedAnalysisTabViz == 1",
                                                                            checkboxGroupButtons("stratifiedPlotOptions",
                                                                                                 "Plotting Options (Optional)", 
                                                                                                 choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
@@ -843,7 +847,9 @@ server <- function(input, output, session) {
     # Stratified tab
     
     stratifiedData = reactive({
-        preEventData() %>% inner_join(postEventData() %>% select(-year, -postcode_event) %>% dplyr::rename(email = "email address"), by = c("email", "location"))
+        stratifiedData = preEventData() %>% inner_join(postEventData() %>% select(-year, -postcode_event) %>% dplyr::rename(email = "email address"), by = c("email", "location"))
+        # validate(need(stratifiedData, "The file selected doesn't have post-event data available to do stratified analysis"))
+        stratifiedData
         })
     
 
@@ -917,9 +923,26 @@ server <- function(input, output, session) {
     #     }else{
     #        data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
     #     }
+    #     
+    #     if (input$stratifiedVarColour == "None"){
+    #         data = stratifiedData() %>% mutate(demographic = "All Participants")
+    #     }else{
+    #         data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered) %>% 
+    #             dplyr::rename(demographic = input$stratifiedVarColour)
+    #     }
+    #     
+    #     
+    #     
+    #     data = data %>%
+    #         dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>%
+    #         mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+    #     browser()
+    #     data %>% select(input$stratifiedEventKPI)
+    #     # data = data %>%
+    #     #     dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>%
+    #     #     mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+    #     data %>% 
     # 
-    #     
-    #     
     #     if (input$advancedstratifiedOptions == TRUE){
     #         if (!is.null(input$stratifiedTitle)){
     #             g = g + ggtitle(input$stratifiedTitle)
@@ -930,13 +953,13 @@ server <- function(input, output, session) {
     #         if (!is.null(input$postYaxis)){
     #             g = g + ylab(input$stratifiedYaxis)
     #         }
-    #         
+    # 
     #     }
     #     ggplotly(g)
     # 
     # })
-    # 
-    
+
+
     output$stratifiedVizMap = leaflet::renderLeaflet({
         
         if (input$filteringVariable == "None"){
