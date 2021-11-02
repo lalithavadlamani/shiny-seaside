@@ -243,47 +243,47 @@ ui <- dashboardPage(
                                              )
                             ),
                             
-                            downloadLink('downloadPreEvent',"Download the data"),
+                            downloadButton('downloadPreEvent',"Download the data"),
                             
                             
 
                                 
-                        )
-                    ),
+                        ),
+                    
                         
                         # Post
                         conditionalPanel("input.sidebar == 'postEvent'",
                                          
-                                         conditionalPanel("input.postTabViz == 2",
-                                             radioGroupButtons(
-                                                 inputId = "postEventKPI",
-                                                 label = "KPI:", 
-                                                 choices = c("Action","Learning", "Community")
-                                             )
-                                         ),
-                                         conditionalPanel("input.postTabViz == 1",
-                                                          prettySwitch("advancedPostOptions", "More Plotting Options?", slim = TRUE)
-                                         ),
-                                         conditionalPanel("input.advancedPostOptions == 1",
-                                                          conditionalPanel("input.analysisType == 'Event'",
-                                                              checkboxGroupButtons("postPlotOptions",
-                                                                                   "Plotting Options (Optional)", 
-                                                                                   choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
-                                                                                   selected = NULL)
-                                                          ),
-                                                          
-                                                          
-                                                          conditionalPanel("input.postTabViz == 1",
-                                                              textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
-                                                              textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
-                                                              textInput("postYaxis", "Choose y-axis label", value = NULL,width = NULL)
-                                                          )
-                                             ),
-                                         
-                                         
-                                         
-                                         
-                                         downloadButton('downloadPostEvent',"Download the data")
+                             conditionalPanel("input.postTabViz == 2",
+                                 radioGroupButtons(
+                                     inputId = "postEventKPI",
+                                     label = "KPI:", 
+                                     choices = c("Action","Learning", "Community")
+                                 )
+                             ),
+                             conditionalPanel("input.postTabViz == 1",
+                                              prettySwitch("advancedPostOptions", "More Plotting Options?", slim = TRUE)
+                             ),
+                             conditionalPanel("input.advancedPostOptions == 1",
+                                              conditionalPanel("input.analysisType == 'Event'",
+                                                  checkboxGroupButtons("postPlotOptions",
+                                                                       "Plotting Options (Optional)", 
+                                                                       choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
+                                                                       selected = NULL)
+                                              ),
+                                              
+                                              
+                                              conditionalPanel("input.postTabViz == 1",
+                                                  textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
+                                                  textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                                  textInput("postYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                              )
+                                 ),
+                             
+                             
+                             
+                             
+                             downloadButton('downloadPostEvent',"Download the data")
                                          
                         ),
                         
@@ -340,6 +340,7 @@ ui <- dashboardPage(
                                          
                         )
                             
+                    ),
                     ),
                 )
             ),
