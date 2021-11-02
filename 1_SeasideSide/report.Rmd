@@ -83,5 +83,3 @@ params$v1 %>% ggplotly()
 <!-- ```{r, message = FALSE, warning = FALSE, echo = TRUE} -->
 <!-- params$v4 %>% ggplotly() -->
 <!-- ``` -->
-
-
