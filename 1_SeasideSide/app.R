@@ -43,7 +43,7 @@ ui <- dashboardPage(
     dashboardHeader(title = "Seashine",
                     tags$li(class = "dropdown",
                             tags$a(href="https://www.seasidescavenge.org/", target="_blank", 
-                                   tags$img(height = "20px", alt="Seaside Logo", src="SS_Logo_Blue.png")
+                                   tags$img(height = "20px", alt="Seaside Logo", src="logo_white.png")
                             )
                     ),
         # Quick Tips Dropdown Box
@@ -345,16 +345,19 @@ ui <- dashboardPage(
             ),
             
             conditionalPanel("input.sidebar == 'home'",
-                 box(
-                     status = "warning", 
-                     solidHeader = TRUE,
-                     collapsible = TRUE,
-                     title = "Helpful Demo Videos",
-                     width = 12,
-                     HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-                     HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
-                     
+                 column(12,
+                        box(
+                            status = "warning", 
+                            solidHeader = TRUE,
+                            collapsible = TRUE,
+                            title = "Helpful Demo Videos",
+                            width = 12,
+                            HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
+                            HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                            
+                        )
                  )
+                 
             ),  
             column(8,
 
