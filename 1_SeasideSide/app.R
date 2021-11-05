@@ -1022,23 +1022,30 @@ server <- function(input, output, session) {
     
     
     p1 = reactive({
-        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
+        data = preEventData()
+        data$age_group = data$age_group %>% factor(age_range_options)
+        
+        PreEventPlot(data, varNames = c("year", "age_group"), additional = c("horizontal", "text", "proportions", "missing"))
 
     })
     
-    # p2 = reactive({
-    #     PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-    # })
-    # 
-    # p3 = reactive({
-    #     PreEventPlot(preEventData(),varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-    # 
-    # })
-    # 
-    # p4 = reactive({
-    #     PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("horizontal", "text", "proportions", "missing"))
-    # 
-    # })
+    p2 = reactive({
+        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("proportions", "missing"))
+    })
+
+    p3 = reactive({
+        PreEventPlot(preEventData(),varNames = c("year", "pre_environmental_impact"), additional = c("missing"))
+
+    })
+
+    p4 = reactive({
+        data = postEventData()
+        data = data %>%
+            dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>%
+            mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+        postEventYearPlot(data)
+
+    })
 
     
     output$downloadData <- downloadHandler(
@@ -1061,8 +1068,8 @@ server <- function(input, output, session) {
             )
             on.exit(removeNotification(id), add = TRUE)
             
-            # params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
-            params = list(v1 = p1())
+            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
+            # params = list(v1 = p1(), v2 = p2(), v3 = p3())
             
             
             # Knit the document, passing in the params list, and eval it in a

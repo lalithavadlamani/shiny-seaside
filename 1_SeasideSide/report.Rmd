@@ -38,48 +38,56 @@ library(tidyverse)
 
 ## Demographic Summary
 
-Plots:
-- Age Bar Plot
-- Gender Bar Plot
-- Ethnicity Bar Plot (After changes to pre-event survey)
-- Environmental Habits
-- Map Visualisation
+## Plots:
 
-
-```{r, echo=FALSE}
-
-```
-
-## Event KPI Plots
-
-Explanation of how the KPIs are derived here.
-
-
-```{r pressure, echo=FALSE}
-
-```
-
-## Stratified KPI Plots
-
-Dummy Text
-
+### Year vs Age Bar Plot
 
 ```{r, message = FALSE, warning = FALSE}
 params$v1 %>% ggplotly()
 ```
 
 
-<!-- ```{r, message = FALSE, warning = FALSE} -->
-<!-- params$v2 %>% ggplotly() -->
-<!-- ``` -->
+### Year vs Gender Bar Plot
+```{r, message = FALSE, warning = FALSE}
+
+params$v2 %>% ggplotly()
+
+
+```
+
+### Year vs Environmental Habits
+
+
+```{r, message = FALSE, warning = FALSE}
+params$v3 %>% ggplotly()
 
 
 
-<!-- ```{r, message = FALSE, warning = FALSE, echo = TRUE} -->
-<!-- params$v3 %>% ggplotly() -->
-<!-- ``` -->
+```
 
 
-<!-- ```{r, message = FALSE, warning = FALSE, echo = TRUE} -->
-<!-- params$v4 %>% ggplotly() -->
-<!-- ``` -->
+<!-- - Ethnicity Bar Plot (After changes to pre-event survey) -->
+
+<!-- - Map Visualisation -->
+
+
+## Event KPI Plots
+
+The KPI values shown below in the visualisation are derived as follows:
+
+Each individual is designated a value for each KPI. This is calculated with the formula:
+
+$$\text{KPI} = \frac{\text{Targeted Responses (Learning KPI) + Targeted Responses(Action KPI) + Targeted Responses (Community KPI)}}{3 \times \text{Total Respondents}}$$
+
+```{r, message = FALSE, warning = FALSE}
+params$v4 %>% ggplotly()
+
+
+```
+
+
+<!-- ## Stratified KPI Plots -->
+
+<!-- Dummy Text -->
+
+
