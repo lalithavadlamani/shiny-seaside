@@ -18,6 +18,7 @@ source("Visualisations.R")
 source("postEventCleaning.R")
 
 
+# addResourcePath("vid", directoryPath = './www')
 
 # path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
 
@@ -110,7 +111,7 @@ ui <- dashboardPage(
                     tags$br(),
                     "as well as a KPI category to analyse. ",
                     tags$br(),
-                    "BLAHBBOACASKJDJKSAHDJ. You can also ",
+                    "participant data. You can also ",
                     tags$br(),
                     "view and download the combined data",
                     tags$br(),
@@ -357,9 +358,13 @@ ui <- dashboardPage(
                             collapsible = TRUE,
                             title = "Helpful Demo Videos",
                             width = 12,
-                            HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'),
-                            HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                            # HTML('<iframe src="jenn_demo.mp4" title="demo_video"</iframe>'),
+                            # HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                            fluidPage(
+                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "jenn_demo.mp4", controls = "controls"),
+                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "jenn_demo2.mp4", controls = "controls")
                             
+                            )
                         )
                  )
                  
@@ -1086,3 +1091,4 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+# shinyServer(function(input, output, session) {})
