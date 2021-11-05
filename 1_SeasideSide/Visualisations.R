@@ -422,3 +422,30 @@ PostEventPlot <- function(df ,additional = c("horizontal", "numeric_text")) {
 
 PostEventPlot(df, additional = c("horizontal", "text"))
 
+
+
+
+
+
+
+# Stratitified
+
+
+
+yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
+  
+  colnames(data) <- tolower(colnames(data))
+  varnames_sorted <- sort(colnames(data))
+  name_kpi = paste('KPI -',kpi_name)
+  plot <- ggplot(data, aes(x = year, y = value, colour = demographic)) + 
+    geom_point(color='black') + 
+    geom_line() + 
+    scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
+    xlab('Year') + 
+    ylab(name_kpi) + 
+    guides(color = guide_legend(title = demographic_name)) + 
+    theme_classic()
+  
+  return(plot)
+  
+}

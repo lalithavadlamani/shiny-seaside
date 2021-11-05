@@ -74,14 +74,16 @@ preprocessing_fn <- function(pre_event_all = dataframe_ls,excel_name_ls = excel_
   section = (pre_event_data %>% select(postcode, age_range_options, age_group))
   for (num in 1:length(age_range_options)) {
     single_age_section = section %>% filter(!!sym(age_range_options[num]) > 0)
-    for (row in 1:nrow(single_age_section)) {
-      duplicates <- single_age_section[row, age_range_options[num]]
-      for (duplicate_no in 1:duplicates) {
-        pre_event_data = pre_event_data %>% add_row(postcode = 
-                                                      single_age_section[row, "postcode"],
-                                                    age_group = age_range_options[num])      
-      }
-    }    
+    if (nrow(single_age_section) != 0){
+      for (row in 1:nrow(single_age_section)) {
+        duplicates <- single_age_section[row, age_range_options[num]]
+        for (duplicate_no in 1:duplicates) {
+          pre_event_data = pre_event_data %>% add_row(postcode = 
+                                                        single_age_section[row, "postcode"],
+                                                      age_group = age_range_options[num])      
+        }
+      }   
+    }
   }
   
   # adds location and year as columns

@@ -2,12 +2,12 @@ library(ggplot2)
 library('readxl')
 library(reshape2)
 
-data <- read_excel("C:/Users/Lalitha Vadlamani/Desktop/180 DC/S2/Stratified/stratified_input_data.xlsx")
+data <- read_excel("C:/Users/souri/OneDrive/Desktop/Work/180 Degrees/shiny-seaside/3_Visualisation_Functions/Stratified/stratified_input_data.xlsx")
 
 data
 
 
-bleh <- function(data,kpi_name,demographic_name){
+yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
   
   colnames(data) <- tolower(colnames(data))
   varnames_sorted <- sort(colnames(data))
@@ -24,6 +24,8 @@ bleh <- function(data,kpi_name,demographic_name){
   
 }
 
-bleh(data,'Action','Pronoun')
+yearlyStratifiedVizPlot(data,'Action','Pronoun')
+
+yearlyStratifiedVizPlot(data, kpi_name = input$stratifiedEventKPI, demographic_name = input$stratifiedVarColour)
 
 

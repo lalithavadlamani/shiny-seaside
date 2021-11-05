@@ -633,7 +633,7 @@ server <- function(input, output, session) {
         }
 
         data = file_names %>% lapply(drive_get) %>% lapply(read_sheet)
-        processedData = preprocessing_multiple_fn(data, file_names)
+        processedData = preprocessing_multiple_fn(dataframe_ls = data, excel_ls_name = file_names)
         processedData
         })
     
@@ -921,47 +921,59 @@ server <- function(input, output, session) {
     )
     
     
-    # output$stratifiedViz = renderPlotly({
-    #     if (input$filteringVariable == "None"){
-    #        data = stratifiedData()
-    #     }else{
-    #        data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
-    #     }
-    #     
-    #     if (input$stratifiedVarColour == "None"){
-    #         data = stratifiedData() %>% mutate(demographic = "All Participants")
-    #     }else{
-    #         data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered) %>% 
-    #             dplyr::rename(demographic = input$stratifiedVarColour)
-    #     }
-    #     
-    #     
-    #     
-    #     data = data %>%
-    #         dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>%
-    #         mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
-    #     browser()
-    #     data %>% select(input$stratifiedEventKPI)
-    #     # data = data %>%
-    #     #     dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>%
-    #     #     mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
-    #     data %>% 
-    # 
-    #     if (input$advancedstratifiedOptions == TRUE){
-    #         if (!is.null(input$stratifiedTitle)){
-    #             g = g + ggtitle(input$stratifiedTitle)
-    #         }
-    #         if (!is.null(input$postXaxis)){
-    #             g = g + xlab(input$stratifiedXaxis)
-    #         }
-    #         if (!is.null(input$postYaxis)){
-    #             g = g + ylab(input$stratifiedYaxis)
-    #         }
-    # 
-    #     }
-    #     ggplotly(g)
-    # 
-    # })
+    output$stratifiedViz = renderPlotly({
+
+        if (input$filteringVariable == "None"){
+           data = stratifiedData()
+        }else{
+           data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
+        }
+
+        if (input$stratifiedVarColour == "None"){
+            demographic_name = ""
+            data = data %>% mutate(demographic = "All Participants")
+        }else{
+            demographic_name = input$stratifiedVarColour
+            data =  data %>%
+                dplyr::rename(demographic = input$stratifiedVarColour)
+        }
+
+        
+        data = data %>%
+            dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year, demographic) %>%
+            mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+        
+        
+        if (input$analysisType != "Event"){
+            data = data %>% 
+                select(value = input$stratifiedEventKPI, demographic, year) %>% 
+                mutate(KPI = input$stratifiedEventKPI) %>% 
+                group_by(demographic, year, KPI)  %>% 
+                dplyr::summarise(value = mean(value)) %>% 
+                ungroup() %>% 
+                mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+
+            g = yearlyStratifiedVizPlot(data,  kpi_name = input$stratifiedEventKPI, demographic_name = demographic_name)
+        }
+
+
+
+
+        if (input$advancedStratifiedOptions == TRUE){
+            if (!is.null(input$stratifiedTitle)){
+                g = g + ggtitle(input$stratifiedTitle)
+            }
+            if (!is.null(input$postXaxis)){
+                g = g + xlab(input$stratifiedXaxis)
+            }
+            if (!is.null(input$postYaxis)){
+                g = g + ylab(input$stratifiedYaxis)
+            }
+
+        }
+        ggplotly(g)
+
+    })
 
 
     output$stratifiedVizMap = leaflet::renderLeaflet({

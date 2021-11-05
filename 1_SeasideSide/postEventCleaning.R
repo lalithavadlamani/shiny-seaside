@@ -60,7 +60,7 @@ full_event_analysis <- function(data,excel_name_ls){
   final_df$action_Doing_after_the_event <- action_data_df$`action-Doing_after_the_event_per`
   final_df$action_likely_to_do <- action_data_df$`action-likely_to_do_per`
   final_df$action_unlikely_to_do <- action_data_df$`action-unlikely_to_do_per`
-  final_df$env_habits <- data$`on a scale of 1-5, how would you rate your environmental habits after the activity?`
+  final_df$env_habits <- data$`On a scale of 1 to 5, where 1 is not engaged at all and 5 is very engaged, how engaged are you in making changes that positively impact the environment?`
   final_df$action_kpi <- (final_df$action_Doing_after_the_event + final_df$action_likely_to_do) / (final_df$action_Doing_after_the_event + final_df$action_likely_to_do + final_df$action_unlikely_to_do)
   
   name_split = strsplit(excel_name_ls, "_", fixed = TRUE)
