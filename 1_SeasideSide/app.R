@@ -689,6 +689,8 @@ server <- function(input, output, session) {
             }
             
         }
+        
+        
         ggplotly(g)
         
         
@@ -810,15 +812,11 @@ server <- function(input, output, session) {
             mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
 
         if (input$analysisType %in% c("Location", "Yearly")){
-            # data = data %>% group_by(year) %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
-            # g = data %>% ggplot(aes(x = year, y = score, colour = KPI )) + geom_line() + geom_point() +
-            #     scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) + theme_minimal()
             g = postEventYearPlot(data)
             
         }else{
             additional = input$postPlotOptions
             data = data %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
-            # g = data %>% ggplot(aes(x = KPI, score )) + geom_bar(stat = "identity", fill = "skyblue") + theme_minimal()
             g = PostEventPlot(df = data, additional = additional)
         }
         
@@ -834,6 +832,8 @@ server <- function(input, output, session) {
             }
 
         }
+        
+
         ggplotly(g)
         
         
@@ -959,6 +959,14 @@ server <- function(input, output, session) {
                 mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
 
             g = yearlyStratifiedVizPlot(data,  kpi_name = input$stratifiedEventKPI, demographic_name = demographic_name)
+            g = g + 
+                ggthemes::scale_color_tableau(
+                    palette = "Tableau 10",
+                    type = "regular",
+                    direction = 1,
+                    na.value = "grey50"
+                )
+            
         }
 
 
@@ -976,6 +984,10 @@ server <- function(input, output, session) {
             }
 
         }
+        
+        
+
+        
         ggplotly(g)
 
     })

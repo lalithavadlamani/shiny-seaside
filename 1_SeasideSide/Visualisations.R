@@ -162,6 +162,15 @@ PreEventPlot <- function(data, varNames, additional = c("horizontal", "text", "p
     g = g + scale_x_discrete(labels = levelsVar1)
   }
 
+  g = g + 
+    ggthemes::scale_fill_tableau(
+      palette = "Tableau 10",
+      type = "regular",
+      direction = 1,
+      na.value = "grey50"
+    )
+  
+  
   g
 
 }
@@ -382,7 +391,7 @@ postEventYearPlot <- function(data){
   df = data %>% gather(-year, key = "KPI", value = "score")
 
   plot <- data %>% ggplot(aes(x = year, y = score, colour = KPI )) +
-    geom_point(color='black') +
+    # geom_point(color='black') +
     geom_line() +
     xlab('Year') +
     ylab('KPI Score') +
@@ -392,6 +401,15 @@ postEventYearPlot <- function(data){
     guides(color = guide_legend(title = "KPI")) +
     theme_classic()
 
+  
+  plot = plot + 
+    ggthemes::scale_color_tableau(
+      palette = "Tableau 10",
+      type = "regular",
+      direction = 1,
+      na.value = "grey50"
+    )
+  
   return(plot)
 }
 
@@ -438,13 +456,21 @@ yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
   varnames_sorted <- sort(colnames(data))
   name_kpi = paste('KPI -',kpi_name)
   plot <- ggplot(data, aes(x = year, y = value, colour = demographic)) + 
-    geom_point(color='black') + 
+    # geom_point(color='black') + 
     geom_line() + 
     scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
     xlab('Year') + 
     ylab(name_kpi) + 
     guides(color = guide_legend(title = demographic_name)) + 
     theme_classic()
+  
+  plot = plot + 
+    ggthemes::scale_color_tableau(
+      palette = "Tableau 10",
+      type = "regular",
+      direction = 1,
+      na.value = "grey50"
+    )
   
   return(plot)
   
