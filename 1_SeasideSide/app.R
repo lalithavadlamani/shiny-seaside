@@ -11,12 +11,16 @@ library(googlesheets4)
 library(googledrive)
 library(readr)
 library(sortable)
+library(lubridate)
 
 source("filename_cleaning.R")
 source("preEventCleaning.R")
 source("Visualisations.R")
 source("postEventCleaning.R")
 
+
+# remove.packages(c("reprex","rprojroot", "rvest","selectr", "shinydashboard", "tidyverse", "xml2"))
+# install.packages(c("reprex","rprojroot", "rvest","selectr", "shinydashboard", "tidyverse", "xml2"))
 
 # addResourcePath("vid", directoryPath = './www')
 
@@ -30,6 +34,12 @@ path = "https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5
 # sheetsToken = gs4_auth(token = drive_token())
 # files = drive_ls(path)
 email = "sourish.iyengar@gmail.com"
+
+
+
+
+
+
 
 
 # Prevent Choices (Variables)
@@ -523,6 +533,8 @@ server <- function(input, output, session) {
         sheetsToken = gs4_auth(token = drive_token())
         files = drive_ls(path)
     })
+
+
     metaData = reactive({name_processing(sheetInitialisation()$name)})
     
     # Updating Survey Choices
