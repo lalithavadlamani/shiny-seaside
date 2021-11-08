@@ -23,6 +23,23 @@ params:
 
 ```
 
+
+```{=html}
+<style>
+  .superbigimage{
+      overflow-x:scroll;
+      white-space: nowrap;
+  }
+
+  .superbigimage img{
+     max-width: none;
+  }
+
+
+</style>
+```
+
+
 ```{js logo-js, echo=FALSE}
 $(document).ready(function() {
   $('#header').parent().prepend('<div id=\"logo\"><img src=\"SS_Logo_Blue.png\" style=\"position:absolute; top:0; right:0; padding:20px; height:120px\"></div>');
@@ -42,29 +59,29 @@ library(tidyverse)
 
 ### Year vs Age Bar Plot
 
+
+::: {.superbigimage}
 ```{r, message = FALSE, warning = FALSE}
 params$v1 %>% ggplotly()
 ```
-
+:::
 
 ### Year vs Gender Bar Plot
-```{r, message = FALSE, warning = FALSE}
 
+::: {.superbigimage}
+```{r, message = FALSE, warning = FALSE}
 params$v2 %>% ggplotly()
 
-
 ```
+:::
 
 ### Year vs Environmental Habits
 
-
+::: {.superbigimage}
 ```{r, message = FALSE, warning = FALSE}
 params$v3 %>% ggplotly()
-
-
-
 ```
-
+:::
 
 <!-- - Ethnicity Bar Plot (After changes to pre-event survey) -->
 
@@ -78,13 +95,11 @@ The KPI values shown below in the visualisation are derived as follows:
 Each individual is designated a value for each KPI. This is calculated with the formula:
 
 $$\text{KPI} = \frac{\text{Targeted Responses (Learning KPI) + Targeted Responses(Action KPI) + Targeted Responses (Community KPI)}}{3 \times \text{Total Respondents}}$$
-
+::: {.superbigimage}
 ```{r, message = FALSE, warning = FALSE}
 params$v4 %>% ggplotly()
-
-
 ```
-
+:::
 
 <!-- ## Stratified KPI Plots -->
 
