@@ -102,7 +102,7 @@ PreEventPlot <- function(data, varNames, additional = c("horizontal", "text", "p
     xaxislabel = paste(varNames[1])
     data = data %>% group_by(var1) %>% dplyr::count()
     g = data
-    g = helperAdditional1(g, additional = additional)
+    g = helperAdditionalOneVariable(g, additional = additional)
 
 
 
@@ -176,6 +176,70 @@ PreEventPlot <- function(data, varNames, additional = c("horizontal", "text", "p
 }
 
 
+
+
+PreEventPlotYear <- function(data, varNames, additional = c("horizontal", "text", "proportions", "missing")) {
+  # data = preEventData()
+  title = paste(varNames[1], "Barplot") %>% str_to_title()
+  yaxislabel = paste("Number of Responses") %>% str_to_title()
+ 
+    data = data %>% dplyr::rename(var1 = varNames[[1]], var2 = varNames[[2]])
+    
+    
+    if (is.factor(data$var2)){
+      levelsVar2 = levels(data$var2) %>% str_replace_all("_"," ") %>% str_to_title()
+    }else{
+      levelsVar2 = NA
+    }
+    
+    data = data %>% mutate(var1 = str_replace_all(var1, "_", " ") %>% str_to_title()) %>% mutate(var2 = str_replace_all(var2, "_", " ") %>% str_to_title())
+    if("missing" %in% additional){
+      data = data %>% filter(!is.na(var1), !is.na(var2))
+    }else{
+      data = data %>% mutate(var1 = ifelse(is.na(var1), "missing",var1), ifelse(is.na(var2), "missing",var2))
+    }
+    xaxislabel = paste(varNames[1])
+    legendlabel = paste(varNames[2])
+    data = data %>% group_by(var1,var2) %>% dplyr::count()
+    data = data %>% group_by(var1) %>% group_modify(~ .x %>% mutate(n2 = sum(n)) )
+    
+    if (!is.na(levelsVar2)){
+      data = data %>% mutate(var2 = factor(var2, levelsVar2))
+    }
+    
+    g = data
+    
+    g = helperAdditionalYear(g, additional = additional)
+    
+    g = g  +
+      xlab(str_to_title(gsub("_", " ", xaxislabel))) + ylab(str_to_title(gsub("_", " ", yaxislabel))) +
+      labs(fill = gsub("_", " ",legendlabel) %>% str_to_title())+
+      ggtitle(gsub("_", " ", title)) +
+      theme(plot.title=element_text(hjust=0.5)) +
+      theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+      theme_minimal()
+  
+  if("horizontal" %in% additional){
+    g = g + coord_flip()
+  }
+
+  
+  g = g + 
+    ggthemes::scale_fill_tableau(
+      palette = "Tableau 10",
+      type = "regular",
+      direction = 1,
+      na.value = "grey50"
+    )
+  
+  
+  g
+  
+}
+
+
+
+
 helperAdditional = function(g, additional){
   if("proportions" %in% additional){
     g = g %>% ggplot(aes(x =  reorder(var1, n2), y = n/n2, fill = var2 ))  + geom_bar(position = "fill", stat = "identity")
@@ -192,7 +256,24 @@ helperAdditional = function(g, additional){
   return(g)
 }
 
-helperAdditional1 = function(g, additional){
+
+helperAdditionalYear = function(g, additional){
+  if("proportions" %in% additional){
+    g = g %>% ggplot(aes(x = var1, y = n/n2, fill = var2 ))  + geom_bar(position = "fill", stat = "identity")
+    if("numeric_text" %in% additional){
+      g = g + geom_text(aes(label= round(n/n2,2) ), position = position_stack(vjust = 0.5), size = 3)
+    }
+  }else{
+    g = g %>% ggplot(aes(x =  var1, y = n, fill = var2 ))  + geom_bar(stat = "identity")
+    if("numeric_text" %in% additional){
+      g = g + geom_text(aes(label=n), position = position_stack(vjust = 0.5), size = 3)
+    }
+  }
+  
+  return(g)
+}
+
+helperAdditionalOneVariable = function(g, additional){
   if("proportions" %in% additional){
     g = g %>% ggplot(aes(x =  reorder(var1, n), y = n/n ))  +
       geom_bar(stat = "identity", fill='skyblue1', position = "fill")

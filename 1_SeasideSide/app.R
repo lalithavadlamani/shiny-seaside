@@ -36,9 +36,14 @@ path = "https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5
 email = "sourish.iyengar@gmail.com"
 
 
-
-
-
+# 
+# options(
+#     gargle_oauth_email = TRUE,
+#     gargle_oauth_cache = "1_SeasideSide/.secrets"
+# )
+# 
+# drive_auth(cache = ".secrets", email = TRUE)
+# gs4_auth(cache = ".secrets", email = TRUE)
 
 
 
@@ -46,8 +51,9 @@ email = "sourish.iyengar@gmail.com"
 preVars = list(Age = "age_group",Gender = "pronoun", 
                "Previous Attendance" = "previous_attendance", 
                "How did you hear about the event?" = "find_out_event",
-               "Perceived Environmental Investment"= "pre_environmental_impact") 
-
+               "Perceived Environmental Investment"= "pre_environmental_impact",
+               "Aboriginal or Torres Strait Islander Origin?" = "origin"
+)
 
 ui <- dashboardPage(
     # Colour
@@ -241,7 +247,7 @@ ui <- dashboardPage(
                                                "Plotting Options (Optional)", 
                                                choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
                                                               "Remove Unknowns" = "missing"), 
-                                               selected = NULL),
+                                               selected = "missing"),
 
                                 textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
                                 textInput("preXaxis", "Choose x-axis label", value = NULL ,width = NULL),
@@ -338,7 +344,7 @@ ui <- dashboardPage(
                                                                                                 "Plotting Options (Optional)", 
                                                                                                 choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
                                                                                                                 "Remove Unknowns" = "missing"), 
-                                                                                                selected = NULL)
+                                                                                                selected = "missing")
                                                           ),
                                                           
                                                           
@@ -540,18 +546,18 @@ server <- function(input, output, session) {
     # Updating Survey Choices
     observeEvent(input$driveID,{
                  if (!(is.null(input$emailID) & is.null(input$driveID))){
-                     
+
                      files = sheetInitialisation()
                      choices = files$name
                      updateSelectizeInput(session,
-                                          "sheet", 
-                                          choices = choices, 
+                                          "sheet",
+                                          choices = choices,
                                           selected = choices[1],
                                           server = TRUE)
                  }
              }
         )
-    
+
     # Updating inputs with choices corresponding to analysis type
     observeEvent(input$analysisType,{
         
@@ -674,13 +680,14 @@ server <- function(input, output, session) {
     output$preViz = renderPlotly({
         
         data = preEventData()
+        data = data %>% 
+            mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+        
         data$age_group = data$age_group %>% factor(age_range_options)
         additional = input$prePlotOptions
-        # browser()
+
         if (input$analysisType %in% c("Location", "Yearly")){
-            g = PreEventPlot(data,varNames = c("year", input$preVar1), additional = additional)
-            
-            
+            g = PreEventPlotYear(data,varNames = c("year", input$preVar1), additional = additional)
         }else{
             if (input$preVarColour == "None"){
                 g = PreEventPlot(data,varNames = c(input$preVar1), additional = additional)
@@ -893,9 +900,9 @@ server <- function(input, output, session) {
                 header = "Please drag away the columns you don't want in the KPI calculation:",
                 group_name = "bucket_list_group",
                 orientation = "horizontal",
-                add_rank_list(text = "Not Filtered Categories",
+                add_rank_list(text = "Visualised Categories",
                               labels = filterVars, input_id = "nonFiltered"),
-                add_rank_list(text = "Filtered Categores",
+                add_rank_list(text = "Non-Visualised Categories",
                               labels = NULL,
                               input_id = "bucket2")
             )  
