@@ -16,6 +16,8 @@ factor_ls <- c("pronoun", "previous_attendance", "find_out_event",  "pre_environ
 character_ls <- c("email", "postcode")
 
 
+
+
 # Helper Cleaners - Datatype conversion
 
 ## Converting NULL's
