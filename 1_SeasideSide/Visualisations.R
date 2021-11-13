@@ -543,7 +543,8 @@ yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
     xlab('Year') + 
     ylab(name_kpi) + 
     guides(color = guide_legend(title = demographic_name)) + 
-    theme_classic()
+    theme_classic() + 
+    ggtitle("Yearly KPI Scores") 
   
   plot = plot + 
     ggthemes::scale_color_tableau(
@@ -556,3 +557,98 @@ yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
   return(plot)
   
 }
+
+
+
+
+
+
+
+
+stratifiedEventPlot <- function(data,
+                                varNames, 
+                                demographicName = "Demographic",
+                                kpi = "KPI",
+                                additional = c("horizontal", "text", "proportions", "missing")) {
+  
+  title = paste(kpi,"-", demographicName %>%  str_replace_all("_", " ") %>%  str_to_title() , "KPI's") 
+  yaxislabel = paste(kpi ,"Scores") %>% str_to_title()
+  
+
+  data = data %>% dplyr::rename(var1 = varNames[[1]])
+  
+  if (is.factor(data$var1)){
+    levelsVar1 = levels(data$var1) %>% str_replace_all("_"," ") %>% str_to_title() %>% append("missing")
+  }else{
+    levelsVar1 = NA
+  }
+  
+  data = data %>% mutate(var1 = str_replace_all(var1, "_", " ") %>% str_to_title())
+  if("missing" %in% additional){
+    data = data %>% filter(!is.na(var1))
+  }else{
+    data = data %>% mutate(var1 = ifelse(is.na(var1), "missing",var1))
+    
+  }
+  xaxislabel = paste(varNames[1])
+  data = data %>% group_by(var1) %>% 
+    dplyr::summarise(n = mean(KPI))
+  
+  g = helperAdditionalOneVariableStratified(g = data, additional = additional)
+  
+  
+  
+  g = g  +
+    xlab(str_to_title(gsub("_", " ", xaxislabel))) + ylab(str_to_title(gsub("_", " ", yaxislabel))) +
+    ggtitle(gsub("_", " ", title)) +
+    theme(plot.title=element_text(hjust=0.5)) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    theme_minimal()
+  
+  
+  
+  if("horizontal" %in% additional){
+    g = g + coord_flip()
+  }
+  if (!is.na(levelsVar1)){
+    g = g + scale_x_discrete(labels = levelsVar1)
+  }
+  
+  g = g + 
+    ggthemes::scale_fill_tableau(
+      palette = "Tableau 10",
+      type = "regular",
+      direction = 1,
+      na.value = "grey50"
+    )
+  
+  
+  g + 
+    xlab(demographicName  %>% str_replace_all("_", " ")%>%  str_to_title()) +
+    guides(fill=guide_legend(title=demographicName  %>% str_replace_all("_", " ")%>%  str_to_title())) + 
+    theme(legend.position="none")
+  
+}
+
+
+helperAdditionalOneVariableStratified = function(g, additional){
+  if("proportions" %in% additional){
+    g = g %>% ggplot(aes(x =  reorder(var1, n), y = n/n, fill = var1 ))  +
+      geom_bar(stat = "identity", position = "fill")
+    
+    if("numeric_text" %in% additional){
+      g = g+ geom_text(aes(label= round(n/n, 2) ), position = position_stack(vjust = 0.5), size = 3)
+    }
+    
+  }else{
+    g = g %>% ggplot(aes(x =  reorder(var1, n), y = n, fill = var1))  +
+      geom_bar(stat = "identity")
+    
+    if("numeric_text" %in% additional){
+      g = g + geom_text(aes(label=n), position = position_stack(vjust = 0.5), size = 3)
+    }
+  }
+  
+  return(g)
+}
+# 

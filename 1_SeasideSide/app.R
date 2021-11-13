@@ -798,7 +798,7 @@ server <- function(input, output, session) {
         if (input$analysisType == "Event"){
             title = paste("KPI","Barplot") 
             xaxis = "KPI" 
-            yaxis = "Number of Responses"
+            yaxis = "KPI"
         }else{
             title = paste("Yearly KPI Scores")
             xaxis = "Year"
@@ -875,8 +875,10 @@ server <- function(input, output, session) {
     # Stratified tab
     
     stratifiedData = reactive({
-        stratifiedData = preEventData() %>% inner_join(postEventData() %>% select(-year, -postcode_event) %>% dplyr::rename(email = "email address"), by = c("email", "location"))
-        # validate(need(stratifiedData, "The file selected doesn't have post-event data available to do stratified analysis"))
+        stratifiedData = preEventData() %>%
+            inner_join(postEventData() %>% 
+                           select(-year, -postcode_event) %>% 
+                           dplyr::rename(email = "email address"), by = c("email", "location"))
         stratifiedData
         })
     
@@ -920,7 +922,7 @@ server <- function(input, output, session) {
             if (input$analysisType == "Event"){
                 title = paste("KPI","Barplot") 
                 xaxis = "KPI" 
-                yaxis = "Number of Responses"
+                yaxis = "KPI"
             }else{
                 title = paste("Yearly KPI Scores")
                 xaxis = "Year"
@@ -946,13 +948,15 @@ server <- function(input, output, session) {
     
     
     output$stratifiedViz = renderPlotly({
-
+        
+ 
         if (input$filteringVariable == "None"){
            data = stratifiedData()
         }else{
            data =  stratifiedData() %>% filter(get(input$filteringVariable) %in% input$nonFiltered)
         }
-
+        data$age_group = data$age_group %>% factor(age_range_options)
+        
         if (input$stratifiedVarColour == "None"){
             demographic_name = ""
             data = data %>% mutate(demographic = "All Participants")
@@ -962,12 +966,11 @@ server <- function(input, output, session) {
                 dplyr::rename(demographic = input$stratifiedVarColour)
         }
 
-        
+    
         data = data %>%
             dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year, demographic) %>%
             mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
-        
-        
+
         if (input$analysisType != "Event"){
             data = data %>% 
                 select(value = input$stratifiedEventKPI, demographic, year) %>% 
@@ -978,13 +981,12 @@ server <- function(input, output, session) {
                 mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
 
             g = yearlyStratifiedVizPlot(data,  kpi_name = input$stratifiedEventKPI, demographic_name = demographic_name)
-            g = g + 
-                ggthemes::scale_color_tableau(
-                    palette = "Tableau 10",
-                    type = "regular",
-                    direction = 1,
-                    na.value = "grey50"
-                )
+            
+        }else{
+            additional = input$stratifiedPlotOptions
+            data = data %>% select(KPI = input$stratifiedEventKPI, demographic)
+            g = stratifiedEventPlot(data, varNames = "demographic", demographicName = demographic_name, kpi = input$stratifiedEventKPI, additional = additional)
+
             
         }
 
@@ -1029,8 +1031,6 @@ server <- function(input, output, session) {
             map_kpi(data, kpi)
         }
 
-        
-        # map_kpi(data, kpi)
     
         
     })
