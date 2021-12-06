@@ -519,7 +519,3 @@ age_df %>%
              #xlab = "age_buckets",
              #ylab = "count_ages" )
 ```
-
-
-
-

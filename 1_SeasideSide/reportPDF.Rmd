@@ -1,15 +1,6 @@
 ---
-title: "Seaside report"
-output: 
-    rmdformats::robobook:
-    toc: yes
-    toc_float: yes
-    toc_depth: 3
-    code_folding: hide
-    fig_caption: yes
-    number_sections: no
-    self_contained: yes
-    theme: flatly
+title: "Seaside Report"
+output: pdf_document
 params:
   v1: NA
   v2: NA
@@ -18,37 +9,7 @@ params:
   v5: NA
   v6: NA
   v7: NA
-
 ---
-
-
-```{r setup, include=FALSE}
-
-```
-
-
-```{=html}
-<style>
-  .superbigimage{
-      overflow-x:scroll;
-      white-space: nowrap;
-  }
-
-  .superbigimage img{
-     max-width: none;
-  }
-
-
-</style>
-```
-
-
-```{js logo-js, echo=FALSE}
-$(document).ready(function() {
-  $('#header').parent().prepend('<div id=\"logo\"><img src=\"SS_Logo_Blue.png\" style=\"position:absolute; top:0; right:0; padding:20px; height:120px\"></div>');
-  $('#header').css('margin-right', '120px')
-});
-```
 
 ```{r, message = FALSE, warning = FALSE, echo=FALSE}
 library(plotly)
@@ -69,7 +30,7 @@ Note: Participants who choose not to disclose their age were omitted.
 
 ::: {.superbigimage}
 ```{r, message = FALSE, warning = FALSE, echo=FALSE}
-params$v1 %>% ggplotly()
+params$v1 
 ```
 :::
 
@@ -80,10 +41,11 @@ The plot below describes participant attendance at each event by whether they ar
 
 ::: {.superbigimage}
 ```{r, message = FALSE, warning = FALSE, echo=FALSE}
-params$v7 %>% ggplotly()
+params$v7 
 ```
 :::
 
+\pagebreak
 ### Attendence by Location
 
 The map visualisation highlights the attendance of participants at Seaside events by their the place of residence (postcode).The plot also allows the filtering participants who have attended a scavenge previously.
@@ -93,6 +55,7 @@ The map visualisation highlights the attendance of participants at Seaside event
 params$v2 
 ```
 :::
+
 
 
 # KPI Analysis
@@ -112,7 +75,7 @@ The visualisation shows the KPI scores for Action, Learning and Community separa
 
 ::: {.superbigimage}
 ```{r, message = FALSE, warning = FALSE,echo=FALSE}
-params$v3 %>% ggplotly()
+params$v3 
 ```
 :::
 
@@ -138,7 +101,7 @@ This visualisation calculates the average KPI scores for individuals who have an
 
 ::: {.superbigimage}
 ```{r, message = FALSE, warning = FALSE, echo=FALSE}
-params$v5 %>% ggplotly()
+params$v5
 ```
 :::
 

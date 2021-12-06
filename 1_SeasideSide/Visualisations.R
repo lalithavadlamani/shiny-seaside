@@ -1,81 +1,4 @@
-
-
-
-
-
-
-
-
-
-# Prevent - Barplot
-
-# PreEventPlot <- function(data, varNames) {
-#
-#   title = paste(varNames[1], "Barplot") %>% str_to_title()
-#   yaxislabel = paste("Number of Responses") %>% str_to_title()
-#   if(length(varNames) == 1) {
-#     # This line fixes it
-#
-#     if(varNames == ("age_group")){
-#       # Mukund's Code
-#       xaxislabel = ("Age Groups")
-#       legendlabel = paste(varNames[2])
-#       data2=select(data, -email, -pronoun, -previous_attendance, -find_out_event, -age_group)
-#       glimpse(data2)
-#
-#       data2[is.na(data2)]  <- 0
-#
-#       glimpse(data2)
-#
-#       data2_agesums<- colSums(data2[3:9])
-#       age_count<- c(data2_agesums)
-#       age_df<- data.frame(age_count)
-#
-#       age_df %>%
-#         rownames_to_column("groups") %>%
-#         ggplot(aes(x = groups, y = age_count)) +
-#         geom_bar(stat = "identity", fill='skyblue1')+
-#         ggtitle(sub("_", " ", title))+
-#         theme(plot.title=element_text(hjust=0.5)) +
-#         theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  +
-#         theme_minimal() +
-#         scale_x_discrete(limits = c("age_under_5","age_5_to_10","age_11_to_20",
-#                                     "age_21_to_30","age_31_to_50",  "age_51_to_70", "age_over_71"),
-#                          labels = c("Age Under 5", "Age 5 to 10", "Age 11 to 20", "Age 21 to 30", "Age 31 to 50",
-#                                     "Age 51 to 70", "Age Over 71")) +
-#         labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel), fill = legendlabel)
-#
-#
-#     }else{
-#
-#       data = data %>% dplyr::rename(var1 = varNames[[1]])
-#       xaxislabel = paste(varNames[1])
-#       legendlabel = paste(varNames[2])
-#       data  %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)))) +
-#         theme_minimal() +
-#         geom_bar(fill="skyblue1") +
-#         labs(y=str_to_title(yaxislabel), x = str_to_title(xaxislabel)) +
-#         ggtitle(sub("_", " ", title))
-#     }
-#
-#
-#   } else {
-#     # This line fixes it
-#     data = data %>% dplyr::rename(var1 = varNames[[1]], var2 = varNames[[2]])
-#     xaxislabel = paste(varNames[1])
-#     legendlabel = paste(varNames[2])
-#     data %>% ggplot(aes(x = reorder(var1, var1, function(x)-length(x)), fill = var2)) +
-#       geom_bar() + labs(y= str_to_title(yaxislabel), x = str_to_title(sub("_", " ", xaxislabel)))+labs(fill=legendlabel)+
-#       ggtitle(sub("_", " ", title)) +
-#       theme(plot.title=element_text(hjust=0.5)) +
-#       theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-#       theme_minimal()
-#
-#   }
-#
-#
-# }
-
+# PreEvent
 
 PreEventPlot <- function(data, varNames, additional = c("horizontal", "text", "proportions", "missing")) {
   # data = preEventData()
@@ -424,6 +347,9 @@ map_kpi <- function(df, kpi){
   if (kpi == "learning"){
     kpi_col = "learning_kpi"
   }
+  if (kpi == "average KPI"){
+    kpi_col = "Average KPI"
+  }
 
   df_joined <- df_joined %>% dplyr::group_by(postcode_event, lat, long, locality) %>%
     dplyr::summarise(
@@ -500,7 +426,8 @@ postEventYearPlot <- function(data){
 # c("horizontal", "numeric_text")
 PostEventPlot <- function(df ,additional = c("horizontal", "numeric_text")) {
   
-  g <- df %>% ggplot() + aes(x=KPI, y = score) + 
+  g <- df %>%   
+    ggplot() + aes(x=KPI, y = score) + 
     geom_bar(stat='identity', fill="skyblue") + 
     ggtitle("KPI Scores") + 
     theme_minimal() + 
@@ -513,7 +440,7 @@ PostEventPlot <- function(df ,additional = c("horizontal", "numeric_text")) {
   }
   
   if("numeric_text" %in% additional){
-    g = g + geom_text(aes(label=score), position = position_stack(vjust = 0.5), size = 5) 
+    g = g + geom_text(aes(label= round(score,2)), position = position_stack(vjust = 0.5), size = 3) 
   }
   
   g
@@ -535,9 +462,8 @@ yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
   
   colnames(data) <- tolower(colnames(data))
   varnames_sorted <- sort(colnames(data))
-  name_kpi = paste('KPI -',kpi_name)
+  name_kpi = paste(kpi_name,'KPI')
   plot <- ggplot(data, aes(x = year, y = value, colour = demographic)) + 
-    # geom_point(color='black') + 
     geom_line() + 
     scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
     xlab('Year') + 
@@ -594,6 +520,7 @@ stratifiedEventPlot <- function(data,
   data = data %>% group_by(var1) %>% 
     dplyr::summarise(n = mean(KPI))
   
+  data = data %>% mutate(n = round(n,2))
   g = helperAdditionalOneVariableStratified(g = data, additional = additional)
   
   

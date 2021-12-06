@@ -24,14 +24,10 @@ source("postEventCleaning.R")
 
 # addResourcePath("vid", directoryPath = './www')
 
-# path = "https://drive.google.com/drive/folders/1PGMilQ7u0zDQ-KJbplDHxG5I-en5IMds"
 
-# path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
-# path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
 path = "https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
 
 # driveToken = googledrive::drive_auth(email = c("sourish.iyengar@gmail.com"), path = path)
-# sheetsToken = gs4_auth(token = drive_token())
 # files = drive_ls(path)
 email = "sourish.iyengar@gmail.com"
 
@@ -455,16 +451,20 @@ ui <- dashboardPage(
                   ),
                   # Panel 4
                   conditionalPanel("input.sidebar == 'report'",
-                                   box(title = "Download Report",
-                                       solidHeader = TRUE,
-                                       collapsible = TRUE,
-                                       collapsed = FALSE,
-                                       width = 12,
-                                       status = "success",
-                                       ## DOESN'T DOWNLOAD ANYTHING
-                                       downloadButton("downloadData",
-                                                      "Download Output"
-                                                      ))
+                                       box(title = "Download Report",
+                                           solidHeader = TRUE,
+                                           collapsible = TRUE,
+                                           collapsed = FALSE,
+                                           width = 12,
+                                           status = "success",
+                                           ## DOESN'T DOWNLOAD ANYTHING
+                                           downloadButton("downloadHTML",
+                                                          "Download Output HTML"
+                                                          ),
+                                           downloadButton("downloadPDF",
+                                                          "Download Output PDF"
+                                           )
+                                       )
                                    )
                   
                   
@@ -536,8 +536,7 @@ server <- function(input, output, session) {
     sheetInitialisation = reactive({
         path = input$driveID
         driveToken = googledrive::drive_auth(email = c(input$emailID), path = input$driveID)
-        sheetsToken = gs4_auth(token = drive_token())
-        files = drive_ls(path)
+        files = drive_ls(path, recursive = TRUE, type = "spreadsheet")
     })
 
 
@@ -969,7 +968,7 @@ server <- function(input, output, session) {
     
         data = data %>%
             dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year, demographic) %>%
-            mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+            mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year()) 
 
         if (input$analysisType != "Event"){
             data = data %>% 
@@ -979,12 +978,13 @@ server <- function(input, output, session) {
                 dplyr::summarise(value = mean(value)) %>% 
                 ungroup() %>% 
                 mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
-
             g = yearlyStratifiedVizPlot(data,  kpi_name = input$stratifiedEventKPI, demographic_name = demographic_name)
             
         }else{
             additional = input$stratifiedPlotOptions
-            data = data %>% select(KPI = input$stratifiedEventKPI, demographic)
+            data = data %>% select(KPI = input$stratifiedEventKPI, demographic)  
+    
+            
             g = stratifiedEventPlot(data, varNames = "demographic", demographicName = demographic_name, kpi = input$stratifiedEventKPI, additional = additional)
 
             
@@ -1051,35 +1051,117 @@ server <- function(input, output, session) {
     # Report
     
     
-    
+    ## Participant Count - Pre Event
     p1 = reactive({
         data = preEventData()
         data$age_group = data$age_group %>% factor(age_range_options)
         
-        PreEventPlot(data, varNames = c("year", "age_group"), additional = c("horizontal", "text", "proportions", "missing"))
+        if (input$analysisType == "Event"){
+            PreEventPlot(data, varNames = c("age_group"), additional = c("horizontal", "numeric_text", "missing"))
+        }else{
+            PreEventPlot(data, varNames = c("year", "age_group"), additional = c("horizontal", "numeric_text", "proportions", "missing")) +
+                ggtitle("Annual Participant Attendance")
+        }
 
     })
     
-    p2 = reactive({
-        PreEventPlot(preEventData(), varNames = c("year", "pronoun"), additional = c("proportions", "missing"))
+    
+    p7 = reactive({
+        data = preEventData()
+        data$age_group = data$age_group %>% factor(age_range_options)
+        
+        if (input$analysisType == "Event"){
+            PreEventPlot(data, varNames = c("origin"), additional = c("horizontal", "numeric_text", "missing"))
+        }else{
+            PreEventPlot(data, varNames = c("year", "origin"), additional = c("horizontal", "numeric_text", "proportions", "missing")) +
+                ggtitle("Annual Indigenous Participant Attendance")
+        }
     })
+    
+    ## Map - Pre event
+    p2 = reactive({
+        data = preEventData()
+        map_one_variable(data, "previous_attendance") 
+    })
+    
+    
+    
 
     p3 = reactive({
-        PreEventPlot(preEventData(),varNames = c("year", "pre_environmental_impact"), additional = c("missing"))
-
-    })
-
-    p4 = reactive({
         data = postEventData()
-        data = data %>%
-            dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>%
+        data = data %>% 
+            dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year) %>% 
             mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
-        postEventYearPlot(data)
+        
+        if (input$analysisType %in% c("Location", "Yearly")){
+            g = postEventYearPlot(data) + ggtitle("Annual KPI Analsyis")
+            
+        }else{
+            additional = input$postPlotOptions
+            data = data %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
+            g = PostEventPlot(df = data, additional = c("horizontal", "numeric_text"))
+        }
 
     })
 
     
-    output$downloadData <- downloadHandler(
+    p4 = reactive({
+        data = postEventData() %>% 
+            rowwise() %>% 
+            mutate(`Average KPI` = (learning_kpi+community_kpi+action_kpi)/3 ) %>% 
+            ungroup()
+        map_kpi(data, "average KPI")
+        
+    })
+    
+    p5 = reactive({
+        data =  stratifiedData() %>% filter(previous_attendance %in% c("Yes", "No"))
+        data$age_group = data$age_group %>% factor(age_range_options)
+
+        demographic_name = "previous_attendance"
+        data =  data %>%
+            dplyr::rename(demographic = demographic_name) %>% 
+            dplyr::select(Action = action_kpi, Learning = learning_kpi, Community = community_kpi,year = year, demographic) %>%
+            mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year()) %>% 
+            rowwise() %>% 
+            mutate(`Average KPI` = (Action+Learning+Community)/3) %>% 
+            ungroup()
+            
+
+        if (input$analysisType != "Event"){
+            data = data %>% 
+                select(value = "Average KPI", demographic, year) %>% 
+                mutate(KPI = "Average KPI") %>% 
+                group_by(demographic, year, KPI)  %>% 
+                dplyr::summarise(value = mean(value)) %>% 
+                ungroup() %>% 
+                mutate(year = as.Date(as.character(year), format = "%Y") %>% lubridate::year())
+            
+            g = yearlyStratifiedVizPlot(data,  kpi_name = "Average", demographic_name = demographic_name)
+            
+        }else{
+            data = data %>% select(KPI = "Average KPI", demographic)
+            g = stratifiedEventPlot(data, varNames = "demographic",
+                                    demographicName = demographic_name, 
+                                    kpi = "Average KPI", 
+                                    additional = c("horizontal", "missing", "numeric_text")) +
+                                        ylab("Average KPI Scores")
+            
+        }
+
+    })
+    
+    
+    p6 = reactive({
+        data = stratifiedData()
+        data %>% dplyr::select(-postcode_event) %>%
+            dplyr::rename(postcode_event = "postcode") %>%
+            map_kpi("action")
+        
+    })
+
+    
+    output$downloadHTML <- downloadHandler(
         # For PDF output, change this to "report.pdf"
         filename = "report.html",
         
@@ -1099,7 +1181,7 @@ server <- function(input, output, session) {
             )
             on.exit(removeNotification(id), add = TRUE)
             
-            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4())
+            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4(), v5 = p5(), v6 = p6(), v7 = p7())
             # params = list(v1 = p1(), v2 = p2(), v3 = p3())
             
             
@@ -1112,6 +1194,47 @@ server <- function(input, output, session) {
             )
         }
     )
+    
+    
+    output$downloadPDF <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
+        filename = "report.pdf",
+        
+        content = function(file) {
+            # Copy the report file to a temporary directory before processing it, in
+            # case we don't have write permissions to the current working dir (which
+            # can happen when deployed).
+            tempReport <- file.path(tempdir(), "reportPDF.Rmd")
+            file.copy("reportPDF.Rmd", tempReport, overwrite = TRUE)
+            
+            # Set up parameters to pass to Rmd document
+            
+            id <- showNotification(
+                "Rendering report...", 
+                duration = NULL, 
+                closeButton = FALSE
+            )
+            on.exit(removeNotification(id), add = TRUE)
+            
+            params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4(), v5 = p5(), v6 = p6(), v7 = p7())
+            # params = list(v1 = p1(), v2 = p2(), v3 = p3())
+            
+            
+            # Knit the document, passing in the params list, and eval it in a
+            # child of the global environment (this isolates the code in the document
+            # from the code in this app).
+            rmarkdown::render(tempReport, output_file = file,
+                              params = params,
+                              envir = new.env(parent = globalenv())
+            )
+        }
+    )
+    
+
+    
+    
+    
+    
     output$messageMenu <- renderMenu({
         dropdownMenu(type = "messages", 
                      messageItem(from = "HELP", message = "PLEASEs"))
