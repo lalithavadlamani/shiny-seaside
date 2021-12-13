@@ -9,6 +9,7 @@ params:
   v5: NA
   v6: NA
   v7: NA
+  rplot: NA
 ---
 
 ```{r, message = FALSE, warning = FALSE, echo=FALSE}
@@ -16,6 +17,8 @@ library(plotly)
 library(tidyverse)
 library(leaflet)
 ```
+
+
 
 
 # Demographic Analysis
@@ -34,7 +37,7 @@ params$v1
 ```
 :::
 
-
+\pagebreak
 ### Attendence by Indigenous Origin 
 
 The plot below describes participant attendance at each event by whether they are of Aboriginal/Torres Strait Islander descent.
@@ -45,19 +48,22 @@ params$v7
 ```
 :::
 
+
 \pagebreak
 ### Attendence by Location
 
 The map visualisation highlights the attendance of participants at Seaside events by their the place of residence (postcode).The plot also allows the filtering participants who have attended a scavenge previously.
 
-::: {.superbigimage}
-```{r,  message = FALSE, warning = FALSE, echo=FALSE}
-params$v2 
-```
-:::
+<!-- ::: {.superbigimage} -->
+<!-- ```{r,  message = FALSE, warning = FALSE, echo=FALSE} -->
+<!-- params$v2  -->
+<!-- ``` -->
+<!-- ::: -->
+
+![](./map1.png)
 
 
-
+\pagebreak
 # KPI Analysis
 
 <!-- The KPI values shown below in the visualisation are derived as follows: -->
@@ -80,17 +86,19 @@ params$v3
 :::
 
 
+\pagebreak
 ### Aggregate KPI's by Location
 
 The visualisation aggregates the Action, Learning and Community KPI's and averages them. This average score is then shown by event location on the map below.  
 
-::: {.superbigimage}
-```{r, message = FALSE, warning = FALSE, echo=FALSE}
-params$v4 
-```
-:::
+<!-- ::: {.superbigimage} -->
+<!-- ```{r, message = FALSE, warning = FALSE, echo=FALSE} -->
+<!-- params$v4 -->
+<!-- ``` -->
+<!-- ::: -->
+![](./map2.png)
 
-
+\pagebreak
 ## Demographic KPI's 
 
 This section includes a more nuanced analysis of KPI measures by incorporating demographic information such as whether participants have attended a scavenge before and KPI's by participant location.
@@ -105,12 +113,16 @@ params$v5
 ```
 :::
 
-
+\pagebreak
 ### KPI's by Participant Location
 
 This visualisation calculates the average KPI scores, creating an overall KPI measure. This measure is then highlighted by participant location in the map below. This gives insights into whether participants from certain regions are more likely to demonstrate behavioural change. Future scavenge events can be then augmented accordingly to consolidate differences in behavioural change by participant location to cater to a wider demographic.
 
-```{r, message = FALSE, warning = FALSE, echo=FALSE}
-params$v6
-```
+<!-- ::: {.superbigimage} -->
+<!-- ```{r, message = FALSE, warning = FALSE, echo=FALSE} -->
+<!-- params$v6 -->
+<!-- ``` -->
+<!-- ::: -->
+
+![](./map3.png)
 

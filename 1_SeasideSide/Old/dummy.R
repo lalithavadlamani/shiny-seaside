@@ -67,21 +67,21 @@
 
 
 
-
-
-
+require(plyr)
+library(tidyverse)
+library(leaflet)
+library(leaflet.extras)
+library(rgdal)
 library("googledrive")
 library("googlesheets4") # I am using the developing version 0.1.0.9000
 library("shiny")
 library("DT")
+source("scripts/Visualisations.R")
 # You want to deploy an app in Shinyapps.io or other server
 # FIRST STEP----
 # Get the token an store it in a cache folder embedded in your app directory
 # designate project-specific cache
-# options(
-#     gargle_oauth_email = TRUE,
-#     gargle_oauth_cache = "1_SeasideSide/.secrets"
-# )
+
 # options(gargle_quiet = FALSE) # So you can know what is happening
 # Authenticate in interactive mode (run the app) ONCE and check if the token
 # has been stored inside the .secrets folder, after that just comment this line
@@ -93,9 +93,15 @@ library("DT")
 # Comment lines 10, 13 and 15 and uncomment lines 21 and 22
 # You tell gargle to search the token in the secrets folder and to look
 # for an auth given to a certain email (enter your email linked to googledrive!)
-drive_auth(cache = ".secrets", email = TRUE)
-gs4_auth(token = drive_token())
 
+options(
+    gargle_oauth_email = TRUE,
+    gargle_oauth_cache = ".secrets"
+)
+
+path = "https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+driveToken = drive_auth(cache = ".secrets", email = TRUE)
+gs4_auth(token = drive_token())
 
 # THIRD STEP---
 # Now you can deploy your app in shinyapps.io!!
@@ -123,10 +129,13 @@ ui <- # Define UI for application that plots random distributions
                             value = 500),
                 actionButton(
                     "add",
-                    "Add new entry")
+                    "Add new entry"),
+                
+                textInput("id",'hope', value = "Bondi Junction_2026_03.02.2019_Pre_Participants")
+                # ,
+                # selectizeInput("abc", "files-test", drive_ls(path, recursive = TRUE, type = "spreadsheet"))
             ),
 
-            # Show a plot of the generated distribution
             mainPanel(
                 "Check your googlesheet!!",
                 DTOutput("plz"),
@@ -145,8 +154,11 @@ server <- function(input, output, session) {
     #  2) Its output type is a plot
     #
     sheetInit = reactive({
-        data = drive_ls("https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5")$name[1]
-        wb <- drive_get(data)
+        # data = drive_ls("https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5", recursive = TRUE, type = "spreadsheet")$name[1]
+        # wb <- drive_get(data)
+        # files = drive_ls(path, recursive = TRUE, type = "spreadsheet")
+        files = gs4_find()$name
+        wb <- drive_get(input$id)
         dt <- read_sheet(wb)
     })
 

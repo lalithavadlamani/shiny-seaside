@@ -1,5 +1,5 @@
-require(stringr)
-require(tidyverse)
+# require(stringr)
+# require(tidyverse)
 
 # Example input
 #test_input = c("Bondi Junction_2026_03.02.2021_Pre_Participants", "Turramurra_2026_04.01.2020_Pre_Participants",

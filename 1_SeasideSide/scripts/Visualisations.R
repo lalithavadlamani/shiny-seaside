@@ -227,12 +227,6 @@ helperAdditionalOneVariable = function(g, additional){
 
 
 # Map
-library(tidyverse)
-library(leaflet)
-library(leaflet.extras)
-library(rgdal)
-require(plyr)
-
 
 map_one_variable <- function(df, var1){
   postcodes_loc <- read_csv("australian_postcodes.csv")
@@ -425,36 +419,31 @@ postEventYearPlot <- function(data){
 
 # c("horizontal", "numeric_text")
 PostEventPlot <- function(df ,additional = c("horizontal", "numeric_text")) {
-  
-  g <- df %>%   
-    ggplot() + aes(x=KPI, y = score) + 
-    geom_bar(stat='identity', fill="skyblue") + 
-    ggtitle("KPI Scores") + 
-    theme_minimal() + 
-    xlab("KPI") + 
+
+  g <-ggplot(data = df, aes(x=KPI, y = score))  +
+    geom_bar(stat='identity', fill="skyblue") +
+    ggtitle("KPI Scores") +
+    theme_minimal() +
+    xlab("KPI") +
     ylab("Score")
-  
+
   if("horizontal" %in% additional){
     g = g + coord_flip()
-    
+
   }
-  
+
   if("numeric_text" %in% additional){
-    g = g + geom_text(aes(label= round(score,2)), position = position_stack(vjust = 0.5), size = 3) 
+    g = g + geom_text(aes(label= round(score,2)), position = position_stack(vjust = 0.5), size = 3)
   }
-  
+
   g
 }
 
-PostEventPlot(df, additional = c("horizontal", "text"))
+# PostEventPlot(df, additional = c("horizontal", "text"))
 
 
 
-
-
-
-
-# Stratitified
+# Stratified
 
 
 
