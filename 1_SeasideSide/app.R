@@ -1,47 +1,46 @@
+require(plyr)
+library(leaflet)
+library(leaflet.extras)
+library(rgdal)
 library(janitor)
+library(stringr)
+library(readxl)
+library(webshot)
+library(mapview)
+
+
 library(tidyverse)
 library(DT)
 library(plotly)
-
-
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(dashboardthemes)
 library(googlesheets4)
+library(googleAuthR)
 library(googledrive)
 library(readr)
 library(sortable)
 library(lubridate)
 
-source("filename_cleaning.R")
-source("preEventCleaning.R")
-source("Visualisations.R")
-source("postEventCleaning.R")
+
+source("scripts/filename_cleaning.R")
+source("scripts/preEventCleaning.R")
+source("scripts/Visualisations.R")
+source("scripts/postEventCleaning.R")
 
 
-# remove.packages(c("reprex","rprojroot", "rvest","selectr", "shinydashboard", "tidyverse", "xml2"))
-# install.packages(c("reprex","rprojroot", "rvest","selectr", "shinydashboard", "tidyverse", "xml2"))
-
-# addResourcePath("vid", directoryPath = './www')
-
-
-path = "https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
-
-# driveToken = googledrive::drive_auth(email = c("sourish.iyengar@gmail.com"), path = path)
-# files = drive_ls(path)
-email = "sourishiyengar@gmail.com"
-
-
+email = "sourish.iyengar@gmail.com"
+path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
 
 options(
     gargle_oauth_email = TRUE,
     gargle_oauth_cache = ".secrets"
 )
 
-# drive_auth(cache = ".secrets", email = TRUE)
 
-
+driveToken = drive_auth(cache = ".secrets", email = TRUE)
+gs4_auth(token = drive_token())
 
 # Prevent Choices (Variables)
 preVars = list(Age = "age_group",Gender = "pronoun", 
@@ -50,6 +49,23 @@ preVars = list(Age = "age_group",Gender = "pronoun",
                "Perceived Environmental Investment"= "pre_environmental_impact",
                "Aboriginal or Torres Strait Islander Origin?" = "origin"
 )
+
+
+phantomjs_path <- webshot:::find_phantom()
+if (is.null(phantomjs_path)){
+    webshot::install_phantomjs()
+    FlgJS <- F
+} else{
+    FlgJS <- T
+}
+phantomjs_path2 <- webshot:::find_phantom()
+(FlgJS2 <- !(is.null(phantomjs_path2)))
+
+EtatInstallationJS <- ifelse(isTRUE(FlgJS),
+                             "1-PhJS déja installé",
+                             ifelse(isTRUE(FlgJS2),
+                                    "2-PhJS vient d'être installé",
+                                    "3-PhJS n'a pas été installé"))
 
 ui <- dashboardPage(
     # Colour
@@ -170,23 +186,25 @@ ui <- dashboardPage(
                 type = "text/css", 
                 href = "styles.css")
         ),
-        # User inputted email and drive link
         fluidRow(
             column(12,
-                box(
-                    status = "danger", 
-                    solidHeader = TRUE,
-                    collapsible = TRUE,
-                    # collapsed = TRUE,
-                    # width = 12,
-                    
-                    title = "File Information",
-                    textInput("emailID", "Paste drive email address:", value = email ,width = NULL, placeholder = email),
-                    textInput("driveID", "Paste folder drive link:", value = path,width = NULL, placeholder = path),
-                    width = 12
-                )
+                   box(
+                       status = "danger", 
+                       solidHeader = TRUE,
+                       collapsible = TRUE,
+                       # collapsed = TRUE,
+                       # width = 12,
+                       
+                       title = "File Information",
+                       # textInput("emailID", "Paste drive email address:", value = email ,width = NULL, placeholder = email),
+                       searchInput("driveID", "Paste folder drive link:", value = path,width = NULL, placeholder = path,
+                                   btnSearch = icon("check"), 
+                                   btnReset = icon("remove")),
+                       width = 12
+                   )
             )
         ),
+
         
 
         # Pre Event Panel
@@ -532,35 +550,31 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
     
-    # Pulling Google Sheets
     sheetInitialisation = reactive({
-        path = input$driveID
-        driveToken = googledrive::drive_auth(email = c(input$emailID), path = input$driveID)
-        # driveToken = drive_auth(cache = ".secrets", email = TRUE, path = "https://drive.google.com/drive/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5")
-        files = drive_ls(path, recursive = TRUE, type = "spreadsheet")
-        
+        files = drive_ls(input$driveID, recursive = TRUE, type = "spreadsheet")
     })
 
 
     metaData = reactive({name_processing(sheetInitialisation()$name)})
     
     # Updating Survey Choices
-    observeEvent(input$driveID,{
-                 if (!(is.null(input$emailID) & is.null(input$driveID))){
-
-                     files = sheetInitialisation()
-                     choices = files$name
-                     updateSelectizeInput(session,
-                                          "sheet",
-                                          choices = choices,
-                                          selected = choices[1],
-                                          server = TRUE)
-                 }
-             }
-        )
+    # observeEvent(input$driveID,{
+    #              if (!(is.null(input$emailID) & is.null(input$driveID))){
+    # 
+    #                  files = sheetInitialisation()
+    #                  choices = files$name
+    #                  updateSelectizeInput(session,
+    #                                       "sheet",
+    #                                       choices = choices,
+    #                                       selected = choices[1],
+    #                                       server = TRUE)
+    #              }
+    #          }
+    #     )
 
     # Updating inputs with choices corresponding to analysis type
-    observeEvent(input$analysisType,{
+    observeEvent({input$analysisType
+                  input$driveID},{
         
                  if (!(is.null(input$emailID) & is.null(input$driveID))){
                      metaData = metaData()
@@ -1111,6 +1125,7 @@ server <- function(input, output, session) {
             rowwise() %>% 
             mutate(`Average KPI` = (learning_kpi+community_kpi+action_kpi)/3 ) %>% 
             ungroup()
+        
         map_kpi(data, "average KPI")
         
     })
@@ -1155,9 +1170,12 @@ server <- function(input, output, session) {
     
     p6 = reactive({
         data = stratifiedData()
-        data %>% dplyr::select(-postcode_event) %>%
+        data = data %>% dplyr::select(-postcode_event) %>%
             dplyr::rename(postcode_event = "postcode") %>%
-            map_kpi("action")
+            rowwise() %>% 
+            mutate(`Average KPI` = (learning_kpi+community_kpi+action_kpi)/3 ) %>% 
+            ungroup() %>% 
+        map_kpi("average KPI")
         
     })
 
@@ -1170,8 +1188,8 @@ server <- function(input, output, session) {
             # Copy the report file to a temporary directory before processing it, in
             # case we don't have write permissions to the current working dir (which
             # can happen when deployed).
-            tempReport <- file.path(tempdir(), "report.Rmd")
-            file.copy("report.Rmd", tempReport, overwrite = TRUE)
+            tempReport <- file.path(tempdir(), "reportHTML.Rmd")
+            file.copy("reportHTML.Rmd", tempReport, overwrite = TRUE)
             
             # Set up parameters to pass to Rmd document
             
@@ -1183,12 +1201,7 @@ server <- function(input, output, session) {
             on.exit(removeNotification(id), add = TRUE)
             
             params = list(v1 = p1(), v2 = p2(), v3 = p3(), v4 = p4(), v5 = p5(), v6 = p6(), v7 = p7())
-            # params = list(v1 = p1(), v2 = p2(), v3 = p3())
-            
-            
-            # Knit the document, passing in the params list, and eval it in a
-            # child of the global environment (this isolates the code in the document
-            # from the code in this app).
+
             rmarkdown::render(tempReport, output_file = file,
                               params = params,
                               envir = new.env(parent = globalenv())
@@ -1201,9 +1214,32 @@ server <- function(input, output, session) {
         filename = "report.pdf",
         
         content = function(file) {
-            tempReport <- file.path(tempdir(), "reportPDF.Rmd")
-            file.copy("reportPDF.Rmd", tempReport, overwrite = TRUE)
+            
+            mapshot(p2(), file = "map1.png")
+            mapshot(p4(), file = "map2.png")
+            mapshot(p6(), file = "map3.png")
+            
+            tempReport <- normalizePath('reportPDF.Rmd')
+            map1 <- normalizePath('map1.png')
+            map2 <- normalizePath('map2.png')
+            map3 <- normalizePath('map3.png')
 
+            owd <- setwd(tempdir())
+            on.exit(setwd(owd))
+            
+            file.copy(tempReport, 'reportPDF.Rmd')
+            file.copy(map1, 'map1.png')
+            file.copy(map2, 'map2.png')
+            file.copy(map3, 'map3.png')
+            # x1 = getwd()
+            # x2 = dir()
+            # 
+            # print(x1)
+            # print(x2)
+                
+            setwd("/srv/connect/apps/1_SeasideSide")
+
+            
             id <- showNotification(
                 "Rendering report...", 
                 duration = NULL, 

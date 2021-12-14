@@ -60,7 +60,7 @@ The map visualisation highlights the attendance of participants at Seaside event
 <!-- ``` -->
 <!-- ::: -->
 
-![](./map1.png)
+![](map1.png)
 
 
 \pagebreak
@@ -96,7 +96,7 @@ The visualisation aggregates the Action, Learning and Community KPI's and averag
 <!-- params$v4 -->
 <!-- ``` -->
 <!-- ::: -->
-![](./map2.png)
+![](map2.png)
 
 \pagebreak
 ## Demographic KPI's 
@@ -124,5 +124,5 @@ This visualisation calculates the average KPI scores, creating an overall KPI me
 <!-- ``` -->
 <!-- ::: -->
 
-![](./map3.png)
+![](map3.png)
 
