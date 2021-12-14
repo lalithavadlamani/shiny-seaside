@@ -455,15 +455,26 @@ yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
   demographic_name = stri_trans_totitle(str_replace_all(demographic_name,'_',' ')) # Added
   data$demographic <- gsub("_"," ",as.character(data$demographic)) # Added 
   data$demographic = stri_trans_totitle(data$demographic) # Added 
-  plot <- ggplot(data, aes(x = year, y = value, colour = demographic)) + 
-    geom_line() + 
-    scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
-    xlab('Year') + 
-    ylab(name_kpi) + 
-    guides(color = guide_legend(title = demographic_name)) + 
-    theme_classic() + 
-    ggtitle("Yearly KPI Scores") 
-  
+  data$kpi = stri_trans_totitle(data$kpi) # Added 
+  # Added 
+  if( length(levels(factor(data$year))) == 1){
+    plot <- ggplot(data, aes(x = demographic, y = value)) +
+      geom_bar(stat='identity',fill='skyblue') +
+      ggtitle(paste(levels(factor(data$kpi)),'KPI Score for',levels(factor(data$year)))) +
+      theme_minimal() +
+      xlab("Demographic") +
+      ylab("Score")
+  } else{
+    plot <- ggplot(data, aes(x = year, y = value, colour = demographic)) + 
+      geom_line() + 
+      scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
+      xlab('Year') + 
+      ylab(name_kpi) + 
+      guides(color = guide_legend(title = demographic_name)) + 
+      theme_classic() + 
+      ggtitle("Yearly KPI Scores") 
+    }
+  # ------
   plot = plot + 
     ggthemes::scale_color_tableau(
       palette = "Tableau 10",
