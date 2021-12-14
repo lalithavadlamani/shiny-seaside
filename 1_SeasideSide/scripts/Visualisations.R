@@ -452,6 +452,9 @@ yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
   colnames(data) <- tolower(colnames(data))
   varnames_sorted <- sort(colnames(data))
   name_kpi = paste(kpi_name,'KPI')
+  demographic_name = stri_trans_totitle(str_replace_all(demographic_name,'_',' ')) # Added
+  data$demographic <- gsub("_"," ",as.character(data$demographic)) # Added 
+  data$demographic = stri_trans_totitle(data$demographic) # Added 
   plot <- ggplot(data, aes(x = year, y = value, colour = demographic)) + 
     geom_line() + 
     scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
