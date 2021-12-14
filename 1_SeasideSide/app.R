@@ -392,8 +392,10 @@ ui <- dashboardPage(
                             # HTML('<iframe src="jenn_demo.mp4" title="demo_video"</iframe>'),
                             # HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
                             fluidPage(
-                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "jenn_demo.mp4", controls = "controls"),
-                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "jenn_demo2.mp4", controls = "controls")
+                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_1.mkv", controls = "controls"),
+                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_2.mkv", controls = "controls"),
+                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_3.mkv", controls = "controls")
+                            
                             
                             )
                         )
