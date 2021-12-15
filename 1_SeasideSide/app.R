@@ -31,8 +31,11 @@ source("scripts/Visualisations.R")
 source("scripts/postEventCleaning.R")
 
 
-email = "sourish.iyengar@gmail.com"
-path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+# email = "sourish.iyengar@gmail.com"
+# path = "https://drive.google.com/drive/u/0/folders/1Yl_VatRKZD7HeA-CrZHaCtZXXVt2rwY5"
+
+email = "seashine.data@gmail.com"
+path = "https://drive.google.com/drive/u/0/folders/1Z7PwwfwXejk3hDq7elW9OGb3ivnhpYW2"
 
 options(
     gargle_oauth_email = TRUE,
