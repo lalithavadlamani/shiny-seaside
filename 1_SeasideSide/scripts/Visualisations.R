@@ -470,13 +470,29 @@ yearlyStratifiedVizPlot <- function(data,kpi_name,demographic_name){
   data$kpi = stri_trans_totitle(data$kpi) # Added 
   # Added 
   if( length(levels(factor(data$year))) == 1){
+    
+     if (grepl("Age", data$demographic[1], fixed = TRUE) == TRUE){
+      age_string <- levels(factor(data$demographic))
+      age_num <- parse_number(age_string)
+      sorted_age_string <- age_string[order(age_num)]
+      
+      plot <- ggplot(data, aes(x = demographic, y = value)) +
+        geom_bar(stat='identity',fill='skyblue') +
+        scale_x_discrete(limits = sorted_age_string ) +
+        ggtitle(paste(levels(factor(data$kpi)),'KPI Score for',levels(factor(data$year)))) +
+        theme_minimal() +
+        xlab("Demographic") +
+        ylab("Score")
+      
+    } else{
     plot <- ggplot(data, aes(x = demographic, y = value)) +
       geom_bar(stat='identity',fill='skyblue') +
       ggtitle(paste(levels(factor(data$kpi)),'KPI Score for',levels(factor(data$year)))) +
       theme_minimal() +
       xlab("Demographic") +
       ylab("Score")
-  } else{
+    }
+     } else{
     plot <- ggplot(data, aes(x = year, y = value, colour = demographic)) + 
       geom_line() + 
       scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
