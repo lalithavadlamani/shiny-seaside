@@ -390,17 +390,29 @@ map_kpi <- function(df, kpi){
 postEventYearPlot <- function(data){
   data = data %>% group_by(year) %>% mutate_all(mean, na.rm = TRUE) %>% dplyr::slice(1) %>% gather(-year, key = "KPI", value = "score")
   df = data %>% gather(-year, key = "KPI", value = "score")
+  # Added 
+  data$KPI = stri_trans_totitle(data$KPI)
+  if (length(levels(factor(data$year))) == 1){
+  
+    plot <- ggplot(data, aes(x=KPI, y = score)) + 
+      geom_bar(stat='identity',fill='skyblue') +
+      ggtitle(paste('KPI Scores for',levels(factor(data$year)))) +
+      theme_minimal() +
+      xlab("KPI") +
+      ylab("Score")
 
-  plot <- data %>% ggplot(aes(x = year, y = score, colour = KPI )) +
-    # geom_point(color='black') +
-    geom_line() +
-    xlab('Year') +
-    ylab('KPI Score') +
-    scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
-    # scale_y_continuous(limits=c(0,1),breaks = seq(0, 1, by = 0.1)) +
-    ggtitle("Yearly KPI Scores") +
-    guides(color = guide_legend(title = "KPI")) +
-    theme_classic()
+  } else{
+    plot <- data %>% ggplot(aes(x = year, y = score, colour = KPI )) +
+      # geom_point(color='black') +
+      geom_line() +
+      xlab('Year') +
+      ylab('KPI Score') +
+      scale_x_continuous(breaks = seq(min(data$year), max(data$year)) ) +
+      # scale_y_continuous(limits=c(0,1),breaks = seq(0, 1, by = 0.1)) +
+      ggtitle("Yearly KPI Scores") +
+      guides(color = guide_legend(title = "KPI")) +
+      theme_classic()
+    }
 
   
   plot = plot + 
