@@ -5,10 +5,10 @@ account: sourish27
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5056539
-bundleId: 5368647
+bundleId: 5371162
 url: https://sourish27.shinyapps.io/1_SeasideSide/
-when: 1639432190.71243
-lastSyncTime: 1639432190.71243
+when: 1639487312.37195
+lastSyncTime: 1639487312.37195
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: map1.png|map2.png|map3.png|Old
+ignoredFiles: Old

@@ -15,6 +15,7 @@ library(DT)
 library(plotly)
 library(shiny)
 library(shinydashboard)
+library(shinymanager)
 library(shinyWidgets)
 library(dashboardthemes)
 library(googlesheets4)
@@ -71,490 +72,530 @@ EtatInstallationJS <- ifelse(isTRUE(FlgJS),
                                     "2-PhJS vient d'être installé",
                                     "3-PhJS n'a pas été installé"))
 
-ui <- dashboardPage(
-    # Colour
-    skin = "blue",
-    # Include the custom styling
-    
-    # Application title
-    dashboardHeader(title = "Seashine",
-                    tags$li(class = "dropdown",
-                            tags$a(href="https://www.seasidescavenge.org/", target="_blank", 
-                                   tags$img(height = "20px", alt="Seaside Logo", src="logo_white.png")
-                            )
-                    ),
-        # Quick Tips Dropdown Box
-        dropdownMenu(
-            type = "notifications",
-            headerText = strong("QUICK TIPS"),
-            icon = icon("question"),
-            badgeStatus = NULL,
-            messageItem(
-                from = "HOME",
-                message = tags$div(
-                    "Welcome to the home page! Start",
-                    tags$br(),
-                    "by clicking one of the tabs in the",
-                    tags$br(),
-                    "side menu, or watch the demo ",
-                    tags$br(),
-                    "videos below for more information."),
-                icon = icon("home")
-            ),
-            messageItem(
-                from = "PRE-EVENT",
-                message = tags$div(
-                    "Use the 'controls' box to choose ",
-                    tags$br(),
-                    "between event, yearly, and location",
-                    tags$br(),
-                    " analysis of demographic data for ",
-                    tags$br(),
-                    "the pre-event survey. You can also ",
-                    tags$br(),
-                    "view and download the data used",
-                    tags$br(),
-                    "in the 'data' section."),
-                
-                icon = icon("chart-bar")
-            ),
-            messageItem(
-                from = "POST-EVENT",
-                message = tags$div(
-                    "Use the 'controls' box to choose ",
-                    tags$br(),
-                    "between event, yearly, and location",
-                    tags$br(),
-                    " analysis of KPI data for ",
-                    tags$br(),
-                    "the post-event survey. You can also ",
-                    tags$br(),
-                    "view and download the data used",
-                    tags$br(),
-                    "in the 'data' section."),
-                icon = icon("seedling")
-            ),
-            messageItem(
-                from = "Combined Analysis",
-                message = tags$div(
-                    "Use the 'controls' box to choose ",
-                    tags$br(),
-                    "between event, yearly, and location,",
-                    tags$br(),
-                    "as well as a KPI category to analyse. ",
-                    tags$br(),
-                    "participant data. You can also ",
-                    tags$br(),
-                    "view and download the combined data",
-                    tags$br(),
-                    "used in the 'data' section."),
-                icon = icon("project-diagram")
-            ),
-            messageItem(
-                from = "Export Report",
-                message = tags$div(
-                    "Download a report with pre-made",
-                    tags$br(),
-                    "visualisastions of the surveys ",
-                    tags$br(),
-                    "you are looking for. "),
-                icon = icon("file-invoice")
-            )
 
-            
-            
-            
-        )   
+
+
+
+
+# Authentication
+inactivity <- "function idleTimer() {
+var t = setTimeout(logout, 120000);
+window.onmousemove = resetTimer; // catches mouse movements
+window.onmousedown = resetTimer; // catches mouse movements
+window.onclick = resetTimer;     // catches mouse clicks
+window.onscroll = resetTimer;    // catches scrolling
+window.onkeypress = resetTimer;  //catches keyboard actions
+
+function logout() {
+window.close();  //close the window
+}
+
+function resetTimer() {
+clearTimeout(t);
+t = setTimeout(logout, 120000);  // time is in milliseconds (1000 is 1 second)
+}
+}
+idleTimer();"
+
+
+# data.frame with credentials info
+
+
+
+
+
+
+
+
+
+ui <-secure_app(head_auth = tags$script(inactivity), 
+        dashboardPage(
+        # Colour
+        skin = "blue",
+        # Include the custom styling
         
-        
-    ),
-    
-    # Sidebar Menu
-    dashboardSidebar( 
-        sidebarMenu(id = "sidebar",
-        menuItem("Home", tabName = "home", icon = icon("home")),
-        menuItem("Pre-event", tabName = "preEvent", icon = icon("chart-bar")),
-        menuItem("Post-event", tabName = "postEvent", icon = icon("seedling")),
-        menuItem("Combined Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
-        menuItem("Report", tabName = "report", icon = icon("file-invoice"))
-        
-        )
-    ),
-    
-    # Main Body
-    dashboardBody(
-        
-        tags$head(
-            tags$link(
-                rel = "stylesheet", 
-                type = "text/css", 
-                href = "styles.css")
-        ),
-        fluidRow(
-            column(12,
-                   box(
-                       status = "danger", 
-                       solidHeader = TRUE,
-                       collapsible = TRUE,
-                       # collapsed = TRUE,
-                       # width = 12,
-                       
-                       title = "File Information",
-                       # textInput("emailID", "Paste drive email address:", value = email ,width = NULL, placeholder = email),
-                       searchInput("driveID", "Paste folder drive link:", value = path,width = NULL, placeholder = path,
-                                   btnSearch = icon("check"), 
-                                   btnReset = icon("remove")),
-                       width = 12
-                   )
-            )
-        ),
-
-        
-
-        # Pre Event Panel
-        ## Row 1
-        fluidRow(
-            
-            # Panel 1 sidebar
-            column(4,
-                                    
-               conditionalPanel("input.sidebar != 'home'",
-                                    
-                box(
-                    status = "warning", 
-                    solidHeader = TRUE,
-                    collapsible = TRUE,
-                    title = "Controls",
-                    width = 12,
-
-                    # Inputs
-                    sidebarPanel(
-                        width = 12,
-                        # Year by Year Analysis     
-                        radioGroupButtons(
-                            inputId = "analysisType",
-                            label = "Analysis:", 
-                            choices = c("Event","Yearly", "Location"),
-                            status = "warning"
-                        ),  
-                        tags$script("$(\"input:radio[name='analysisType'][value='Event']\").parent().css('background-color', '#F27B34');"),
-                        tags$script("$(\"input:radio[name='analysisType'][value='Yearly']\").parent().css('background-color', '#F27B34');"),
-                        tags$script("$(\"input:radio[name='analysisType'][value='Location']\").parent().css('background-color', '#F27B34');"),
-                        
-                        # Survey choice - Choices populated in server
-                        selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
-                        
-                        # Pre 
-                        conditionalPanel("input.sidebar == 'preEvent'",
-                                         
-                            selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun"),
-                            
-                            # Only show for barplot
-                            conditionalPanel("input.analysisType == 'Event' & input.preTabViz == 1",
-                                selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
-                                ),
-                            
-                            # Only show for barplot
-                            conditionalPanel("input.preTabViz == 1",
-                                prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE)
-                            ),
-                            
-                            conditionalPanel("input.advancedPreOptions == 1 & input.preTabViz == 1",
-                             #selectizeInput
-                                checkboxGroupButtons("prePlotOptions",
-                                               "Plotting Options (Optional)", 
-                                               choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
-                                                              "Remove Unknowns" = "missing"), 
-                                               selected = "missing"),
-
-                                textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
-                                textInput("preXaxis", "Choose x-axis label", value = NULL ,width = NULL),
-                                textInput("preYaxis", "Choose y-axis label", value = NULL,width = NULL)
-                                ),
-                            
-                            
-                            # For map
-                            conditionalPanel("input.preTabViz == 2",
-                                             radioGroupButtons(
-                                                 inputId = "preMapAnalysisType",
-                                                 label = "Spatial Analysis:", 
-                                                 choices = c("Participants","Event")
-                                             )
-                            ),
-                            
-                            downloadButton('downloadPreEvent',"Download the data"),
-                            
-                            
-
-                                
+        # Application title
+        dashboardHeader(title = "Seashine",
+                        tags$li(class = "dropdown",
+                                tags$a(href="https://www.seasidescavenge.org/", target="_blank", 
+                                       tags$img(height = "20px", alt="Seaside Logo", src="logo_white.png")
+                                )
                         ),
+            # Quick Tips Dropdown Box
+            dropdownMenu(
+                type = "notifications",
+                headerText = strong("QUICK TIPS"),
+                icon = icon("question"),
+                badgeStatus = NULL,
+                messageItem(
+                    from = "HOME",
+                    message = tags$div(
+                        "Welcome to the home page! Start",
+                        tags$br(),
+                        "by clicking one of the tabs in the",
+                        tags$br(),
+                        "side menu, or watch the demo ",
+                        tags$br(),
+                        "videos below for more information."),
+                    icon = icon("home")
+                ),
+                messageItem(
+                    from = "PRE-EVENT",
+                    message = tags$div(
+                        "Use the 'controls' box to choose ",
+                        tags$br(),
+                        "between event, yearly, and location",
+                        tags$br(),
+                        " analysis of demographic data for ",
+                        tags$br(),
+                        "the pre-event survey. You can also ",
+                        tags$br(),
+                        "view and download the data used",
+                        tags$br(),
+                        "in the 'data' section."),
                     
-                        
-                        # Post
-                        conditionalPanel("input.sidebar == 'postEvent'",
-                                         
-                             conditionalPanel("input.postTabViz == 2",
-                                 radioGroupButtons(
-                                     inputId = "postEventKPI",
-                                     label = "KPI:", 
-                                     choices = c("Action","Learning", "Community")
-                                 )
-                             ),
-                             conditionalPanel("input.postTabViz == 1",
-                                              prettySwitch("advancedPostOptions", "More Plotting Options?", slim = TRUE)
-                             ),
-                             conditionalPanel("input.advancedPostOptions == 1",
-                                              conditionalPanel("input.analysisType == 'Event'",
-                                                  checkboxGroupButtons("postPlotOptions",
-                                                                       "Plotting Options (Optional)", 
-                                                                       choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
-                                                                       selected = NULL)
-                                              ),
-                                              
-                                              
-                                              conditionalPanel("input.postTabViz == 1",
-                                                  textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
-                                                  textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
-                                                  textInput("postYaxis", "Choose y-axis label", value = NULL,width = NULL)
-                                              )
-                                 ),
-                             
-                             
-                             
-                             
-                             downloadButton('downloadPostEvent',"Download the data")
-                                         
-                        ),
-                        
-                        # Stratified
-                        conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
-                                         radioGroupButtons(
-                                             inputId = "stratifiedEventKPI",
-                                             label = "KPI:", 
-                                             choices = c("Action","Learning", "Community")
-                                         ),
-                                         conditionalPanel("input.stratifiedAnalysisTabViz == 1",
-                                             selectizeInput("stratifiedVarColour", "Colouring Variable", choices = c("None",preVars))
-                                         ),
-                                         
-                                         # For map
-                                         conditionalPanel("input.stratifiedAnalysisTabViz == 2",
-                                                          radioGroupButtons(
-                                                              inputId = "stratifiedMapAnalysisType",
-                                                              label = "Spatial Analysis:", 
-                                                              choices = c("Participants","Event")
-                                                          )
-                                         ),
-                                         
-                                         selectizeInput(
-                                             "filteringVariable", "Variable to filter by:", choices = c("None",preVars)
-                                         ),
-                                         tabItem(tabName = "drag",
-                                                 uiOutput("bucket")
-                                         ),
-                                         conditionalPanel("input.stratifiedAnalysisTabViz == 1",
-                                                          prettySwitch("advancedStratifiedOptions", "More Plotting Options?", slim = TRUE)
-                                         ),
-                                         
-                                         conditionalPanel("input.advancedStratifiedOptions == 1",
-                                                          conditionalPanel("input.analysisType == 'Event' &  input.stratifiedAnalysisTabViz == 1",
-                                                                           checkboxGroupButtons("stratifiedPlotOptions",
-                                                                                                "Plotting Options (Optional)", 
-                                                                                                choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
-                                                                                                                "Remove Unknowns" = "missing"), 
-                                                                                                selected = "missing")
-                                                          ),
-                                                          
-                                                          
-                                                          conditionalPanel("input.stratifiedAnalysisTabViz == 1",
-                                                                           textInput("stratifiedTitle", "Choose plot title", value = NULL ,width = NULL),
-                                                                           textInput("stratifiedXaxis", "Choose x-axis label", value = NULL ,width = NULL),
-                                                                           textInput("stratifiedYaxis", "Choose y-axis label", value = NULL,width = NULL)
-                                                          )
-                                         ),
-                                         
-
-
-                                         downloadButton('downloadStratifiedEventKPIEvent',"Download the data")
-                                         
-                        )
-                            
-                    ),
-                    ),
+                    icon = icon("chart-bar")
+                ),
+                messageItem(
+                    from = "POST-EVENT",
+                    message = tags$div(
+                        "Use the 'controls' box to choose ",
+                        tags$br(),
+                        "between event, yearly, and location",
+                        tags$br(),
+                        " analysis of KPI data for ",
+                        tags$br(),
+                        "the post-event survey. You can also ",
+                        tags$br(),
+                        "view and download the data used",
+                        tags$br(),
+                        "in the 'data' section."),
+                    icon = icon("seedling")
+                ),
+                messageItem(
+                    from = "Combined Analysis",
+                    message = tags$div(
+                        "Use the 'controls' box to choose ",
+                        tags$br(),
+                        "between event, yearly, and location,",
+                        tags$br(),
+                        "as well as a KPI category to analyse. ",
+                        tags$br(),
+                        "participant data. You can also ",
+                        tags$br(),
+                        "view and download the combined data",
+                        tags$br(),
+                        "used in the 'data' section."),
+                    icon = icon("project-diagram")
+                ),
+                messageItem(
+                    from = "Export Report",
+                    message = tags$div(
+                        "Download a report with pre-made",
+                        tags$br(),
+                        "visualisastions of the surveys ",
+                        tags$br(),
+                        "you are looking for. "),
+                    icon = icon("file-invoice")
+                )
+    
+                
+                
+                
+            )   
+            
+            
+        ),
+        
+        # Sidebar Menu
+        dashboardSidebar( 
+            sidebarMenu(id = "sidebar",
+            menuItem("Home", tabName = "home", icon = icon("home")),
+            menuItem("Pre-event", tabName = "preEvent", icon = icon("chart-bar")),
+            menuItem("Post-event", tabName = "postEvent", icon = icon("seedling")),
+            menuItem("Combined Analysis", tabName = "stratifiedAnalysis", icon = icon("project-diagram")),
+            menuItem("Report", tabName = "report", icon = icon("file-invoice"))
+            
+            )
+        ),
+        
+        # Main Body
+        dashboardBody(
+            
+            tags$head(
+                tags$link(
+                    rel = "stylesheet", 
+                    type = "text/css", 
+                    href = "styles.css")
+            ),
+            fluidRow(
+                column(12,
+                       box(
+                           status = "danger", 
+                           solidHeader = TRUE,
+                           collapsible = TRUE,
+                           # collapsed = TRUE,
+                           # width = 12,
+                           
+                           title = "File Information",
+                           # textInput("emailID", "Paste drive email address:", value = email ,width = NULL, placeholder = email),
+                           searchInput("driveID", "Paste folder drive link:", value = path,width = NULL, placeholder = path,
+                                       btnSearch = icon("check"), 
+                                       btnReset = icon("remove")),
+                           width = 12
+                       )
                 )
             ),
+    
             
-            conditionalPanel("input.sidebar == 'home'",
-                 column(12,
-                        box(
-                            status = "warning", 
-                            solidHeader = TRUE,
-                            collapsible = TRUE,
-                            title = "Helpful Demo Videos",
-                            width = 12,
-                            # HTML('<iframe src="jenn_demo.mp4" title="demo_video"</iframe>'),
-                            # HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
-                            fluidPage(
-                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_1.mkv", controls = "controls"),
-                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_2.mkv", controls = "controls"),
-                            tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_3.mkv", controls = "controls")
-                            
-                            
-                            )
-                        )
-                 )
-                 
-            ),  
-            column(8,
-
-                   # Panel 1 Viz
-                   conditionalPanel("input.sidebar == 'preEvent'",
-                        box(
-                            title = "Demographic Analysis",
-                            solidHeader = TRUE,
-                            collapsible = TRUE,
-                            width = 12,
-                            status = "success",
-                            
-                       tabBox(
-                           # title = "Demographic Analysis",
-                           id = "preTabViz",    
-                           width = 12,
-                           tabPanel("Main Analysis", "",value = 1,
-                                    plotly::plotlyOutput("preViz", height = 400)
-                           ),
-                           tabPanel("Spatial Visualisation", "", value = 2,
-                                    leaflet::leafletOutput("preVizMap")
-                           )
-                       )
-                     )
-                   )
-                   # )
-                   ,
-                   
-                   # Panel 2
-                  conditionalPanel("input.sidebar == 'postEvent'",
-                       box(
-                           title = "KPI Analysis",
-                           solidHeader = TRUE,
-                           collapsible = TRUE,
-                           width = 12,
-                           status = "success",
-                                   tabBox(
-                                       id = "postTabViz",    
-                                       width = 12,
-                                       tabPanel("Main Analysis", "",value = 1,
-                                                plotly::plotlyOutput("postViz", height = 400)
-                                       ),
-                                       tabPanel("Spatial Visualisation", "", value = 2,
-                                                leaflet::leafletOutput("postVizMap")
-                                       )
-                                   )
-                       )
-                  ),
-                  
-                  # Panel 3
-                  conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
-                       box(
-                           title = "Combined Analysis",
-                           solidHeader = TRUE,
-                           collapsible = TRUE,
-                           width = 12,
-                           status = "success",
-                                   tabBox(
-                                       id = "stratifiedAnalysisTabViz",    
-                                       width = 12,
-                                       tabPanel("Main Analysis", "",value = 1,
-                                                plotly::plotlyOutput("stratifiedViz", height = 400)
-                                       ),
-                                       tabPanel("Spatial Visualisation", "", value = 2,
-                                                leaflet::leafletOutput("stratifiedVizMap")
-                                       )
-                                   )
-                       )
-                  ),
-                  # Panel 4
-                  conditionalPanel("input.sidebar == 'report'",
-                                       box(title = "Download Report",
-                                           solidHeader = TRUE,
-                                           collapsible = TRUE,
-                                           collapsed = FALSE,
-                                           width = 12,
-                                           status = "success",
-                                           ## DOESN'T DOWNLOAD ANYTHING
-                                           downloadButton("downloadHTML",
-                                                          "Download HTML Report (Recommended)"
-                                                          ),
-                                           downloadButton("downloadPDF",
-                                                          "Download PDF Report"
-                                           )
-                                       )
-                                   )
-                  
-                  
-            ),
-            
-            # Panel 1 Data
-            column(12,
-                conditionalPanel("input.sidebar == 'preEvent'",   
-                    box(title = "Data",
+    
+            # Pre Event Panel
+            ## Row 1
+            fluidRow(
+                
+                # Panel 1 sidebar
+                column(4,
+                                        
+                   conditionalPanel("input.sidebar != 'home'",
+                                        
+                    box(
+                        status = "warning", 
                         solidHeader = TRUE,
                         collapsible = TRUE,
-                        collapsed = TRUE,
+                        title = "Controls",
                         width = 12,
-                        status = "primary",
-        
-                        DT::DTOutput("preCleanedData", height = 300)
-                        )
+    
+                        # Inputs
+                        sidebarPanel(
+                            width = 12,
+                            # Year by Year Analysis     
+                            radioGroupButtons(
+                                inputId = "analysisType",
+                                label = "Analysis:", 
+                                choices = c("Event","Yearly", "Location"),
+                                status = "warning"
+                            ),  
+                            tags$script("$(\"input:radio[name='analysisType'][value='Event']\").parent().css('background-color', '#F27B34');"),
+                            tags$script("$(\"input:radio[name='analysisType'][value='Yearly']\").parent().css('background-color', '#F27B34');"),
+                            tags$script("$(\"input:radio[name='analysisType'][value='Location']\").parent().css('background-color', '#F27B34');"),
+                            
+                            # Survey choice - Choices populated in server
+                            selectizeInput("sheet", "Choose Survey", choices = NULL, multiple = TRUE),
+                            
+                            # Pre 
+                            conditionalPanel("input.sidebar == 'preEvent'",
+                                             
+                                selectizeInput("preVar1", "Demographic", choices = preVars,selected  = "pronoun"),
+                                
+                                # Only show for barplot
+                                conditionalPanel("input.analysisType == 'Event' & input.preTabViz == 1",
+                                    selectizeInput("preVarColour", "Colouring Variable", choices = c("None",preVars))
+                                    ),
+                                
+                                # Only show for barplot
+                                conditionalPanel("input.preTabViz == 1",
+                                    prettySwitch("advancedPreOptions", "More Plotting Options?", slim = TRUE)
+                                ),
+                                
+                                conditionalPanel("input.advancedPreOptions == 1 & input.preTabViz == 1",
+                                 #selectizeInput
+                                    checkboxGroupButtons("prePlotOptions",
+                                                   "Plotting Options (Optional)", 
+                                                   choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
+                                                                  "Remove Unknowns" = "missing"), 
+                                                   selected = "missing"),
+    
+                                    textInput("preTitle", "Choose plot title", value = NULL ,width = NULL),
+                                    textInput("preXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                    textInput("preYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                    ),
+                                
+                                
+                                # For map
+                                conditionalPanel("input.preTabViz == 2",
+                                                 radioGroupButtons(
+                                                     inputId = "preMapAnalysisType",
+                                                     label = "Spatial Analysis:", 
+                                                     choices = c("Participants","Event")
+                                                 )
+                                ),
+                                
+                                downloadButton('downloadPreEvent',"Download the data"),
+                                
+                                
+    
+                                    
+                            ),
+                        
+                            
+                            # Post
+                            conditionalPanel("input.sidebar == 'postEvent'",
+                                             
+                                 conditionalPanel("input.postTabViz == 2",
+                                     radioGroupButtons(
+                                         inputId = "postEventKPI",
+                                         label = "KPI:", 
+                                         choices = c("Action","Learning", "Community")
+                                     )
+                                 ),
+                                 conditionalPanel("input.postTabViz == 1",
+                                                  prettySwitch("advancedPostOptions", "More Plotting Options?", slim = TRUE)
+                                 ),
+                                 conditionalPanel("input.advancedPostOptions == 1",
+                                                  conditionalPanel("input.analysisType == 'Event'",
+                                                      checkboxGroupButtons("postPlotOptions",
+                                                                           "Plotting Options (Optional)", 
+                                                                           choices = list("Horizontal" = "horizontal", "Numeric Text" = "numeric_text"), 
+                                                                           selected = NULL)
+                                                  ),
+                                                  
+                                                  
+                                                  conditionalPanel("input.postTabViz == 1",
+                                                      textInput("postTitle", "Choose plot title", value = NULL ,width = NULL),
+                                                      textInput("postXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                                      textInput("postYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                                  )
+                                     ),
+                                 
+                                 
+                                 
+                                 
+                                 downloadButton('downloadPostEvent',"Download the data")
+                                             
+                            ),
+                            
+                            # Stratified
+                            conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                                             radioGroupButtons(
+                                                 inputId = "stratifiedEventKPI",
+                                                 label = "KPI:", 
+                                                 choices = c("Action","Learning", "Community")
+                                             ),
+                                             conditionalPanel("input.stratifiedAnalysisTabViz == 1",
+                                                 selectizeInput("stratifiedVarColour", "Colouring Variable", choices = c("None",preVars))
+                                             ),
+                                             
+                                             # For map
+                                             conditionalPanel("input.stratifiedAnalysisTabViz == 2",
+                                                              radioGroupButtons(
+                                                                  inputId = "stratifiedMapAnalysisType",
+                                                                  label = "Spatial Analysis:", 
+                                                                  choices = c("Participants","Event")
+                                                              )
+                                             ),
+                                             
+                                             selectizeInput(
+                                                 "filteringVariable", "Variable to filter by:", choices = c("None",preVars)
+                                             ),
+                                             tabItem(tabName = "drag",
+                                                     uiOutput("bucket")
+                                             ),
+                                             conditionalPanel("input.stratifiedAnalysisTabViz == 1",
+                                                              prettySwitch("advancedStratifiedOptions", "More Plotting Options?", slim = TRUE)
+                                             ),
+                                             
+                                             conditionalPanel("input.advancedStratifiedOptions == 1",
+                                                              conditionalPanel("input.analysisType == 'Event' &  input.stratifiedAnalysisTabViz == 1",
+                                                                               checkboxGroupButtons("stratifiedPlotOptions",
+                                                                                                    "Plotting Options (Optional)", 
+                                                                                                    choices = list("Horizontal" = "horizontal", "Proportions" = "proportions", "Numeric Text" = "numeric_text",
+                                                                                                                    "Remove Unknowns" = "missing"), 
+                                                                                                    selected = "missing")
+                                                              ),
+                                                              
+                                                              
+                                                              conditionalPanel("input.stratifiedAnalysisTabViz == 1",
+                                                                               textInput("stratifiedTitle", "Choose plot title", value = NULL ,width = NULL),
+                                                                               textInput("stratifiedXaxis", "Choose x-axis label", value = NULL ,width = NULL),
+                                                                               textInput("stratifiedYaxis", "Choose y-axis label", value = NULL,width = NULL)
+                                                              )
+                                             ),
+                                             
+    
+    
+                                             downloadButton('downloadStratifiedEventKPIEvent',"Download the data")
+                                             
+                            )
+                                
+                        ),
+                        ),
+                    )
+                ),
+                
+                conditionalPanel("input.sidebar == 'home'",
+                     column(12,
+                            box(
+                                status = "warning", 
+                                solidHeader = TRUE,
+                                collapsible = TRUE,
+                                title = "Helpful Demo Videos",
+                                width = 12,
+                                # HTML('<iframe src="jenn_demo.mp4" title="demo_video"</iframe>'),
+                                # HTML('<iframe width="280" height="157.5" src="https://www.youtube.com/embed/W86cTIoMv2U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                                fluidPage(
+                                tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_1.mkv", controls = "controls"),
+                                tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_2.mkv", controls = "controls"),
+                                tags$video(id="demo_video", type = "video/mp4", width = "400px", width = "200px", src = "FINAL_3.mkv", controls = "controls")
+                                
+                                
+                                )
+                            )
+                     )
+                     
+                ),  
+                column(8,
+    
+                       # Panel 1 Viz
+                       conditionalPanel("input.sidebar == 'preEvent'",
+                            box(
+                                title = "Demographic Analysis",
+                                solidHeader = TRUE,
+                                collapsible = TRUE,
+                                width = 12,
+                                status = "success",
+                                
+                           tabBox(
+                               # title = "Demographic Analysis",
+                               id = "preTabViz",    
+                               width = 12,
+                               tabPanel("Main Analysis", "",value = 1,
+                                        plotly::plotlyOutput("preViz", height = 400)
+                               ),
+                               tabPanel("Spatial Visualisation", "", value = 2,
+                                        leaflet::leafletOutput("preVizMap")
+                               )
+                           )
+                         )
+                       )
+                       # )
+                       ,
+                       
+                       # Panel 2
+                      conditionalPanel("input.sidebar == 'postEvent'",
+                           box(
+                               title = "KPI Analysis",
+                               solidHeader = TRUE,
+                               collapsible = TRUE,
+                               width = 12,
+                               status = "success",
+                                       tabBox(
+                                           id = "postTabViz",    
+                                           width = 12,
+                                           tabPanel("Main Analysis", "",value = 1,
+                                                    plotly::plotlyOutput("postViz", height = 400)
+                                           ),
+                                           tabPanel("Spatial Visualisation", "", value = 2,
+                                                    leaflet::leafletOutput("postVizMap")
+                                           )
+                                       )
+                           )
+                      ),
+                      
+                      # Panel 3
+                      conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                           box(
+                               title = "Combined Analysis",
+                               solidHeader = TRUE,
+                               collapsible = TRUE,
+                               width = 12,
+                               status = "success",
+                                       tabBox(
+                                           id = "stratifiedAnalysisTabViz",    
+                                           width = 12,
+                                           tabPanel("Main Analysis", "",value = 1,
+                                                    plotly::plotlyOutput("stratifiedViz", height = 400)
+                                           ),
+                                           tabPanel("Spatial Visualisation", "", value = 2,
+                                                    leaflet::leafletOutput("stratifiedVizMap")
+                                           )
+                                       )
+                           )
+                      ),
+                      # Panel 4
+                      conditionalPanel("input.sidebar == 'report'",
+                                           box(title = "Download Report",
+                                               solidHeader = TRUE,
+                                               collapsible = TRUE,
+                                               collapsed = FALSE,
+                                               width = 12,
+                                               status = "success",
+                                               ## DOESN'T DOWNLOAD ANYTHING
+                                               downloadButton("downloadHTML",
+                                                              "Download HTML Report (Recommended)"
+                                                              ),
+                                               downloadButton("downloadPDF",
+                                                              "Download PDF Report"
+                                               )
+                                           )
+                                       )
+                      
+                      
+                ),
+                
+                # Panel 1 Data
+                column(12,
+                    conditionalPanel("input.sidebar == 'preEvent'",   
+                        box(title = "Data",
+                            solidHeader = TRUE,
+                            collapsible = TRUE,
+                            collapsed = TRUE,
+                            width = 12,
+                            status = "primary",
+            
+                            DT::DTOutput("preCleanedData", height = 300)
+                            )
+                    )
+                ),
+                
+                
+                ## Panel 2 Data
+                
+                column(12,
+                       conditionalPanel("input.sidebar == 'postEvent'",
+                                        box(title = "Data",
+                                            status = "primary",
+                                            solidHeader = TRUE,
+                                            collapsible = TRUE,
+                                            collapsed = TRUE,
+                                            width = 12,
+    
+                                            DT::DTOutput("postCleanedData", height = 300)
+                                        )
+                       )
+                ),
+                
+                ## Panel 3 Data
+                
+                column(12,
+                       conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
+                                        box(title = "Data",
+                                            status = "primary",
+                                            solidHeader = TRUE,
+                                            collapsible = TRUE,
+                                            collapsed = TRUE,
+                                            width = 12,
+                                            
+                                            DT::DTOutput("stratifiedAnalysisCleanedData", height = 300)
+                                        )
+                       )
                 )
-            ),
-            
-            
-            ## Panel 2 Data
-            
-            column(12,
-                   conditionalPanel("input.sidebar == 'postEvent'",
-                                    box(title = "Data",
-                                        status = "primary",
-                                        solidHeader = TRUE,
-                                        collapsible = TRUE,
-                                        collapsed = TRUE,
-                                        width = 12,
-
-                                        DT::DTOutput("postCleanedData", height = 300)
-                                    )
-                   )
-            ),
-            
-            ## Panel 3 Data
-            
-            column(12,
-                   conditionalPanel("input.sidebar == 'stratifiedAnalysis'",
-                                    box(title = "Data",
-                                        status = "primary",
-                                        solidHeader = TRUE,
-                                        collapsible = TRUE,
-                                        collapsed = TRUE,
-                                        width = 12,
-                                        
-                                        DT::DTOutput("stratifiedAnalysisCleanedData", height = 300)
-                                    )
-                   )
+                
+                
+                
             )
-            
-            
             
         )
         
+        
+        
     )
-    
-    
-    
 )
 
 
 
 server <- function(input, output, session) {
+    
+    result_auth <- secure_server(check_credentials = check_credentials(credentials))
     
     sheetInitialisation = reactive({
         files = drive_ls(input$driveID, recursive = TRUE, type = "spreadsheet")

@@ -323,14 +323,12 @@ map_0_var <- function(df){
 
 
 map_kpi <- function(df, kpi){
-  postcodes_loc <- read_csv("australian_postcodes.csv")
+  postcodes_loc <- read_csv("australian_postcodes.csv") %>% group_by(postcode) %>% slice(1)
   df$postcode_event = as.character(df$postcode_event)
   df$`...1` = seq(nrow(df))
   df_joined <- left_join(df, postcodes_loc, by = c("postcode_event" = "postcode"))
   df_joined <- df_joined %>% dplyr::distinct(...1, .keep_all = TRUE)
-  df_joined <- df_joined 
-  # %>%
-  #   dplyr::rename(action_kpi = action_summary)
+
 
   if (kpi == "action"){
     kpi_col = "action_kpi"
@@ -345,6 +343,12 @@ map_kpi <- function(df, kpi){
     kpi_col = "Average KPI"
   }
 
+  # df_joined <- df_joined %>% dplyr::group_by(postcode_event, lat, long, locality) %>%
+  #   dplyr::summarise(
+  #     vis_kpi = mean(get(kpi_col)),
+  #     count = n()
+  #   )
+  
   df_joined <- df_joined %>% dplyr::group_by(postcode_event, lat, long, locality) %>%
     dplyr::summarise(
       vis_kpi = mean(get(kpi_col)),
@@ -363,13 +367,20 @@ map_kpi <- function(df, kpi){
     addCircleMarkers(~long, ~lat,
                      popup = paste("Location: ", df_joined$locality %>% str_to_title(),
                                    "<br>", "Average KPI: ", round(df_joined$vis_kpi, 2),
-                                   "<br>", "Number of Participants: ", df_joined$count, sep = ""),
-                     color = ~pal(vis_kpi), fillOpacity = 0.5,
-                     radius = ~count_scaled
-    ) %>%
-    addLegend(pal = pal, values = ~vis_kpi, opacity = 1.0,
+                                   "<br>", "Number of Participants: ", df_joined$count, 
+                                   "<br>", "Postcode: ", df_joined$postcode_event, 
+                                   sep = ""),
+                     color = ~pal(vis_kpi), fillOpacity = 0.5
+                     # ,radius = ~count_scaled
+    )
+  
+  if (nrow(df_joined) == 1){
+    m = m
+  }else{
+    m = m %>% addLegend(pal = pal, values = ~vis_kpi, opacity = 1.0,
               title = paste((kpi_col %>% str_split("_"))[[1]][1] %>% str_to_title(), 'KPI'),
               labFormat = labelFormat(transform = function(x) round(x, 2)))
+  }
   m
 }
 

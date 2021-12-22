@@ -1,0 +1,13 @@
+name: 1_SeasideSide
+title: 1_SeasideSide
+username:
+account: seashine
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5329883
+bundleId: 5400087
+url: https://seashine.shinyapps.io/1_SeasideSide/
+when: 1640158900.58315
+lastSyncTime: 1640158900.58315
+asMultiple: FALSE
+asStatic: FALSE

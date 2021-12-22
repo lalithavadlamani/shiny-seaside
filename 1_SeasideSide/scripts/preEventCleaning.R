@@ -6,7 +6,7 @@
 
 
 # definitions
-attributes_ls <- c("Email", "What pronoun do you identify with?", "Age", "Postcode", "How many people under (5) years are you signing up for?", "How many people in the age range(5-10) are you signing up for?", "How many people in the age range(11-20) are you signing up for?", "How many people in the age range(21-30) are you signing up for?", "How many people in the age range(31-50) are you signing up for?", "How many people in the age range(51-70) are you signing up for?", "How many people in this age range(71+) are you signing up for?", "Have you previously attended an organised clean-up event (hosted by any organisation)?",  "On a scale of 1 to 5, where 1 is not engaged at all and 5 is very engaged, how engaged are you in making changes that positively impact the environment?", "How did you find out about this event?", "Are you of Aboriginal or Torres Strait Islander Origin?" ) 
+attributes_ls <- c("Email", "What pronoun do you identify with?", "Age", "Postcode", "How many people under (5) years are you signing up for?", "How many people in the age range(5-10) are you signing up for?", "How many people in the age range(11-20) are you signing up for?", "How many people in the age range(21-30) are you signing up for?", "How many people in the age range(31-50) are you signing up for?", "How many people in the age range(51-70) are you signing up for?", "How many people in the age range(71+) are you signing up for?", "Have you previously attended an organised clean-up event (hosted by any organisation)?",  "On a scale of 1 to 5, where 1 is not engaged at all and 5 is very engaged, how engaged are you in making changes that positively impact the environment?", "How did you find out about this event?", "Are you of Aboriginal or Torres Strait Islander Origin?" ) 
 colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "pre_environmental_impact", "find_out_event", "origin"  )
 total_colnames_ls <- c("email", "pronoun", "age", "postcode", "age_under_5", "age_5_to_10","age_11_to_20","age_21_to_30","age_31_to_50","age_51_to_70","age_over_71", "previous_attendance", "pre_environmental_impact", "find_out_event", "age_group", "location", "year", "postcode_event",  "origin")
 merge_colnames_ls <- c("location", "year")
@@ -66,8 +66,12 @@ preprocessing_fn <- function(pre_event_all = dataframe_ls,excel_name_ls = excel_
   pre_event_data = cbind(pre_event_data, pre_event_data_numeric)
   
   # creates new column for correct age bin of eventbrite responders
-  pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE) %>% 
-    factor(age_range_options)
+  if (all(is.na(pre_event_data$age))){
+    pre_event_data$age_group = NA
+  }else{
+    pre_event_data$age_group <- cut(pre_event_data$age, breaks = c(0, 5, 10, 20, 30, 50, 70, Inf), labels = age_range_options,  right = FALSE, include.lowest = TRUE) %>% 
+      factor(age_range_options)
+  }
 
  # Convert invested enviro impact to factor
   pre_event_data$pre_environmental_impact = factor(pre_event_data$pre_environmental_impact, levels = c(1,2,3,4,5))
