@@ -52,6 +52,7 @@ This app requires specific excel data inputs in order to function as intended.
 * Postcode<br/><br/>
 _Age Range Questions_
 * How many people under (5) years are you signing up for?
+* How many people in the age range(5-10) are you signing up for?
 * How many people in the age range(11-20) are you signing up for?
 * How many people in the age range(21-30) are you signing up for?
 * How many people in the age range(31-50) are you signing up for?
