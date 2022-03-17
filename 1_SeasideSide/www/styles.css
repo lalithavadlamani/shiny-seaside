@@ -44,51 +44,18 @@ body, label, input, button, select, box,
   background: var(--ssGreen);
 }
 
-
-
-
 /* box: primary color */
 .box.box-solid.box-primary>.box-header h3, .box.box-primary>.box-header h3 {
   color: white;
 }
 .box.box-solid.box-primary>.box-header {
-  background: var(--ssBlue);
+  background: var(--ssLightBlue);
 }
 .box.box-solid.box-primary, .box.box-primary {
-  border-color: var(--ssBlue);
-  border-left-color: var(--ssBlue);
-  border-right-color: var(--ssBlue);
-  border-top-color: var(--ssBlue);
-}
-
-/* box: success color */
-.box.box-solid.box-success>.box-header h3, .box.box-success>.box-header h3 {
-  color: white;
-}
-.box.box-solid.box-success>.box-header {
-  background: var(--ssGreen);
-}
-.box.box-solid.box-success, .box.box-success {
-  border-color: var(--ssGreen);
-  border-left-color: ssGreen
-;
-  border-right-color: var(--ssGreen);
-  border-top-color: var(--ssGreen);
-}
-
-/* box: danger color */
-.box.box-solid.box-danger>.box-header h3, .box.box-danger>.box-header h3 {
-  color: white;
-}
-.box.box-solid.box-danger>.box-header {
-  background: var(--ssPink);
-}
-.box.box-solid.box-danger, .box.box-danger {
-  border-color: var(--ssPink);
-  border-left-color: ssPink
-;
-  border-right-color: var(--ssPink);
-  border-top-color: var(--ssPink);
+  border-color: var(--ssLightBlue);
+  border-left-color: var(--ssLightBlue);
+  border-right-color: var(--ssLightBlue);
+  border-top-color: var(--ssLightBlue);
 }
 
 /* box: warning color */
@@ -96,15 +63,50 @@ body, label, input, button, select, box,
   color: white;
 }
 .box.box-solid.box-warning>.box-header {
-  background: var(--ssPink);
+  background: var(--ssOrange);
+  border-radius: ', boxBorderRadius, 'px;
 }
 .box.box-solid.box-warning, .box.box-warning {
+  border-color: var(--ssOrange);
+  border-left-color: var(--ssOrange);
+  border-right-color: var(--ssOrange);
+  border-top-color: var(--ssOrange);
+  border-radius: var(--ssOrange)px;
+}
+
+/* box: success color */
+.box.box-solid.box-success>.box-header h3, .box.box-success>.box-header h3 {
+  color: white;
+  font-family: var(--ssFont);
+
+}
+.box.box-solid.box-success>.box-header {
+  background: var(--ssGreen);
+}
+.box.box-solid.box-success, .box.box-success {
+  border-color: var(--ssGreen);
+  border-left-color: var(--ssGreen);
+  border-right-color: var(--ssGreen);
+  border-top-color: var(--ssGreen);
+}
+
+/* box: danger color */
+.box.box-solid.box-danger>.box-header h3, .box.box-danger>.box-header h3 {
+  color: white;
+  font-family: var(--ssFont);
+
+}
+.box.box-solid.box-danger>.box-header {
+  background: var(--ssPink);
+
+}
+.box.box-solid.box-danger, .box.box-danger {
   border-color: var(--ssPink);
-  border-left-color: ssPink
-;
+  border-left-color: var(--ssPink);
   border-right-color: var(--ssPink);
   border-top-color: var(--ssPink);
 }
+
 
 /* header */
 .skin-blue .main-header .navbar {
@@ -114,13 +116,13 @@ body, label, input, button, select, box,
 
 /* header side */
 .skin-blue .main-header .navbar .sidebar-toggle {
-  background:var(--ssLightBlue);
-  color:var(--ssBlue);
+  background:var(--ssBlue);
+  color:var(--ssLightBlue);
 }
 
 /* header side hover */
 .skin-blue .main-header .navbar .sidebar-toggle:hover {
-  background:var(--ssBlue);
+  background:var(--ssGrey);
   color:var(--ssLightBlue);
 }
 
@@ -142,7 +144,19 @@ body, label, input, button, select, box,
   color: ', sidebarTabTextColorHover, ';
   font-size: ', sidebarTabTextSize, 'px;
   border-style: ', sidebarTabBorderStyleHover, ';
-  border-color: var(ssLightBlue);
+  border-color: var(ssBlue);
   border-width: ', sidebarTabBorderWidthHover, 'px;
   border-radius: ', sidebarTabRadiusHover, ';
+}
+
+/* tabbox: tab color */
+.nav-tabs-custom, .nav-tabs-custom .nav-tabs li.active:hover a,
+.nav-tabs-custom .nav-tabs li.active a {
+
+  color: var(--ssBlue);
+}
+
+/* box: title */
+.box-header .box-title {
+  color: white;
 }

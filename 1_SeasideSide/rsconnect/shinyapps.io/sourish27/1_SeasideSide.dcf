@@ -1,0 +1,14 @@
+name: 1_SeasideSide
+title:
+username:
+account: sourish27
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5056539
+bundleId: 5371162
+url: https://sourish27.shinyapps.io/1_SeasideSide/
+when: 1639487312.37195
+lastSyncTime: 1639487312.37195
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Old
